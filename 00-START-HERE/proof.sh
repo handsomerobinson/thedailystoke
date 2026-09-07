@@ -35,12 +35,26 @@ command -v docker >/dev/null 2>&1 || die "Docker is not installed.
 docker compose version >/dev/null 2>&1 || die "Docker Compose plugin missing. Update Docker."
 docker info >/dev/null 2>&1 || die "Docker is installed but not running. Start Docker Desktop."
 
+# Build the compose arguments once. The override may not exist yet in a
+# proof-vault created by an older version of this script, so stop and destroy
+# have to tolerate its absence rather than erroring out on the way to cleanup.
+compose() {
+  local args=(-f "$DIR/docker-compose.yml")
+  [ -f "$DIR/docker-compose.override.yml" ] && args+=(-f "$DIR/docker-compose.override.yml")
+  [ -f "$DIR/.env" ] && args+=(--env-file "$DIR/.env")
+  docker compose "${args[@]}" "$@"
+}
+
 case "${1:-start}" in
   stop)
-    docker compose -f "$DIR/docker-compose.yml" --env-file "$DIR/.env" down
+    [ -f "$DIR/docker-compose.yml" ] || die "Nothing set up yet."
+    compose down
     ok "stopped — photos kept in $DIR"; exit 0 ;;
   destroy)
-    docker compose -f "$DIR/docker-compose.yml" --env-file "$DIR/.env" down -v 2>/dev/null || true
+    [ -f "$DIR/docker-compose.yml" ] && compose down -v 2>/dev/null || true
+    # Catch containers and volumes from an older run whose compose file is gone.
+    docker rm -f immich_server immich_machine_learning immich_postgres immich_redis 2>/dev/null || true
+    docker volume rm -f proof-vault_proof-pgdata immich_model-cache 2>/dev/null || true
     rm -rf "$DIR"; ok "destroyed"; exit 0 ;;
 esac
 
@@ -55,7 +69,7 @@ fi
 [ -n "$IP" ] || IP="<this computer's IP address>"
 
 printf '\n%s==> Setting up in %s%s\n' "$c_bld" "$DIR" "$c_off"
-mkdir -p "$DIR/library" "$DIR/postgres"
+mkdir -p "$DIR/library"
 
 [ -f "$DIR/docker-compose.yml" ] || {
   curl -fsSL "https://github.com/immich-app/immich/releases/latest/download/docker-compose.yml" \
@@ -63,9 +77,26 @@ mkdir -p "$DIR/library" "$DIR/postgres"
   ok "downloaded Immich"
 }
 
+# Postgres goes in a Docker-managed volume, NOT a folder on the Mac.
+# Bind-mounting a database directory from macOS into Docker's VM breaks
+# Postgres initialisation: initdb cannot apply the ownership it needs, silently
+# skips creating the database, and Immich then fails with
+# 'database "immich" does not exist'. A named volume lives inside the VM on a
+# real Linux filesystem and just works. Photos stay a normal folder so you can
+# see them in Finder.
+cat > "$DIR/docker-compose.override.yml" <<'YAML'
+services:
+  database:
+    volumes: !override
+      - proof-pgdata:/var/lib/postgresql/data
+
+volumes:
+  proof-pgdata:
+YAML
+
 cat > "$DIR/.env" <<EOF
 UPLOAD_LOCATION=$DIR/library
-DB_DATA_LOCATION=$DIR/postgres
+DB_DATA_LOCATION=/unused-see-override
 IMMICH_VERSION=v3
 DB_PASSWORD=proofonlynotsecret
 DB_USERNAME=postgres
@@ -74,7 +105,7 @@ EOF
 ok "configured"
 
 printf '\n%s==> Starting (first run downloads a few GB, be patient)%s\n' "$c_bld" "$c_off"
-docker compose -f "$DIR/docker-compose.yml" --env-file "$DIR/.env" up -d
+compose up -d
 
 printf '\n%s==> Waiting for Immich to come up%s\n' "$c_bld" "$c_off"
 # First boot is genuinely slow: Postgres initialises, Immich runs its database
