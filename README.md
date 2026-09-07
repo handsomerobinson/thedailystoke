@@ -22,6 +22,7 @@ and nowhere else.
 | [docs/DEVICES.md](docs/DEVICES.md) | Which device plays which role — brain, storage, pocket, terminal. |
 | [docs/STORAGE.md](docs/STORAGE.md) | Disks: the two-tier split, what to buy at every capacity, off-site at scale. |
 | [docs/HARDWARE.md](docs/HARDWARE.md) | What to buy. Capacity and bandwidth math for multiple people. |
+| [docs/IMMICH-SETUP.md](docs/IMMICH-SETUP.md) | First-run choices in Immich, and why the storage template matters most. |
 | [docs/MIGRATION.md](docs/MIGRATION.md) | Getting a life out of iCloud. |
 | [docs/RUNBOOK.md](docs/RUNBOOK.md) | When something breaks. Includes full rebuild from backup. |
 | [docs/CLIENT-PLAYBOOK.md](docs/CLIENT-PLAYBOOK.md) | Doing this for money. Pricing, onboarding, liability. |
