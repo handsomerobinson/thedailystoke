@@ -1,0 +1,109 @@
+# =============================================================================
+#  10-4 VAULT — Nextcloud (files, notes, contacts, calendar)
+# =============================================================================
+#  Immich handles photos. This handles everything else: documents, scans,
+#  notes, contacts, calendars. It is the piece that gives the iPhone a real
+#  "Files" provider that is not iCloud or Dropbox.
+#
+#  Bound to 127.0.0.1 only — Tailscale fronts it. See immich override for why.
+#
+#  Every image is pinned to a MAJOR version on purpose. `docker compose pull`
+#  then collects security patches automatically, but never jumps a major.
+#  That matters most for Postgres: an unattended major bump leaves the old
+#  data directory unreadable and the database refusing to start. Nextcloud is
+#  the same — it cannot skip a major, each one must be stepped through.
+#  Major upgrades are a deliberate act. See docs/RUNBOOK.md.
+# =============================================================================
+
+name: nextcloud
+
+services:
+  nextcloud-app:
+    container_name: nextcloud_app
+    image: nextcloud:34-apache
+    restart: always
+    depends_on:
+      nextcloud-db:
+        condition: service_healthy
+      nextcloud-redis:
+        condition: service_started
+    ports:
+      - '127.0.0.1:11000:80'
+    volumes:
+      - ${VAULT_ROOT}/nextcloud/html:/var/www/html
+      - ${VAULT_ROOT}/nextcloud/data:/data
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+
+      POSTGRES_HOST: nextcloud-db
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      POSTGRES_PASSWORD: ${NC_DB_PASSWORD:?NC_DB_PASSWORD must be set}
+
+      REDIS_HOST: nextcloud-redis
+
+      NEXTCLOUD_ADMIN_USER: ${NC_ADMIN_USER:?NC_ADMIN_USER must be set}
+      NEXTCLOUD_ADMIN_PASSWORD: ${NC_ADMIN_PASSWORD:?NC_ADMIN_PASSWORD must be set}
+
+      # Data lives outside /var/www/html so an image upgrade can never touch it.
+      NEXTCLOUD_DATA_DIR: /data
+
+      # Nextcloud refuses requests for hostnames it does not recognise, and
+      # generates its own links from these. Get them wrong and the iOS app
+      # logs in but every file link 404s.
+      NEXTCLOUD_TRUSTED_DOMAINS: ${TS_HOSTNAME}.${TAILNET_DOMAIN}
+      OVERWRITEPROTOCOL: https
+      OVERWRITEHOST: ${TS_HOSTNAME}.${TAILNET_DOMAIN}:${NEXTCLOUD_HTTPS_PORT}
+      OVERWRITECLIURL: https://${TS_HOSTNAME}.${TAILNET_DOMAIN}:${NEXTCLOUD_HTTPS_PORT}
+      # tailscale serve proxies from the host, so trust loopback + the docker net.
+      TRUSTED_PROXIES: 127.0.0.1/32 ::1/128 172.16.0.0/12
+
+      # Phone video files are large. The defaults (512M) will reject them.
+      PHP_UPLOAD_LIMIT: 16G
+      PHP_MEMORY_LIMIT: 1G
+
+  # Nextcloud needs a cron runner or background jobs silently never execute:
+  # no file scans, no trash cleanup, no previews. The web UI shows a warning
+  # most people never read. This container is not optional.
+  nextcloud-cron:
+    container_name: nextcloud_cron
+    image: nextcloud:34-apache
+    restart: always
+    entrypoint: /cron.sh
+    depends_on:
+      nextcloud-db:
+        condition: service_healthy
+    volumes:
+      - ${VAULT_ROOT}/nextcloud/html:/var/www/html
+      - ${VAULT_ROOT}/nextcloud/data:/data
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+
+  nextcloud-db:
+    container_name: nextcloud_db
+    image: postgres:17-alpine
+    restart: always
+    volumes:
+      - ${VAULT_ROOT}/nextcloud/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      POSTGRES_PASSWORD: ${NC_DB_PASSWORD:?NC_DB_PASSWORD must be set}
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+      TZ: ${TZ:-Etc/UTC}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U nextcloud -d nextcloud']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  nextcloud-redis:
+    container_name: nextcloud_redis
+    image: valkey/valkey:9-alpine
+    restart: always
+    healthcheck:
+      test: ['CMD-SHELL', 'valkey-cli ping || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
