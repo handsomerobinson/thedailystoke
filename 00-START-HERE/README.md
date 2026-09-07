@@ -10,6 +10,23 @@ selling something you cannot.
 
 ---
 
+## Prove it first
+
+Before buying anything, run `./proof.sh` on a computer you already own. It
+stands up Immich in about ten minutes, LAN only, and gets your own photos
+uploading from your phone so you can see the thing work. Details and the full
+four-stage proof ladder: [../docs/PROOF.md](../docs/PROOF.md).
+
+```
+./proof.sh            start it
+./proof.sh stop       stop it, keep the photos
+./proof.sh destroy    delete everything
+```
+
+Then come back here and build the real one.
+
+---
+
 ## Order of operations
 
 ```
@@ -50,6 +67,7 @@ mockup, and you will know your real hours before you quote anyone.
 
 | | |
 |---|---|
+| `proof.sh` | Throwaway 10-minute Immich on any computer, to prove the concept before spending money. |
 | `lib.sh` | Shared helpers. Sourced by everything, run directly by nothing. |
 | `01-provision.sh` | Docker, Tailscale, restic, libimobiledevice, firewall, directory layout. |
 | `02-deploy.sh` | Starts the stack, publishes it on the tailnet, installs the nightly timer. |

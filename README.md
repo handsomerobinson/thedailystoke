@@ -7,7 +7,9 @@ replica. Encrypted on your machine before it leaves it, backed up off-site to
 storage that cannot read a word of it, reachable from anywhere over Tailscale
 and nowhere else.
 
-**→ [`00-START-HERE/`](00-START-HERE/) to build one.**
+**→ [`docs/PROOF.md`](docs/PROOF.md) to prove the concept today, on hardware you already own, for $0.**
+
+**→ [`00-START-HERE/`](00-START-HERE/) to build the real one.**
 
 **→ [`docs/WHAT-IS-POSSIBLE.md`](docs/WHAT-IS-POSSIBLE.md) before promising one to anyone.**
 
