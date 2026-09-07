@@ -67,6 +67,12 @@ If you only ever prove one thing, prove this one.
 
 ## Stage 4 — make it permanent  ·  a weekend  ·  ~$425
 
+> **Before you create the Backblaze and Tailscale accounts:** decide which
+> email owns them, deliberately. Backblaze holds the only off-site copy of
+> everything, and moving that account later is genuinely painful. See
+> [IDENTITY.md](IDENTITY.md).
+
+
 Now buy the hardware, because now you know it works and roughly what it costs
 you in hours.
 

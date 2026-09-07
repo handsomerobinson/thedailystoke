@@ -26,6 +26,7 @@ and nowhere else.
 | [docs/RUNBOOK.md](docs/RUNBOOK.md) | When something breaks. Includes full rebuild from backup. |
 | [docs/CLIENT-PLAYBOOK.md](docs/CLIENT-PLAYBOOK.md) | Doing this for money. Pricing, onboarding, liability. |
 | [docs/COCOON.md](docs/COCOON.md) | Phase 2 — making all of it searchable. |
+| [docs/IDENTITY.md](docs/IDENTITY.md) | Open item: consolidate scattered logins before creating the vault's accounts. |
 | [docs/BEACON.md](docs/BEACON.md) | Phase 3 — voice-first access. Captured notes, not started. |
 
 Built on [Immich](https://immich.app) (photos), [Nextcloud](https://nextcloud.com)
