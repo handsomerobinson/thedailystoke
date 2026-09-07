@@ -59,6 +59,18 @@ already most of the way built.
 - "Remind me about that barn" — location plus a voice note plus a thing seen.
   Probably the smallest real demo of the whole idea.
 
+## Related, also parked: "tenfour OS"
+
+A phone that is deliberately minimal — the pocket device as a door to the
+cocoon rather than a place things pile up.
+
+One constraint to know before designing anything: **iOS cannot be replaced or
+forked.** Apple does not permit it, and no amount of work changes that. The
+achievable version is an **Android launcher** — Android lets you replace the
+home screen entirely, which is how minimal-phone experiences are actually
+built. So "tenfour iOS" in practice means a tenfour launcher on cheap Android
+hardware, or an iPhone home screen stripped to three apps.
+
 ## Status
 
 Parked. Revisit after the vault runs and the cocoon can answer a question.
