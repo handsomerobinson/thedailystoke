@@ -77,13 +77,27 @@ printf '\n%s==> Starting (first run downloads a few GB, be patient)%s\n' "$c_bld
 docker compose -f "$DIR/docker-compose.yml" --env-file "$DIR/.env" up -d
 
 printf '\n%s==> Waiting for Immich to come up%s\n' "$c_bld" "$c_off"
-for i in $(seq 1 90); do
+# First boot is genuinely slow: Postgres initialises, Immich runs its database
+# migrations, and the machine-learning container unpacks its models. On a
+# laptop running Docker in a VM this regularly takes 5+ minutes. Later starts
+# are seconds. Waiting 12 minutes here beats telling someone it failed when it
+# was merely still working.
+echo "   First boot takes several minutes — database migrations and ML models."
+UP=0
+for i in $(seq 1 240); do
   if curl -fsS --max-time 3 "http://127.0.0.1:2283/api/server/ping" >/dev/null 2>&1; then
-    ok "Immich is up"; break
+    printf '\n'; ok "Immich is up"; UP=1; break
   fi
-  [ "$i" = 90 ] && die "Immich did not start in 3 minutes. Check: docker compose -f $DIR/docker-compose.yml logs"
-  sleep 2
+  printf '.'; sleep 3
 done
+if [ "$UP" = 0 ]; then
+  printf '\n'
+  echo "Immich has not answered after 12 minutes. It may still be starting."
+  echo "Watch what it is doing with:"
+  echo "    docker logs immich_server --tail 40 -f"
+  echo "Then open http://localhost:2283 — it often comes up shortly after."
+  exit 1
+fi
 
 cat <<NEXT
 
