@@ -28,10 +28,19 @@ load_env() {
 
   set -a; . "$VAULT_ENV"; set +a
 
+  local required=(VAULT_NAME VAULT_ROOT TZ TAILNET_DOMAIN TS_HOSTNAME
+                  DB_PASSWORD NC_DB_PASSWORD NC_ADMIN_USER NC_ADMIN_PASSWORD
+                  RESTIC_REPOSITORY RESTIC_PASSWORD)
+
+  # Backblaze credentials are only needed for a b2: repository. An off-site
+  # copy can just as well be a second box at a relative's house over Tailscale
+  # (sftp:), which costs nothing per month. See docs/COSTS.md.
+  case "${RESTIC_REPOSITORY:-}" in
+    b2:*) required+=(B2_ACCOUNT_ID B2_ACCOUNT_KEY) ;;
+  esac
+
   local missing=()
-  for v in VAULT_NAME VAULT_ROOT TZ TAILNET_DOMAIN TS_HOSTNAME \
-           DB_PASSWORD NC_DB_PASSWORD NC_ADMIN_USER NC_ADMIN_PASSWORD \
-           B2_ACCOUNT_ID B2_ACCOUNT_KEY RESTIC_REPOSITORY RESTIC_PASSWORD; do
+  for v in "${required[@]}"; do
     [ -n "${!v:-}" ] || missing+=("$v")
   done
   [ ${#missing[@]} -eq 0 ] || die "vault.env is missing values for: ${missing[*]}"
@@ -41,7 +50,10 @@ load_env() {
   [[ "$DB_PASSWORD" =~ ^[A-Za-z0-9]+$ ]] || \
     die "DB_PASSWORD must be letters and digits only (Immich requirement). Regenerate: openssl rand -hex 24"
 
-  export B2_ACCOUNT_ID B2_ACCOUNT_KEY RESTIC_REPOSITORY RESTIC_PASSWORD
+  export RESTIC_REPOSITORY RESTIC_PASSWORD
+  [ -n "${B2_ACCOUNT_ID:-}" ]  && export B2_ACCOUNT_ID
+  [ -n "${B2_ACCOUNT_KEY:-}" ] && export B2_ACCOUNT_KEY
+  return 0
 }
 
 # Paths, derived once so no script invents its own layout.

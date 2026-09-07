@@ -21,6 +21,7 @@ sudo ./03-verify.sh        # health AND exposure checks
 sudo ./backup.sh           # first off-site backup (long — it is the whole library)
 sudo ./restore-test.sh     # PROVES it. do not skip. do not delete anything before this.
 sudo ./04-iphone-pull.sh   # full encrypted device backup, phone on a cable
+sudo ./05-coverage.sh      # is everything actually in there, and current?
 ```
 
 Every script is safe to re-run.
@@ -35,8 +36,8 @@ fine to start — you can move to real hardware later, the install is identical.
 1. Ubuntu Server 24.04 on the box, on the network, SSH working.
 2. `01-provision.sh` → `tailscale up` → fill in `vault.env` → `02-deploy.sh`.
    Budget an hour, most of it downloads.
-3. Install Immich from the App Store on your phone, point it at your tailnet
-   address, turn on backup. Watch your own photos land in your own vault.
+3. Set up the phone — [../docs/IPHONE.md](../docs/IPHONE.md). Three free apps,
+   ten minutes. Watch your own photos land in your own vault.
 4. `backup.sh`, then `restore-test.sh`.
 
 **That is the demo.** Your own working cocoon, your own photos, restored in
@@ -55,6 +56,7 @@ mockup, and you will know your real hours before you quote anyone.
 | `03-verify.sh` | Is it healthy — and is it accidentally exposed to the internet? |
 | `04-iphone-pull.sh` | Full encrypted iPhone backup into the vault. |
 | `backup.sh` | Nightly. Dumps both databases, then encrypts and ships to B2. |
+| `05-coverage.sh` | What is in the vault, how stale each source is, what is still only on the phone. |
 | `restore-test.sh` | Pulls it back out and proves it. The one that matters. |
 
 Configuration is one file: `/srv/vault/vault.env`, from
@@ -89,6 +91,8 @@ the first backup, not after.**
 
 ## More
 
+- [IPHONE.md](../docs/IPHONE.md) — the phone side: apps, what syncs, the monthly ritual.
+- [COSTS.md](../docs/COSTS.md) — what it costs to build and run, versus iCloud.
 - [WHAT-IS-POSSIBLE.md](../docs/WHAT-IS-POSSIBLE.md) — the boundaries. Read before selling.
 - [HARDWARE.md](../docs/HARDWARE.md) — what to buy, and capacity math for multiple people.
 - [MIGRATION.md](../docs/MIGRATION.md) — getting a life out of iCloud.

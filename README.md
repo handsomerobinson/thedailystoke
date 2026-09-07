@@ -15,6 +15,8 @@ and nowhere else.
 |---|---|
 | [00-START-HERE](00-START-HERE/) | The scripts, in order. Provision → deploy → verify → back up → prove it. |
 | [docs/WHAT-IS-POSSIBLE.md](docs/WHAT-IS-POSSIBLE.md) | What works, what needs a human, what cannot be built. |
+| [docs/IPHONE.md](docs/IPHONE.md) | Living with it: apps, what syncs by itself, what doesn't, the monthly ritual. |
+| [docs/COSTS.md](docs/COSTS.md) | What it costs to build and to run, compared honestly against iCloud. |
 | [docs/HARDWARE.md](docs/HARDWARE.md) | What to buy. Capacity and bandwidth math for multiple people. |
 | [docs/MIGRATION.md](docs/MIGRATION.md) | Getting a life out of iCloud. |
 | [docs/RUNBOOK.md](docs/RUNBOOK.md) | When something breaks. Includes full rebuild from backup. |

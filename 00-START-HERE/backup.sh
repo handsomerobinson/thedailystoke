@@ -102,6 +102,13 @@ step "Backing up"
 # from the originals, and together they are often a third of the library. There
 # is no reason to pay to store, upload, and encrypt derivatives every night.
 # backups/ is Immich's own dump directory — we make our own above.
+# Optionally keep the bulky device backups on local disk only. See docs/COSTS.md.
+IPHONE_PATHS=("$IPHONE_DIR")
+if [ "${BACKUP_IPHONE_OFFSITE:-1}" != "1" ]; then
+  IPHONE_PATHS=()
+  warn "BACKUP_IPHONE_OFFSITE=0 — device backups stay on this machine only"
+fi
+
 restic backup \
   --tag "$VAULT_NAME" \
   --exclude "$IMMICH_LIBRARY/thumbs" \
@@ -113,7 +120,7 @@ restic backup \
   "$DUMPS_DIR" \
   "$IMMICH_LIBRARY" \
   "$NC_DIR" \
-  "$IPHONE_DIR" \
+  ${IPHONE_PATHS[@]+"${IPHONE_PATHS[@]}"} \
   "$VAULT_ENV"
 # vault.env is included so a rebuild recovers the database and admin passwords.
 # Its restic passphrase is of no use inside the repository it unlocks — that
