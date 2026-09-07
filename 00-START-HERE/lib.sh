@@ -57,15 +57,34 @@ load_env() {
 }
 
 # Paths, derived once so no script invents its own layout.
+#
+# Storage is two tiers, because at scale they want different hardware:
+#
+#   VAULT_ROOT   FAST  — databases, dumps, config. Small (under ~200GB even
+#                        for a huge library) but every page of random IO the
+#                        system does lands here. Wants an SSD.
+#   VAULT_MEDIA  BULK  — originals, device backups. Enormous, but read
+#                        sequentially, so a hard drive is indistinguishable
+#                        in use and roughly a tenth the price per TB.
+#
+# Leave VAULT_MEDIA unset and both collapse onto one disk. That is correct for
+# anything under a few TB. See docs/STORAGE.md.
 set_paths() {
-  IMMICH_DIR="$VAULT_ROOT/immich"
-  IMMICH_LIBRARY="$IMMICH_DIR/library"
-  IMMICH_PGDATA="$IMMICH_DIR/postgres"
-  NC_DIR="$VAULT_ROOT/nextcloud"
-  IPHONE_DIR="$VAULT_ROOT/iphone"
+  MEDIA_ROOT="${VAULT_MEDIA:-$VAULT_ROOT}"
+
+  # --- fast tier ---
+  IMMICH_PGDATA="$VAULT_ROOT/immich/postgres"
+  NC_HTML="$VAULT_ROOT/nextcloud/html"
+  NC_PGDATA="$VAULT_ROOT/nextcloud/postgres"
   DUMPS_DIR="$VAULT_ROOT/dumps"
   STACK_DIR="$VAULT_ROOT/stack"
-  SCRATCH_DIR="$VAULT_ROOT/restore-test"
+
+  # --- bulk tier ---
+  IMMICH_LIBRARY="$MEDIA_ROOT/immich/library"
+  NC_DATA="$MEDIA_ROOT/nextcloud/data"
+  IPHONE_DIR="$MEDIA_ROOT/iphone"
+  SCRATCH_DIR="$MEDIA_ROOT/restore-test"
+
   VAULT_URL="https://${TS_HOSTNAME}.${TAILNET_DOMAIN}"
   NC_URL="https://${TS_HOSTNAME}.${TAILNET_DOMAIN}:${NEXTCLOUD_HTTPS_PORT:-8443}"
 }

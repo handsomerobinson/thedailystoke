@@ -30,8 +30,8 @@ services:
     ports:
       - '127.0.0.1:11000:80'
     volumes:
-      - ${VAULT_ROOT}/nextcloud/html:/var/www/html
-      - ${VAULT_ROOT}/nextcloud/data:/data
+      - ${NC_HTML_DIR}:/var/www/html
+      - ${NC_DATA_DIR}:/data
       - /etc/localtime:/etc/localtime:ro
     environment:
       TZ: ${TZ:-Etc/UTC}
@@ -75,8 +75,8 @@ services:
       nextcloud-db:
         condition: service_healthy
     volumes:
-      - ${VAULT_ROOT}/nextcloud/html:/var/www/html
-      - ${VAULT_ROOT}/nextcloud/data:/data
+      - ${NC_HTML_DIR}:/var/www/html
+      - ${NC_DATA_DIR}:/data
     environment:
       TZ: ${TZ:-Etc/UTC}
 
@@ -85,7 +85,7 @@ services:
     image: postgres:17-alpine
     restart: always
     volumes:
-      - ${VAULT_ROOT}/nextcloud/postgres:/var/lib/postgresql/data
+      - ${NC_PGDATA_DIR}:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: nextcloud
       POSTGRES_USER: nextcloud

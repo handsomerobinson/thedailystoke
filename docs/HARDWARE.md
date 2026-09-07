@@ -5,7 +5,7 @@
 | Part | Spec | Rough cost |
 |---|---|---|
 | Mini PC | N100/N150 or Ryzen, **16GB RAM**, 500GB NVMe for the OS | $250–400 |
-| Data disk | 2TB–4TB SSD or 3.5" HDD | $100–200 |
+| Data disk | 4TB HDD + powered enclosure (see [STORAGE.md](STORAGE.md)) | $135 |
 | UPS (optional) | Small battery, protects against corruption on power cuts | $60–100 |
 
 **16GB is the floor, not 8GB.** Immich's machine-learning container — the thing
@@ -29,7 +29,7 @@ since each Immich needs its own ~4GB machine-learning container.
 | Part | Spec |
 |---|---|
 | Machine | 32GB RAM, 6+ cores |
-| Storage | **Mirrored.** Two drives in RAID1 or a ZFS mirror. |
+| Storage | **Mirrored.** Two drives in RAID1 or a ZFS mirror, on hard drives — SSD is ~9x the price per TB at these capacities. |
 | Capacity | ~300GB/person average → 4TB usable for 10 people |
 | Network | Wired ethernet, never wifi |
 

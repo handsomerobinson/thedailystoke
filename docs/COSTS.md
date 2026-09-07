@@ -10,11 +10,17 @@ anyone — it has moved once already.
 | | |
 |---|---|
 | Mini PC — 16GB RAM, 500GB NVMe for the OS | $250–400 |
-| Data disk — 4TB SSD | $200–250 |
-| *or* data disk — 4TB HDD (fine for media, slower) | $85–110 |
+| Data disk — 4TB HDD + powered USB enclosure **(recommended)** | $135 |
+| *or* data disk — 4TB SSD (no practical benefit for media) | ~$300 |
 | UPS (optional, prevents corruption on power cuts) | $60–100 |
 
-**Realistic total: $400–700.**
+**Realistic total: $425**, or $495 with a UPS.
+
+The mini PC's own 500GB NVMe is the fast tier — it holds the databases, which
+is the only place SSD speed matters. Media goes on the hard drive. Paying $300
+for a 4TB SSD instead buys you nothing you can perceive: photos and video are
+read sequentially and a hard drive streams them faster than you can look.
+See [STORAGE.md](STORAGE.md).
 
 An old desktop or laptop you already own costs $0 and works fine to start.
 The install is identical, so you can begin today and buy hardware later.
@@ -64,7 +70,7 @@ Put side by side:
 | ~6 TB | ~$44/mo | $29.99 | **iCloud cheaper** |
 
 **So: this does not save you money at typical sizes, and above about 1.5TB it
-costs more.** Apple prices its large tiers aggressively. Add $400–700 of
+costs more.** Apple prices its large tiers aggressively. Add $425–500 of
 hardware and the payback period on cost alone is somewhere between long and
 never.
 
@@ -113,7 +119,7 @@ backups out of B2 and cut that bill substantially.
 
 | | |
 |---|---|
-| Hardware, once | ~$500 |
+| Hardware, once | ~$425 |
 | Running cost | **~$9/month** |
 | With a Pi off-site instead of B2 | ~$180 more once, then **~$3/month** |
 

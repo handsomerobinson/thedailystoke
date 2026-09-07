@@ -18,6 +18,7 @@ and nowhere else.
 | [docs/IPHONE.md](docs/IPHONE.md) | Living with it: apps, what syncs by itself, what doesn't, the monthly ritual. |
 | [docs/COSTS.md](docs/COSTS.md) | What it costs to build and to run, compared honestly against iCloud. |
 | [docs/DEVICES.md](docs/DEVICES.md) | Which device plays which role — brain, storage, pocket, terminal. |
+| [docs/STORAGE.md](docs/STORAGE.md) | Disks: the two-tier split, what to buy at every capacity, off-site at scale. |
 | [docs/HARDWARE.md](docs/HARDWARE.md) | What to buy. Capacity and bandwidth math for multiple people. |
 | [docs/MIGRATION.md](docs/MIGRATION.md) | Getting a life out of iCloud. |
 | [docs/RUNBOOK.md](docs/RUNBOOK.md) | When something breaks. Includes full rebuild from backup. |

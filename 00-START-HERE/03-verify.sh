@@ -80,19 +80,21 @@ else
 fi
 
 step "Storage"
-if [ -d "$VAULT_ROOT" ]; then
-  USE=$(df -h "$VAULT_ROOT" | awk 'NR==2{print $5}' | tr -d '%')
-  AVAIL=$(df -h "$VAULT_ROOT" | awk 'NR==2{print $4}')
-  if [ "$USE" -ge 90 ]; then
-    fail "$VAULT_ROOT is ${USE}% full — only $AVAIL left"
-  elif [ "$USE" -ge 75 ]; then
-    warn "$VAULT_ROOT is ${USE}% full ($AVAIL free) — plan more storage"
-  else
-    ok "$VAULT_ROOT is ${USE}% full ($AVAIL free)"
+check_disk() {  # check_disk <path> <label>
+  [ -d "$1" ] || return 0
+  local use avail
+  use=$(df -h "$1" | awk 'NR==2{print $5}' | tr -d '%')
+  avail=$(df -h "$1" | awk 'NR==2{print $4}')
+  if   [ "$use" -ge 90 ]; then fail "$2 $1 is ${use}% full — only $avail left"
+  elif [ "$use" -ge 75 ]; then warn "$2 $1 is ${use}% full ($avail free) — plan more storage"
+  else                         ok   "$2 $1 is ${use}% full ($avail free)"
   fi
-  if ! mountpoint -q "$VAULT_ROOT"; then
-    warn "$VAULT_ROOT is on the OS disk, not a dedicated data disk"
-  fi
+}
+check_disk "$VAULT_ROOT" "fast tier —"
+if [ "$MEDIA_ROOT" != "$VAULT_ROOT" ]; then
+  check_disk "$MEDIA_ROOT" "bulk tier —"
+else
+  mountpoint -q "$VAULT_ROOT" 2>/dev/null || warn "vault is on the OS disk, not a dedicated data disk"
 fi
 
 step "Off-site backup"

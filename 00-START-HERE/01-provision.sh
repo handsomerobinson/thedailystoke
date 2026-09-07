@@ -73,14 +73,28 @@ fi
 
 step "Creating the vault directory layout"
 VR="${VAULT_ROOT:-/srv/vault}"
-if ! mountpoint -q "$VR" 2>/dev/null; then
-  warn "$VR is not a separate mount point."
-  warn "You are about to store a whole photo library on the OS disk."
-  warn "If you have a data disk, mount it at $VR first. See docs/HARDWARE.md."
-fi
-mkdir -p "$VR"/{immich/library,immich/postgres,nextcloud/html,nextcloud/data,nextcloud/postgres,iphone,dumps,stack,restore-test}
+VM="${VAULT_MEDIA:-$VR}"
+
+# Fast tier — databases, dumps, config.
+mkdir -p "$VR"/{immich/postgres,nextcloud/html,nextcloud/postgres,dumps,stack}
 chmod 700 "$VR"
-ok "layout created under $VR"
+ok "fast tier under $VR"
+
+# Bulk tier — originals and device backups. Same disk unless VAULT_MEDIA is set.
+mkdir -p "$VM"/{immich/library,nextcloud/data,iphone,restore-test}
+chmod 700 "$VM"
+if [ "$VM" != "$VR" ]; then
+  mountpoint -q "$VM" 2>/dev/null \
+    && ok "bulk tier under $VM (separate disk)" \
+    || warn "VAULT_MEDIA=$VM is not a mount point — is the big disk mounted?"
+else
+  ok "bulk tier under $VM (same disk as fast tier)"
+  if ! mountpoint -q "$VR" 2>/dev/null; then
+    warn "$VR is not a separate mount point."
+    warn "You are about to store a whole photo library on the OS disk."
+    warn "See docs/STORAGE.md."
+  fi
+fi
 
 step "Locking down the firewall"
 # Everything is reachable over Tailscale only. Nothing is published to the

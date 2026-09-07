@@ -57,11 +57,16 @@ Plugged directly into the brain. Never network-attached for the database.
 
 | | Cost | Notes |
 |---|---|---|
-| 4TB USB SSD | $200–250 | Quiet, fast, no separate power. Best with a Pi. |
-| 4TB 3.5" HDD + powered enclosure | $90–130 | Cheapest per TB. Needs its own power supply. |
-| 2TB USB SSD | $100–130 | Fine if the library is under ~1TB. |
+| 4TB 3.5" HDD + powered enclosure | $135 | **Recommended.** Needs its own power supply. |
+| 16TB 3.5" HDD + powered enclosure | $290 | ~$16/TB. The only sane way to reach this capacity. |
+| 4TB USB SSD | ~$300 | Quiet and no separate power, but no perceptible benefit for media. |
 
 Rule: roughly twice the phone's used storage.
+
+Consumer SSDs stop at 8TB and cost around $144/TB; hard drives are about
+$16/TB. Media is read sequentially, so the drive is not the bottleneck.
+Keep the databases on the SSD and the media on the hard drive —
+[STORAGE.md](STORAGE.md).
 
 ---
 
@@ -90,7 +95,7 @@ Nextcloud are already web apps, so this needs no extra software at all.
 
 ## Two builds
 
-### Cheapest working prototype — ~$330
+### Cheapest working prototype — ~$285
 
 | | |
 |---|---|
@@ -98,21 +103,22 @@ Nextcloud are already web apps, so this needs no extra software at all.
 | Official 27W power supply | $12 |
 | Active cooler | $10 |
 | 32GB microSD (boot only) | $8 |
-| 4TB USB SSD | $220 |
+| 4TB HDD + powered enclosure | $135 |
 
 Slower first-time indexing — a large photo library can take days rather than
 hours to process faces and search. Everything works; you just wait longer once.
 
-### The one to keep — ~$510
+### The one to keep — ~$425
 
 | | |
 |---|---|
 | Mini PC, 16GB RAM, 500GB NVMe | $280 |
-| 4TB SATA SSD | $220 |
+| 4TB HDD + powered enclosure | $135 |
 | USB-A to Lightning cable | $10 |
 
 Faster at everything, more room to grow, and the machine-learning work that
 powers search finishes in hours instead of days.
 
-**The gap is about $180.** If this is a weekend experiment, buy the Pi. If you
-expect to still be running it in a year, buy the mini PC.
+**The gap is about $140.** If this is a weekend experiment, buy the Pi. If you
+expect to still be running it in a year, buy the mini PC — the extra RAM and
+CPU cut first-time indexing from days to hours, and you only pay it once.

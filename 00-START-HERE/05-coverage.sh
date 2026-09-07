@@ -53,10 +53,10 @@ say "    Check against the phone: Settings > General > iPhone Storage > Photos"
 
 # --- Files --------------------------------------------------------------------
 step "Files, contacts, calendars  [ automatic — Nextcloud app + iOS sync ]"
-if [ -d "$NC_DIR/data" ]; then
-  NF=$(find "$NC_DIR/data" -type f 2>/dev/null | wc -l)
-  ok "$NF files ($(du -sh "$NC_DIR/data" 2>/dev/null | cut -f1))"
-  NEWEST_F=$(find "$NC_DIR/data" -type f -printf '%T@\n' 2>/dev/null | sort -rn | head -1 | cut -d. -f1)
+if [ -d "$NC_DATA" ]; then
+  NF=$(find "$NC_DATA" -type f 2>/dev/null | wc -l)
+  ok "$NF files ($(du -sh "$NC_DATA" 2>/dev/null | cut -f1))"
+  NEWEST_F=$(find "$NC_DATA" -type f -printf '%T@\n' 2>/dev/null | sort -rn | head -1 | cut -d. -f1)
   [ -n "${NEWEST_F:-}" ] && stale "$(age_days "$NEWEST_F")" 7 "newest file"
 else
   warn "no Nextcloud data directory yet"

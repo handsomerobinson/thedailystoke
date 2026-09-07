@@ -114,12 +114,13 @@ restic backup \
   --exclude "$IMMICH_LIBRARY/thumbs" \
   --exclude "$IMMICH_LIBRARY/encoded-video" \
   --exclude "$IMMICH_LIBRARY/backups" \
-  --exclude "$NC_DIR/postgres" \
   --exclude "$IMMICH_PGDATA" \
+  --exclude "$NC_PGDATA" \
   --exclude-caches \
   "$DUMPS_DIR" \
   "$IMMICH_LIBRARY" \
-  "$NC_DIR" \
+  "$NC_DATA" \
+  "$NC_HTML" \
   ${IPHONE_PATHS[@]+"${IPHONE_PATHS[@]}"} \
   "$VAULT_ENV"
 # vault.env is included so a rebuild recovers the database and admin passwords.
