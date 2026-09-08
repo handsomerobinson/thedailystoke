@@ -82,6 +82,33 @@ eventually anyway.
 
 ---
 
+## Above ~5TB the conclusion inverts
+
+Everything above assumes an ordinary library. Apple's own pricing is what makes
+the vault look marginal — but only up to a point. Past roughly 5TB you are
+forced onto the 12TB tier at **$59.99/month**, whether you need 6TB or 11TB,
+and the comparison changes completely.
+
+Worked example, a real 7.2TB library (6.2TB photos, 1TB files):
+
+| | Per year |
+|---|---|
+| iCloud 12TB, indefinitely | **$720** |
+| Vault + Backblaze (7.2TB) | **$600** |
+| Vault + a drive at a relative's house | **~$36** |
+
+Backblaze saves about $10/month at this size — not enough to bother. **The
+local off-site copy is what makes it worth doing**, at roughly $720 once
+against $720 every year, paying for itself inside twelve months.
+
+There is also a hard physical limit at this scale: 6TB to Backblaze over home
+broadband is three to eight weeks of saturated upload. Seeding a drive locally
+and relocating it stops being the budget option and becomes the only one that
+finishes. See [STORAGE.md](STORAGE.md).
+
+So: **under ~2TB, do this because you want to own it. Over ~5TB, it also pays
+for itself.**
+
 ## The lever that changes the math
 
 **The off-site copy does not have to be Backblaze.** restic backs up over SSH

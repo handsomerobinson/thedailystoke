@@ -36,7 +36,39 @@ while you deal with the backlog.
 Photos. Apple emails download links in a few days. You get ZIPs of originals.
 Slower, but no Mac needed and nothing is re-encoded.
 
-**C. Small library — direct from the phone**
+**C. Large library (2TB+) — external drive on the Mac**
+
+Apple's export service produces hundreds of ZIP files at this size and the
+Mac's internal disk cannot hold the library. Use an external drive as the
+staging ground:
+
+1. **Format the drive APFS.** Disk Utility → select the drive → Erase →
+   format **APFS**, scheme **GUID Partition Map**. Not exFAT — Photos refuses
+   to host a library on it. *This erases the drive.*
+2. **Move the Photos library to it.** Quit Photos. In Finder, drag
+   `~/Pictures/Photos Library.photoslibrary` onto the external drive. On a big
+   library this copy alone takes hours.
+3. **Point Photos at the new location.** Hold **Option** while launching
+   Photos, choose the library on the external drive, then
+   Photos → Settings → General → **Use as System Photo Library**.
+4. **Pull down the originals.** Photos → Settings → iCloud → select
+   **Download Originals to this Mac**.
+
+Then leave it. Multiple terabytes over home broadband is days of continuous
+downloading. Photos does not show a useful progress bar; check by watching the
+free space on the drive fall.
+
+Once it has finished, upload into Immich:
+
+```bash
+npx @immich/cli upload --recursive \
+  "/Volumes/<drive>/Photos Library.photoslibrary/originals"
+```
+
+> Do this while you wait on hardware. It is the longest single step in the
+> whole project and it needs nothing but the drive and time.
+
+**D. Small library — direct from the phone**
 Just let the Immich app upload everything. Leave it plugged in on wifi
 overnight. Fine up to roughly 20–30GB; beyond that iOS keeps suspending it.
 
