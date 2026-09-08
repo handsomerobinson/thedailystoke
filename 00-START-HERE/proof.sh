@@ -10,7 +10,7 @@
 #    - runs anywhere with Docker: a laptop, a Mac, a desktop
 #    - LAN only, no Tailscale — your phone must be on the same wifi
 #    - no off-site backup, no Nextcloud, no firewall
-#    - stores data in ./proof-vault next to this script
+#    - stores everything in Docker volumes, not folders on the Mac
 #
 #  Because it binds to your local network rather than loopback, anyone on your
 #  wifi can reach it. Fine for an afternoon at home. Not a vault. Do not put
@@ -49,12 +49,12 @@ case "${1:-start}" in
   stop)
     [ -f "$DIR/docker-compose.yml" ] || die "Nothing set up yet."
     compose down
-    ok "stopped — photos kept in $DIR"; exit 0 ;;
+    ok "stopped — photos kept in the Docker volume"; exit 0 ;;
   destroy)
     [ -f "$DIR/docker-compose.yml" ] && compose down -v 2>/dev/null || true
     # Catch containers and volumes from an older run whose compose file is gone.
     docker rm -f immich_server immich_machine_learning immich_postgres immich_redis 2>/dev/null || true
-    docker volume rm -f proof-vault_proof-pgdata immich_model-cache 2>/dev/null || true
+    docker volume rm -f proof-vault_proof-pgdata proof-vault_proof-library immich_model-cache 2>/dev/null || true
     rm -rf "$DIR"; ok "destroyed"; exit 0 ;;
 esac
 
@@ -69,7 +69,7 @@ fi
 [ -n "$IP" ] || IP="<this computer's IP address>"
 
 printf '\n%s==> Setting up in %s%s\n' "$c_bld" "$DIR" "$c_off"
-mkdir -p "$DIR/library"
+mkdir -p "$DIR"
 
 [ -f "$DIR/docker-compose.yml" ] || {
   curl -fsSL "https://github.com/immich-app/immich/releases/latest/download/docker-compose.yml" \
@@ -77,25 +77,45 @@ mkdir -p "$DIR/library"
   ok "downloaded Immich"
 }
 
-# Postgres goes in a Docker-managed volume, NOT a folder on the Mac.
-# Bind-mounting a database directory from macOS into Docker's VM breaks
-# Postgres initialisation: initdb cannot apply the ownership it needs, silently
-# skips creating the database, and Immich then fails with
-# 'database "immich" does not exist'. A named volume lives inside the VM on a
-# real Linux filesystem and just works. Photos stay a normal folder so you can
-# see them in Finder.
+# BOTH the database and the photo library go in Docker-managed volumes, not
+# folders on the Mac. Docker Desktop shares macOS directories into a Linux VM
+# through a translation layer that is not a real filesystem, and anything doing
+# genuine filesystem work hits it:
+#
+#   - Postgres initdb cannot apply the ownership it needs, so it silently skips
+#     creating the database and Immich dies with 'database "immich" does not
+#     exist'.
+#   - Immich writes .immich marker files to verify its storage, and reading one
+#     back fails with 'EIO: i/o error', which kills the microservices worker.
+#
+# Named volumes live inside the VM on a real Linux filesystem and simply work.
+#
+# This is a macOS-Docker limitation, not a property of the vault. On the Linux
+# machine the real install targets, bind mounts are native and none of this
+# applies — 02-deploy.sh deliberately uses real directories there.
+#
+# Trade-off here: photos are not browsable in Finder during the proof. View
+# them through Immich. To pull them out later:
+#     docker run --rm -v proof-vault_proof-library:/data -v "$PWD":/out \
+#       alpine tar czf /out/library.tgz -C /data .
 cat > "$DIR/docker-compose.override.yml" <<'YAML'
 services:
+  immich-server:
+    volumes: !override
+      - proof-library:/data
+      - /etc/localtime:/etc/localtime:ro
+
   database:
     volumes: !override
       - proof-pgdata:/var/lib/postgresql/data
 
 volumes:
+  proof-library:
   proof-pgdata:
 YAML
 
 cat > "$DIR/.env" <<EOF
-UPLOAD_LOCATION=$DIR/library
+UPLOAD_LOCATION=/unused-see-override
 DB_DATA_LOCATION=/unused-see-override
 IMMICH_VERSION=v3
 DB_PASSWORD=proofonlynotsecret
