@@ -91,6 +91,12 @@ class TestNotesTool(unittest.TestCase):
         r = self.tool.run(action="read", user_id="bob", title="secret")
         self.assertFalse(r.ok)
 
+    def test_body_size_cap_enforced(self):
+        tool = NotesTool(base_dir=self.tmp, max_bytes=10)
+        result = tool.run(action="write", user_id="alice", title="big", body="x" * 100)
+        self.assertFalse(result.ok)
+        self.assertIn("cap", result.error)
+
     def test_unsafe_title_sanitized(self):
         w = self.tool.run(action="write", user_id="alice", title="../../etc/passwd", body="x")
         self.assertTrue(w.ok)

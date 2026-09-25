@@ -129,7 +129,12 @@ class Agent:
                         stopped_reason="permission_denied",
                     )
 
-                result = tool.run(user_id=user_id, **tool_args)
+                try:
+                    result = tool.run(user_id=user_id, **tool_args)
+                except Exception as tool_exc:  # noqa: BLE001 - a buggy/third-party
+                    # tool must never crash the loop; treat it as a failed
+                    # tool result so reflection can still kick in.
+                    result = ToolResult(ok=False, output="", error=f"tool raised {type(tool_exc).__name__}: {tool_exc}")
                 record.result = result
                 attempts.append(record)
 
@@ -166,6 +171,24 @@ class Agent:
                     attempts=attempts,
                     cost_usd=costs.spent_usd,
                     stopped_reason="cost_cap_exceeded",
+                )
+            except Exception as e:  # noqa: BLE001 - last-resort guard: a
+                # broken provider, a malformed args JSON edge case, or any
+                # other unexpected failure must degrade to a failed
+                # TaskResult, never propagate and crash the caller's loop.
+                record.error = f"internal error: {type(e).__name__}: {e}"
+                attempts.append(record)
+                try:
+                    mem.remember_episode(task_id, f"attempt {attempt_no}: internal error: {e}")
+                except Exception:
+                    pass  # even memory itself failing must not crash the loop
+                return TaskResult(
+                    task_id=task_id,
+                    ok=False,
+                    output="",
+                    attempts=attempts,
+                    cost_usd=costs.spent_usd,
+                    stopped_reason="internal_error",
                 )
 
         return TaskResult(

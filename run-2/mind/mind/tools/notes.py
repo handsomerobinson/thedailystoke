@@ -27,9 +27,10 @@ class NotesTool(Tool):
     tier = PermissionTier.STATE_CHANGING  # writes/deletes are state changes
     description = "Read, write, list, or delete simple text notes for a user."
 
-    def __init__(self, base_dir: Optional[Path] = None):
+    def __init__(self, base_dir: Optional[Path] = None, max_bytes: int = config.DEFAULT_NOTE_MAX_BYTES):
         self.base_dir = base_dir or config.NOTES_DIR
         self.base_dir.mkdir(parents=True, exist_ok=True)
+        self.max_bytes = max_bytes
 
     def _user_dir(self, user_id: str) -> Path:
         safe_user = _SAFE_RE.sub("_", user_id) or "anonymous"
@@ -53,6 +54,13 @@ class NotesTool(Tool):
         if action == "write":
             if not title:
                 return ToolResult(ok=False, output="", error="title required to write a note")
+            body_bytes = body.encode("utf-8")
+            if len(body_bytes) > self.max_bytes:
+                return ToolResult(
+                    ok=False,
+                    output="",
+                    error=f"note body exceeds {self.max_bytes} byte cap ({len(body_bytes)} bytes)",
+                )
             path = d / f"{_safe_name(title)}.txt"
             path.write_text(body, encoding="utf-8")
             return ToolResult(ok=True, output=f"saved note {path.name}", meta={"path": str(path)})

@@ -31,7 +31,7 @@ class FailThenSucceedProvider(LLMProvider):
                 return LLMResponse(text='TOOL: code_exec\nARGS: {"code": "print(2)"}', cost_usd=self.cost_per_call)
             return LLMResponse(text='TOOL: code_exec\nARGS: {"code": "raise ValueError(1)"}', cost_usd=self.cost_per_call)
         if "previous attempt failed" in last.lower():
-            return LLMResponse(text="Reflection: avoid raising ValueError next time.", cost_usd=self.cost_per_call)
+            return LLMResponse(text="Reflection: avoid code that raises ValueError next time.", cost_usd=self.cost_per_call)
         return LLMResponse(text="ack", cost_usd=self.cost_per_call)
 
 
@@ -124,6 +124,70 @@ class CostCapTest(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertEqual(result.stopped_reason, "cost_cap_exceeded")
         self.assertLessEqual(result.cost_usd, 0.15 + 1e-9)
+
+
+class RobustnessTest(unittest.TestCase):
+    """Round-2 attack findings: the agent must degrade gracefully instead of
+    crashing when a tool misbehaves or the provider raises."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.memory_store = MemoryStore(base_dir=self.tmp / "memory")
+        self.audit = AuditLog(path=self.tmp / "audit.jsonl")
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_tool_raising_exception_does_not_crash_loop(self):
+        class ExplodingTool(Tool):
+            name = "boom"
+            tier = PermissionTier.READ_ONLY
+
+            def run(self, **kwargs):
+                raise RuntimeError("kaboom")
+
+        class PickBoomProvider(LLMProvider):
+            name = "pick_boom"
+
+            def complete(self, system, messages, max_tokens=512):
+                last = messages[-1]["content"]
+                if "AVAILABLE TOOLS" in last:
+                    return LLMResponse(text="TOOL: boom\nARGS: {}")
+                return LLMResponse(text="Reflection: the tool exploded; stop using it.")
+
+        tools = {"boom": ExplodingTool()}
+        agent = Agent(provider=PickBoomProvider(), tools=tools, memory_store=self.memory_store, audit_log=self.audit, approver=auto_approver(), max_retries=2)
+        result = agent.run_task("alice", "trigger the explosion")
+        self.assertFalse(result.ok)
+        self.assertEqual(result.stopped_reason, "max_retries_exhausted")
+        self.assertIn("kaboom", result.attempts[0].result.error)
+
+    def test_provider_raising_exception_returns_internal_error(self):
+        class BrokenProvider(LLMProvider):
+            name = "broken"
+
+            def complete(self, system, messages, max_tokens=512):
+                raise ConnectionError("network down")
+
+        agent = Agent(provider=BrokenProvider(), tools=default_toolset(), memory_store=self.memory_store, audit_log=self.audit, approver=auto_approver())
+        result = agent.run_task("alice", "do something")
+        self.assertFalse(result.ok)
+        self.assertEqual(result.stopped_reason, "internal_error")
+
+    def test_unknown_tool_name_does_not_crash_and_eventually_stops(self):
+        class GhostToolProvider(LLMProvider):
+            name = "ghost"
+
+            def complete(self, system, messages, max_tokens=512):
+                last = messages[-1]["content"]
+                if "AVAILABLE TOOLS" in last:
+                    return LLMResponse(text="TOOL: does_not_exist\nARGS: {}")
+                return LLMResponse(text="Reflection: pick a real tool.")
+
+        agent = Agent(provider=GhostToolProvider(), tools=default_toolset(), memory_store=self.memory_store, audit_log=self.audit, approver=auto_approver(), max_retries=2)
+        result = agent.run_task("alice", "use a fake tool")
+        self.assertFalse(result.ok)
+        self.assertEqual(result.stopped_reason, "max_retries_exhausted")
 
 
 class MockProviderIntegrationTest(unittest.TestCase):

@@ -36,6 +36,10 @@ DEFAULT_MAX_REFLECTION_RETRIES = 3
 DEFAULT_TOOL_TIMEOUT_SECONDS = 5
 DEFAULT_TOOL_OUTPUT_CAP_BYTES = 4096
 
+# Decision: cap note size so the notes tool can't be used to fill the disk
+# via a runaway/adversarial task loop.
+DEFAULT_NOTE_MAX_BYTES = 64 * 1024
+
 
 def ensure_data_dirs() -> None:
     for d in (DATA_DIR, MEMORY_DIR, NOTES_DIR, SANDBOX_DIR):
