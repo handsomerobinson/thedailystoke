@@ -1,0 +1,245 @@
+============================================================================================================
+BASE CASE: month by month, month 0 to break-even + 3
+============================================================================================================
+mo yyyy-mm mode   claimed  halls  pay%   fte  op_rev   opex   op_net  grants patron   loan debtSv    cash cum_def
+ 0 2027-01 normal       0      0  0.00  2.5       0   126k    -126k    500k      0      0      0   1.02M    126k
+ 1 2027-02 normal       0      0  0.00  2.5       0    88k     -88k       0      0      0      0    935k    214k
+ 2 2027-03 normal       0      0  0.00  2.5       0    88k     -88k       0      0      0      0    847k    302k
+ 3 2027-04 normal       6      0  0.00  2.5       0    58k     -58k       0      0      0      0    788k    360k
+ 4 2027-05 normal      13      0  0.00  2.5       0    58k     -58k       0      0      0      0    730k    418k
+ 5 2027-06 normal      23      0  0.00  3.5       0   163k    -163k       0      0      0      0    566k    581k
+ 6 2027-07 normal     284     15  2.34  3.5     165    69k     -69k       0     4k      0      0    571k    650k
+ 7 2027-08 normal     630     32  2.44  3.5     351    69k     -68k       0     4k      0      0    506k    718k
+ 8 2027-09 normal      1k     50  2.47  3.5     564    69k     -68k       0     4k      0      0    441k    786k
+ 9 2027-10 normal      2k     69  2.48  3.5     808    69k     -68k    100k     4k      0      0    477k    854k
+10 2027-11 normal      3k     91  2.48  3.5      1k    69k     -68k       0     4k      0      0    413k    922k
+11 2027-12 normal      4k    114  2.48  3.5      1k    89k     -87k       0     4k      0      0    329k   1.01M
+12 2028-01 normal      5k    141  2.48  3.5      2k    70k     -69k    500k     4k      0      0    765k   1.08M
+13 2028-02 normal      6k    168  2.47  3.5      2k    70k     -68k       0     4k      0      0    700k   1.15M
+14 2028-03 normal      7k    196  2.46  3.5      2k    70k     -68k       0     4k      0      0    636k   1.21M
+15 2028-04 normal      9k    226  2.46  3.5      3k    70k     -68k    100k     4k      0      0    672k   1.28M
+16 2028-05 normal     10k    258  2.45  3.5      3k    70k     -67k       0     4k      0      0    608k   1.35M
+17 2028-06 normal     12k    291  2.45  3.5      4k   140k    -137k       0     4k      0      0    475k   1.49M
+18 2028-07 normal     13k    326  2.44  3.5      4k    70k     -66k       0     7k      0      0    416k   1.55M
+19 2028-08 normal     15k    362  2.44  3.5      5k    71k     -66k       0     7k      0      0    356k   1.62M
+20 2028-09 normal     17k    401  2.43  3.5      5k    71k     -65k       0     7k      0      0    298k   1.68M
+21 2028-10 normal     20k    441  2.43  3.5      6k    71k     -65k    100k     7k      0      0    340k   1.75M
+22 2028-11 normal     22k    483  2.42  3.5      6k    71k     -64k       0     7k      0      0    282k   1.81M
+23 2028-12 normal     25k    529  2.42  3.5      7k    91k     -84k       0     7k      0      0    205k   1.90M
+24 2029-01 normal     28k    579  2.42  3.5      8k    89k     -81k    500k     7k      0      0    630k   1.98M
+25 2029-02 normal     30k    630  2.41  3.5      8k    79k     -71k       0     7k      0      0    566k   2.05M
+26 2029-03 normal     33k    682  2.41  3.5      9k    79k     -70k       0     7k      0      0    503k   2.12M
+27 2029-04 normal     37k    736  2.40  3.5     10k    79k     -69k    100k     7k      0      0    540k   2.19M
+28 2029-05 normal     40k    793  2.40  3.5     11k    79k     -69k       0     7k      0      0    478k   2.26M
+29 2029-06 ember      44k    852  2.39  3.5     11k   149k    -138k       0     7k      0      0    347k   2.39M
+30 2029-07 normal     47k    914  2.39  3.0     12k    79k     -67k       0     7k      0      0    287k   2.46M
+31 2029-08 normal     50k    977  2.38  4.0     13k   109k     -95k       0     7k      0      0    198k   2.56M
+32 2029-09 normal     54k     1k  2.38  4.0     14k    86k     -72k       0     7k      0      0    132k   2.63M
+33 2029-10 normal     59k     1k  2.38  4.0     15k    86k     -71k    100k     7k      0      0    168k   2.70M
+34 2029-11 normal     64k     1k  2.38  4.0     16k    86k     -70k       0     7k      0      0    104k   2.77M
+35 2029-12 normal     69k     1k  2.37  4.0     18k   107k     -89k       0     7k      0      0     22k   2.86M
+36 2030-01 normal     74k     1k  2.37  4.0     19k    98k     -80k       0     8k  2.20M      0   2.15M   2.94M
+37 2030-02 normal     80k     1k  2.37  4.0     20k    89k     -69k       0     8k      0      0   2.09M   3.01M
+38 2030-03 normal     85k     2k  2.36  4.0     21k    89k     -67k       0     8k      0      0   2.03M   3.07M
+39 2030-04 normal     91k     2k  2.36  4.0     23k    89k     -66k    100k     8k      0      0   2.07M   3.14M
+40 2030-05 normal     97k     2k  2.36  4.0     24k    89k     -65k       0     8k      0      0   2.01M   3.20M
+41 2030-06 normal    104k     2k  2.36  4.0     25k   159k    -133k       0     8k      0      0   1.89M   3.34M
+42 2030-07 normal    110k     2k  2.35  4.0     27k    89k     -62k       0     8k      0      0   1.83M   3.40M
+43 2030-08 normal    117k     2k  2.35  4.0     29k    89k     -61k       0     8k      0      0   1.78M   3.46M
+44 2030-09 normal    125k     2k  2.35  4.0     30k    89k     -59k       0     8k      0      0   1.73M   3.52M
+45 2030-10 normal    133k     2k  2.35  4.0     32k    90k     -57k    100k     8k      0      0   1.78M   3.58M
+46 2030-11 normal    142k     2k  2.34  4.0     34k    90k     -56k       0     8k      0      0   1.73M   3.63M
+47 2030-12 normal    152k     3k  2.34  5.0     36k   134k     -98k       0     8k      0      0   1.64M   3.73M
+48 2031-01 normal    161k     3k  2.34  5.0     38k   111k     -73k       0     8k      0      0   1.58M   3.80M
+49 2031-02 normal    171k     3k  2.34  5.5     41k   114k     -73k       0     8k      0      0   1.51M   3.88M
+50 2031-03 normal    181k     3k  2.34  5.5     43k   107k     -64k       0     8k      0      0   1.45M   3.94M
+51 2031-04 normal    191k     3k  2.33  5.5     45k   107k     -62k    100k     8k      0      0   1.50M   4.00M
+52 2031-05 normal    202k     3k  2.33  5.5     48k   107k     -59k       0     8k      0      0   1.45M   4.06M
+53 2031-06 normal    213k     4k  2.33  5.5     50k   177k    -127k       0     8k      0      0   1.33M   4.19M
+54 2031-07 normal    225k     4k  2.33  5.5     53k   108k     -55k       0     8k      0      0   1.28M   4.24M
+55 2031-08 normal    236k     4k  2.33  5.5     55k   108k     -52k       0     8k      0      0   1.24M   4.30M
+56 2031-09 normal    248k     4k  2.32  5.5     58k   108k     -50k       0     8k      0      0   1.19M   4.35M
+57 2031-10 normal    261k     4k  2.32  5.5     61k   108k     -47k       0     8k      0      0   1.15M   4.39M
+58 2031-11 normal    275k     4k  2.32  5.5     64k   109k     -45k       0     8k      0      0   1.12M   4.44M
+59 2031-12 normal    290k     5k  2.32  6.0     67k   142k     -75k       0     8k      0      0   1.05M   4.51M
+60 2032-01 normal    304k     5k  2.32  6.0     69k   127k     -57k       0     8k      0      0   1.00M   4.57M
+61 2032-02 normal    318k     5k  2.31  6.0     72k   117k     -45k       0     8k      0      0    963k   4.62M
+62 2032-03 normal    333k     5k  2.31  6.0     75k   117k     -42k       0     8k      0      0    929k   4.66M
+63 2032-04 normal    347k     5k  2.31  6.0     78k   118k     -40k       0     8k      0      0    896k   4.70M
+64 2032-05 normal    362k     6k  2.31  6.0     81k   118k     -37k       0     8k      0      0    867k   4.73M
+65 2032-06 normal    378k     6k  2.30  6.0     84k   188k    -104k       0     8k      0      0    770k   4.84M
+66 2032-07 normal    394k     6k  2.30  6.0     87k   119k     -32k       0     8k      0      0    746k   4.87M
+67 2032-08 normal    409k     6k  2.30  6.5     90k   132k     -42k       0     8k      0      0    711k   4.91M
+68 2032-09 normal    425k     6k  2.30  6.5     92k   125k     -32k       0     8k      0      0    687k   4.95M
+69 2032-10 normal    442k     6k  2.29  6.5     95k   125k     -29k       0     8k      0      0    665k   4.97M
+70 2032-11 normal    460k     7k  2.29  6.5     99k   125k     -27k       0     8k      0      0    646k   5.00M
+71 2032-12 normal    480k     7k  2.29  6.5    102k   146k     -44k       0     8k      0      0    610k   5.05M
+72 2033-01 normal    497k     7k  2.29  6.5    105k   139k     -34k       0     8k      0      0    584k   5.08M
+73 2033-02 normal    515k     7k  2.29  6.5    108k   129k     -21k       0     8k      0      0    571k   5.10M
+74 2033-03 normal    533k     7k  2.28  7.0    111k   142k     -31k       0     8k      0      0    548k   5.13M
+75 2033-04 normal    551k     8k  2.28  7.0    115k   135k     -21k       0     8k      0      0    535k   5.15M
+76 2033-05 normal    570k     8k  2.28  7.0    118k   136k     -18k       0     8k      0      0    524k   5.17M
+77 2033-06 normal    589k     8k  2.28  7.0    121k   206k     -85k       0     8k      0      0    447k   5.25M
+78 2033-07 normal    608k     8k  2.27  7.0    124k   136k     -12k       0     8k      0      0    442k   5.27M
+79 2033-08 normal    627k     8k  2.27  7.0    127k   137k      -9k       0     8k      0      0    441k   5.28M
+80 2033-09 normal    647k     8k  2.27  7.5    131k   150k     -20k       0     8k      0      0    429k   5.29M
+81 2033-10 normal    667k     9k  2.27  7.5    134k   143k      -9k       0     8k      0      0    427k   5.30M
+82 2033-11 normal    689k     9k  2.27  7.5    137k   143k      -6k       0     8k      0      0    429k   5.31M
+83 2033-12 normal    712k     9k  2.27  7.5    141k   164k     -23k       0     8k      0      0    414k   5.33M
+84 2034-01 normal    733k     9k  2.26  7.5    145k   157k     -13k       0     8k      0      0    409k   5.35M
+85 2034-02 normal    754k     9k  2.26  8.0    148k   161k     -13k       0     8k      0      0    403k   5.36M
+86 2034-03 normal    775k    10k  2.26  8.0    151k   154k      -2k       0     8k      0      0    409k   5.36M
+87 2034-04 normal    796k    10k  2.26  8.0    155k   154k      649       0     8k      0      0    417k   5.36M
+88 2034-05 normal    818k    10k  2.25  8.0    158k   155k       4k       0     8k      0      0    428k   5.36M
+89 2034-06 normal    839k    10k  2.25  8.0    162k   225k     -63k       0     8k      0      0    373k   5.42M
+90 2034-07 normal    860k    10k  2.25  8.0    165k   155k      10k       0     8k      0      0    390k   5.41M
+91 2034-08 normal    881k    11k  2.25  8.5    168k   169k     -677       0     8k      0      0    397k   5.41M
+92 2034-09 normal    902k    11k  2.24  8.5    172k   162k      10k       0     8k      0      0    414k   5.40M
+93 2034-10 normal    924k    11k  2.24  8.5    175k   162k      13k       0     8k      0      0    435k   5.39M
+94 2034-11 normal    947k    11k  2.24  8.5    178k   163k      16k       0     8k      0      0    458k   5.37M
+95 2034-12 normal    972k    11k  2.24  8.5    182k   183k      -1k       0     8k      0      0    464k   5.37M
+
+scenario=base
+  break-even (first of 3 consecutive months with operating revenue >= operating cost): month 92 (2034-09)
+  build cost to sustainability = peak cumulative operating deficit: $5.42M
+  at break-even: claimed 902k, Halls 11k, paying 2.24%, FTE 8.5, opex $162k/mo, op revenue $172k/mo
+  inflows to then: founder $800k (of which $150k trust reserve), grants $2.30M, patrons $630k, founding pledges $72k, PRI loan $2.20M
+  min PBC cash $22k; cash<0 (wind-down trigger) never; ember months 1; grants declined by deed caps $0
+  pay ratio highest/median salary 1.50 (deed cap 4.0)
+
+============================================================================================================
+SENSITIVITY (same funding plan and runway policy)
+============================================================================================================
+scenario=conv_half
+  break-even (first of 3 consecutive months with operating revenue >= operating cost): NOT within 120 months
+  build cost to sustainability = peak cumulative operating deficit: $7.50M
+  at horizon: claimed 775k, Halls 7k, paying 1.09%, FTE 7.5, opex $156k/mo, op revenue $99k/mo
+  inflows to then: founder $800k (of which $150k trust reserve), grants $2.30M, patrons $846k, founding pledges $72k, PRI loan $0
+  min PBC cash $-3.68M; cash<0 (wind-down trigger) at month 35; ember months 85; grants declined by deed caps $0
+  pay ratio highest/median salary 1.50 (deed cap 4.0)
+
+scenario=growth_half
+  break-even (first of 3 consecutive months with operating revenue >= operating cost): NOT within 120 months
+  build cost to sustainability = peak cumulative operating deficit: $8.31M
+  at horizon: claimed 205k, Halls 3k, paying 2.14%, FTE 5.0, opex $109k/mo, op revenue $41k/mo
+  inflows to then: founder $800k (of which $150k trust reserve), grants $2.30M, patrons $846k, founding pledges $72k, PRI loan $2.20M
+  min PBC cash $-2.29M; cash<0 (wind-down trigger) at month 34; ember months 60; grants declined by deed caps $0
+  pay ratio highest/median salary 1.50 (deed cap 4.0)
+
+scenario=both
+  break-even (first of 3 consecutive months with operating revenue >= operating cost): NOT within 120 months
+  build cost to sustainability = peak cumulative operating deficit: $8.00M
+  at horizon: claimed 187k, Halls 3k, paying 1.08%, FTE 5.0, opex $109k/mo, op revenue $31k/mo
+  inflows to then: founder $800k (of which $150k trust reserve), grants $2.30M, patrons $846k, founding pledges $72k, PRI loan $0
+  min PBC cash $-4.17M; cash<0 (wind-down trigger) at month 34; ember months 85; grants declined by deed caps $0
+  pay ratio highest/median salary 1.50 (deed cap 4.0)
+
+scenario=halls_half
+  break-even (first of 3 consecutive months with operating revenue >= operating cost): NOT within 120 months
+  build cost to sustainability = peak cumulative operating deficit: $7.97M
+  at horizon: claimed 726k, Halls 5k, paying 2.15%, FTE 7.5, opex $155k/mo, op revenue $104k/mo
+  inflows to then: founder $800k (of which $150k trust reserve), grants $2.30M, patrons $846k, founding pledges $72k, PRI loan $2.20M
+  min PBC cash $-1.95M; cash<0 (wind-down trigger) at month 35; ember months 56; grants declined by deed caps $0
+  pay ratio highest/median salary 1.50 (deed cap 4.0)
+
+============================================================================================================
+UNCONSTRAINED NEED (runway policy off: what each world would cost to reach break-even)
+============================================================================================================
+  base         break-even month 92               peak cumulative operating deficit $  5.40M   min cash $37k
+  conv_half    break-even none in 180 months     peak cumulative operating deficit $ 13.98M   min cash $-9.70M
+  growth_half  break-even none in 180 months     peak cumulative operating deficit $ 14.99M   min cash $-8.51M
+  both         break-even none in 180 months     peak cumulative operating deficit $ 16.57M   min cash $-12.29M
+  halls_half   break-even none in 180 months     peak cumulative operating deficit $ 12.34M   min cash $-5.86M
+
+============================================================================================================
+HALFWAY SHORTFALL: from month 46 every grant and the PRI fail; patrons halve
+============================================================================================================
+scenario=shortfall_m46
+  break-even (first of 3 consecutive months with operating revenue >= operating cost): month 96 (2035-01)
+  build cost to sustainability = peak cumulative operating deficit: $5.41M
+  at break-even: claimed 981k, Halls 11k, paying 2.23%, FTE 8.5, opex $177k/mo, op revenue $183k/mo
+  inflows to then: founder $800k (of which $150k trust reserve), grants $2.20M, patrons $458k, founding pledges $72k, PRI loan $2.20M
+  min PBC cash $22k; cash<0 (wind-down trigger) never; ember months 3; grants declined by deed caps $0
+  pay ratio highest/median salary 1.50 (deed cap 4.0)
+
+mo yyyy-mm mode   claimed  halls  pay%   fte  op_rev   opex   op_net  grants patron   loan debtSv    cash cum_def
+ 0 2027-01 normal       0      0  0.00  2.5       0   126k    -126k    500k      0      0      0   1.02M    126k
+ 3 2027-04 normal       6      0  0.00  2.5       0    58k     -58k       0      0      0      0    788k    360k
+ 6 2027-07 normal     284     15  2.34  3.5     165    69k     -69k       0     4k      0      0    571k    650k
+ 9 2027-10 normal      2k     69  2.48  3.5     808    69k     -68k    100k     4k      0      0    477k    854k
+12 2028-01 normal      5k    141  2.48  3.5      2k    70k     -69k    500k     4k      0      0    765k   1.08M
+15 2028-04 normal      9k    226  2.46  3.5      3k    70k     -68k    100k     4k      0      0    672k   1.28M
+18 2028-07 normal     13k    326  2.44  3.5      4k    70k     -66k       0     7k      0      0    416k   1.55M
+21 2028-10 normal     20k    441  2.43  3.5      6k    71k     -65k    100k     7k      0      0    340k   1.75M
+24 2029-01 normal     28k    579  2.42  3.5      8k    89k     -81k    500k     7k      0      0    630k   1.98M
+27 2029-04 normal     37k    736  2.40  3.5     10k    79k     -69k    100k     7k      0      0    540k   2.19M
+30 2029-07 normal     47k    914  2.39  3.0     12k    79k     -67k       0     7k      0      0    287k   2.46M
+33 2029-10 normal     59k     1k  2.38  4.0     15k    86k     -71k    100k     7k      0      0    168k   2.70M
+36 2030-01 normal     74k     1k  2.37  4.0     19k    98k     -80k       0     8k  2.20M      0   2.15M   2.94M
+39 2030-04 normal     91k     2k  2.36  4.0     23k    89k     -66k    100k     8k      0      0   2.07M   3.14M
+42 2030-07 normal    110k     2k  2.35  4.0     27k    89k     -62k       0     8k      0      0   1.83M   3.40M
+45 2030-10 normal    133k     2k  2.35  4.0     32k    90k     -57k    100k     8k      0      0   1.78M   3.58M
+48 2031-01 normal    161k     3k  2.34  5.0     38k   111k     -73k       0     4k      0      0   1.56M   3.80M
+51 2031-04 normal    191k     3k  2.33  5.5     45k   107k     -62k       0     4k      0      0   1.38M   4.00M
+54 2031-07 normal    225k     4k  2.33  5.5     53k   108k     -55k       0     4k      0      0   1.15M   4.24M
+57 2031-10 normal    261k     4k  2.32  5.5     61k   108k     -47k       0     4k      0      0   1.01M   4.39M
+60 2032-01 normal    304k     5k  2.32  6.0     69k   127k     -57k       0     4k      0      0    840k   4.57M
+63 2032-04 normal    347k     5k  2.31  6.0     78k   118k     -40k       0     4k      0      0    724k   4.70M
+66 2032-07 normal    394k     6k  2.30  6.0     87k   119k     -32k       0     4k      0      0    562k   4.87M
+69 2032-10 normal    442k     6k  2.29  6.5     95k   125k     -29k       0     4k      0      0    469k   4.97M
+72 2033-01 normal    497k     7k  2.29  6.5    105k   139k     -34k       0     4k      0      0    376k   5.08M
+75 2033-04 normal    551k     8k  2.28  7.0    115k   135k     -21k       0     4k      0      0    315k   5.15M
+78 2033-07 normal    607k     8k  2.27  6.5    124k   130k      -6k       0     4k      0      0    216k   5.26M
+81 2033-10 normal    664k     9k  2.27  7.5    133k   143k     -10k       0     4k      0      0    191k   5.30M
+84 2034-01 normal    729k     9k  2.26  7.5    144k   157k     -13k       0     4k      0      0    158k   5.34M
+87 2034-04 normal    791k    10k  2.25  8.0    154k   154k     -194       0     4k      0      0    158k   5.35M
+90 2034-07 normal    853k    10k  2.25  7.5    164k   149k      15k       0     4k      0      0    123k   5.40M
+93 2034-10 normal    914k    11k  2.24  8.5    173k   162k      11k       0     4k      0      0    154k   5.38M
+96 2035-01 normal    981k    11k  2.23  8.5    183k   177k       7k       0     4k      0      0    182k   5.36M
+99 2035-04 normal   1.04M    12k  2.23  9.0    193k   174k      19k       0     4k      0      0    235k   5.34M
+
+============================================================================================================
+RED TEAM COMPARISON: the 04b shape vs the rebuild, same honest assumptions
+============================================================================================================
+scenario=orig_shape_honest
+  break-even (first of 3 consecutive months with operating revenue >= operating cost): NOT within 120 months
+  build cost to sustainability = peak cumulative operating deficit: $6.80M
+  at horizon: claimed 731k, Halls 7k, paying 2.18%, FTE 7.5, opex $155k/mo, op revenue $123k/mo
+  inflows to then: founder $800k (of which $150k trust reserve), grants $1.00M, patrons $846k, founding pledges $72k, PRI loan $2.50M
+  min PBC cash $-1.78M; cash<0 (wind-down trigger) at month 5; ember months 104; grants declined by deed caps $0
+  pay ratio highest/median salary 1.50 (deed cap 4.0)
+
+scenario=unfunded
+  break-even (first of 3 consecutive months with operating revenue >= operating cost): month 109 (2036-02)
+  build cost to sustainability = peak cumulative operating deficit: $4.68M
+  at break-even: claimed 769k, Halls 9k, paying 2.20%, FTE 7.5, opex $146k/mo, op revenue $148k/mo
+  inflows to then: founder $800k (of which $150k trust reserve), grants $1.00M, patrons $766k, founding pledges $72k, PRI loan $0
+  min PBC cash $-2.26M; cash<0 (wind-down trigger) at month 12; ember months 101; grants declined by deed caps $0
+  pay ratio highest/median salary 1.50 (deed cap 4.0)
+
+scenario=circle_price_15
+  break-even (first of 3 consecutive months with operating revenue >= operating cost): NOT within 120 months
+  build cost to sustainability = peak cumulative operating deficit: $6.28M
+  at horizon: claimed 1.09M, Halls 12k, paying 2.16%, FTE 8.5, opex $174k/mo, op revenue $165k/mo
+  inflows to then: founder $800k (of which $150k trust reserve), grants $2.30M, patrons $846k, founding pledges $72k, PRI loan $2.20M
+  min PBC cash $-288k; cash<0 (wind-down trigger) at month 35; ember months 49; grants declined by deed caps $0
+  pay ratio highest/median salary 1.50 (deed cap 4.0)
+
+Cost per CLAIMED member per month, steady state, v2 features on (guests: 5 touches/member)
+lean = pre-break-even staffing (no revenue-gated hires); full = all workload + growth hires
+line item                                             10K lean     1M lean     1M full   100M full
+Compute: API, relay, MLS delivery, workers             $0.0400     $0.0040     $0.0040     $0.0014
+Postgres metadata (HA, PITR backups)                   $0.0350     $0.0030     $0.0030     $0.0010
+Object storage, ciphertext (200 MB @ $0.015/GB)        $0.0030     $0.0030     $0.0030     $0.0025
+CDN, egress, request operations                        $0.0053     $0.0005     $0.0005     $0.0003
+Email + web push                                       $0.0040     $0.0020     $0.0020     $0.0012
+Mind LLM (30% opt-in x $0.05; cap $0.10)               $0.0150     $0.0150     $0.0150     $0.0100
+Observability, 7-day logs, transparency log            $0.0150     $0.0011     $0.0011     $0.0003
+Guest page loads (5 x $0.0005)                         $0.0025     $0.0025     $0.0025     $0.0020
+= infrastructure subtotal                              $0.1198     $0.0311     $0.0311     $0.0186
+Trust & safety staff (workload-sized, in-house)        $0.6784     $0.0543     $0.0543     $0.0437
+Other staff (eng, design, support, ops)                $5.1433     $0.0601     $0.1316     $0.0243
+Legal, compliance, audits, insurance, trust            $2.9279     $0.0338     $0.0338     $0.0049
+= FULLY LOADED                                         $8.8694     $0.1794     $0.2508     $0.0916
+FTE                                                          4           9          14         658
+Net revenue per member (steady state, ~2.8% paying, 1 Hall/250)     $0.1653     $0.1653     $0.1653     $0.1653

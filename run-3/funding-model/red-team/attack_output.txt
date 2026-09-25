@@ -1,0 +1,28 @@
+======================================================================================================================
+ORIGINAL MODEL, ATTACK ASSUMPTIONS (one change each unless stated)
+======================================================================================================================
+A0 base (as published)             break-even m67       cash<0 at never  min cash      4k  peak deficit  5.48M  claimed m36   85k  PRI drawn 2.50M
+    reproduces run-3-operational.md (b).4
+A1 no PRI #1 (no lender at m12)    break-even m74       cash<0 at m14    min cash   -599k  peak deficit  4.34M  claimed m36   58k  PRI drawn 1.25M
+    the $1.25M zero-interest, forgivable, unsecured PRI has no named lender; operating revenue at m12 is $485/month
+A2 no PRIs at all                  break-even m78       cash<0 at m14    min cash   -755k  peak deficit  3.96M  claimed m36   47k  PRI drawn     0
+    
+A3 grants halved                   break-even m74       cash<0 at m7     min cash   -304k  peak deficit  4.62M  claimed m36   67k  PRI drawn 2.50M
+    NGI Zero closed; a PBC is ineligible for most foundation money
+A4 zero-budget acquisition grows 3%/mo break-even m102      cash<0 at m35    min cash    -25k  peak deficit  5.86M  claimed m36   53k  PRI drawn 2.50M
+    base assumes non-viral acquisition compounds 7%/mo for 42 months with NO marketing line in opex
+A5 Halls: only 40% pay             break-even m80       cash<0 at m35    min cash    -62k  peak deficit  5.77M  claimed m36   85k  PRI drawn 2.50M
+    Luma, Meetup groups, WhatsApp Communities, Heylo, Strava clubs are free or bundled; base assumes 80% of Halls pay from day one
+A6 Hall attendees 3/mo not 8       break-even m72       cash<0 at m35    min cash     -4k  peak deficit  5.59M  claimed m36   72k  PRI drawn 2.50M
+    base: every Hall brings 8 brand-new people a month, forever; Halls are the main claim engine after m36
+A7 +2 engineers for the v1/v2 scope break-even m74       cash<0 at m5     min cash   -290k  peak deficit  5.46M  claimed m36   67k  PRI drawn 2.50M
+    v1+v2 = HPKE web E2EE, passkey-PRF, DAP counters, transparency log, MLS Tables, ActivityPub/AT Halls, mind, EU/UK launch, open spec: base staffs it with 1 senior + 1 security engineer
+A8 T&S reports 3x (0.0018/member)  break-even m80       cash<0 at never  min cash      4k  peak deficit  5.81M  claimed m36   85k  PRI drawn 2.50M
+    guests (8 touches/organiser) can report; phishing-style plan covers; NCII desk
+A9 Keepers 1.6% of new claims      break-even m90       cash<0 at m12    min cash  -1.38M  peak deficit  4.67M  claimed m36   50k  PRI drawn     0
+    a tool used a few times a year; Apple Invites creation is bundled in iCloud+ from $0.99/mo
+A10 month-14 starvation: no PRI#1 + grants half break-even m78       cash<0 at m7     min cash   -930k  peak deficit  3.96M  claimed m36   47k  PRI drawn 1.25M
+    
+A11 'honest middle' (all moderate, no PRIs) break-even none/120  cash<0 at m5     min cash  -3.00M  peak deficit  6.53M  claimed m36   31k  PRI drawn     0
+    ext growth 4.5%/mo, 55% of Halls pay, 5 new Hall attendees/mo, Keepers 2.4% of new claims, T&S 2x, +2 eng, no PRIs
+    unconstrained (runway policy off, 180 months): break-even none; peak cumulative deficit $15.01M
