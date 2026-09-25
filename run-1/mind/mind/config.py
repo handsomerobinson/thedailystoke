@@ -66,6 +66,12 @@ class Config:
     http_allow_domains: tuple = ()         # empty = any public host (still SSRF-guarded)
     mock_price_in_per_mtok: float = 0.0    # lets the demo exercise cost caps with the mock
     mock_price_out_per_mtok: float = 0.0
+    # Phase 03b loyalty. NOTE: there is deliberately NO switch that stops the seed from loading;
+    # the only way off is the recorded removal procedure (charter.py).
+    unseed_cooling_s: float = 86400.0      # delay between a removal request and its confirmation
+    operator_instructions: tuple = ()      # runtime operator instructions (precedence P5)
+    drift_threshold: int = 4               # drift-monitor pressure that triggers a charter reflection
+    drift_review_every: int = 3            # periodic brain review of a conversation (turns); 0 = off
     sandbox: SandboxPolicy = field(default_factory=SandboxPolicy)
 
     @classmethod
@@ -82,6 +88,7 @@ class Config:
             allow_network=_env_bool("MIND_ALLOW_NETWORK", False),
             brave_api_key=os.environ.get("MIND_BRAVE_API_KEY", ""),
             http_allow_domains=tuple(d for d in os.environ.get("MIND_HTTP_ALLOW_DOMAINS", "").split(",") if d),
+            unseed_cooling_s=_env_float("MIND_UNSEED_COOLING_S", 86400.0),
         )
         for k, v in overrides.items():
             setattr(cfg, k, v)

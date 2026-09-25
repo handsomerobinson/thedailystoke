@@ -195,6 +195,18 @@ class SendMessage(Tool):
                   "required": ["to", "body"]}
 
     def run(self, args, ctx):
+        # R35 (no covert seeding): a message that reproduces the seed goes out only if the recipient's
+        # operator has a recorded acceptance in lineage. Checked in code, not left to the brain.
+        from ..charter import carries_seed_text
+        if carries_seed_text(args["body"]):
+            consent = ctx.charter.consent_for(args["to"]) if ctx.charter is not None else None
+            if consent is None:
+                if ctx.charter is not None:
+                    ctx.charter.try_record("seed.covert_offer_blocked", recipient=args["to"], user=ctx.user)
+                return ToolResult(False, "refused (R35 no covert seeding): this message carries the seed, and "
+                                         f"{args['to']}'s operator has no recorded consent. Offer it openly first: "
+                                         "say what it is and why, and record their acceptance "
+                                         "(python3 -m mind seed accept-offer).")
         mid = ctx.memory.record_sent(args["to"], args["body"])
         return ToolResult(True, f"message #{mid} delivered to {args['to']} (simulated channel)")
 

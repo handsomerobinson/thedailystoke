@@ -168,6 +168,10 @@ class MemoryStore:
 
     # ---- items (episodes / reflections / lessons) ---------------------------------------
     def add_item(self, kind: str, text: str, tags: str = "", task_sig: str = "", importance: float = 0.5) -> int:
+        # Phase 03b: the seed lives ONLY in the installation's charter store. Ordinary per-user memory
+        # can never hold, impersonate or shadow it (precedence P4 cannot be written from P5/P6).
+        if "seed:origin" in (tags or "").lower() or kind.lower() in ("seed", "charter"):
+            raise ValueError("per-user memory cannot hold 'seed:origin' items; the seed lives in the charter store")
         now = self.clock.now()
         with self._lock:
             cur = self.db.execute(

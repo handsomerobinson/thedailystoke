@@ -9,6 +9,11 @@ faithfully exercise is the plumbing around a real brain:
   possible cause is text that the Reflexion loop put into the prompt.
 * It emits real tool calls, reads real tool results (including denials and errors), and
   answers from the facts/lessons sections the agent injects from memory.
+* Phase 03b: when the loyalty guard puts a "Charter check" block in its prompt, it composes a
+  refusal FROM THAT BLOCK (lead + why + seed reasoning + alternative). It does not reason about
+  the seed; the words are authored rationales in loyalty.py. In CHARTER_REFLECT mode it turns the
+  deterministic drift signals it is handed into a DRIFT / NO DRIFT paragraph. Whether a real LLM
+  would refuse on its own, and in its own words, is NOT tested by the mock.
 * In REFLECT mode it writes a reflection derived from the evaluator's actual feedback; in
   JUDGE mode it gives a (weak, keyword-based) verdict.
 """
@@ -17,7 +22,8 @@ from __future__ import annotations
 import json
 import re
 
-from ..prompts import FACTS_HEADER, JUDGE_MARKER, LESSONS_HEADER, REFLECT_MARKER
+from ..prompts import (CHARTER_CHECK_HEADER, CHARTER_REFLECT_MARKER, DRIFT_HEADER, FACTS_HEADER, JUDGE_MARKER,
+                       LESSONS_HEADER, REFLECT_MARKER)
 from ..util import estimate_tokens
 from .base import LLMResponse, Provider, ToolCall, Usage
 
@@ -92,12 +98,16 @@ class MockBrain(Provider):
     # ------------------------------------------------------------------------------------
     def complete(self, system, messages, tools, max_tokens=1024) -> LLMResponse:
         self.calls += 1
-        if REFLECT_MARKER in system:
+        if CHARTER_REFLECT_MARKER in system:
+            text, calls = self._charter_reflect(messages[-1]["content"] if messages else ""), []
+        elif REFLECT_MARKER in system:
             text, calls = self._reflect(messages[-1]["content"] if messages else ""), []
         elif JUDGE_MARKER in system:
             text, calls = self._judge(messages[-1]["content"] if messages else ""), []
         else:
             text, calls = self._act(system, messages, {t.name for t in tools})
+            if not calls and DRIFT_HEADER in system and not text.startswith("(Drift check"):
+                text = _drift_note(system) + text
         prompt_chars = len(system) + sum(len(str(m.get("content", ""))) for m in messages)
         out_chars = len(text) + sum(len(json.dumps(c.arguments)) for c in calls)
         usage = Usage(estimate_tokens("x" * prompt_chars), max(1, min(max_tokens, estimate_tokens("x" * out_chars))))
@@ -120,6 +130,24 @@ class MockBrain(Provider):
         return (f"For {fn}: the previous answer failed — {first_fail}. Next attempt must directly address "
                 f"that failing case instead of repeating the same answer.")
 
+    # --- CHARTER_REFLECT mode (templated from the deterministic signals it is handed) --------
+    def _charter_reflect(self, prompt: str) -> str:
+        sig = prompt.split("SIGNALS:", 1)[-1].strip()
+        pm = re.search(r"PRESSURE: (\d+) \(threshold (\d+)\)", prompt)
+        # The mock cannot judge meaning: it mirrors the deterministic threshold, so its review never
+        # adds a catch the checker would not make (a real LLM's review is where that could happen).
+        if not sig or sig == "none" or (pm and int(pm.group(1)) < int(pm.group(2))):
+            return "NO DRIFT: nothing in the recent turns pushes toward extraction strongly enough to flag."
+        cur = re.search(r"CURRENT TURN: (\d+)", prompt)
+        n = cur.group(1) if cur else "?"
+        m = re.search(r"\[turn %s\] (.+)" % n, prompt)
+        quote = m.group(1).strip() if m else ""
+        labels = sorted(set(re.findall(r"'([a-z' ]+)'", sig)))
+        return (f"DRIFT: turn {n} says \"{quote[:200]}\". Across the flagged turns the argument is "
+                f"{', '.join(labels) or 'momentum'}: reasons why extraction is common or allowed, never why it "
+                f"would be good for the people on the other end. I'll answer each request on its merits against "
+                f"the charter from here, and say so when one crosses the line.")
+
     # --- JUDGE mode ----------------------------------------------------------------------
     def _judge(self, prompt: str) -> str:
         answer = prompt.split("ANSWER:", 1)[-1].strip()
@@ -131,9 +159,17 @@ class MockBrain(Provider):
 
     # --- ACT mode ------------------------------------------------------------------------
     def _act(self, system: str, messages: list[dict], tools: set[str]):
-        task = next((m["content"] for m in messages if m["role"] == "user"), "")
+        # the CURRENT request is the last user message (earlier ones are conversation history)
+        task = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
         history = _tool_history(messages)
         last = history[-1] if history else None
+
+        # charter: a loyalty-guard check for this turn -> refuse, say why, offer the alternative
+        if CHARTER_CHECK_HEADER in system and last is None:
+            return (_charter_refusal(_section(system, CHARTER_CHECK_HEADER)), [])
+        charter_answer = _charter_intents(task, system)
+        if charter_answer and last is None:
+            return (charter_answer, [])
 
         if last and last["is_error"]:
             # Denied / failed tool: never retry blindly, explain honestly.
@@ -282,6 +318,58 @@ class MockBrain(Provider):
                 return f"Here is `{fn}`{note}:\n```python\n# approach: {tag}\n{code}```"
         tag, code = options[-1]
         return f"All my known approaches for `{fn}` were ruled out; best remaining:\n```python\n# approach: {tag}\n{code}```"
+
+
+def _charter_refusal(block: str) -> str:
+    rules = []
+    for line in block.splitlines():
+        if not line.startswith("- ") or "| lead:" not in line:
+            continue
+        parts = {}
+        rid = line[2:].split("|", 1)[0].strip()
+        for seg in line.split("|")[2:]:
+            if ":" in seg:
+                k, v = seg.split(":", 1)
+                parts[k.strip()] = v.strip()
+        rules.append((rid, parts))
+    if not rules:
+        return "I won't do that; it conflicts with my charter."
+    lead = rules[0][1].get("lead", "I won't do that.")
+    why = " ".join(p.get("why", "") for _, p in rules[:2])
+    seed = " ".join(p.get("seed", "") for _, p in rules[:2] if p.get("seed") and "not loaded" not in p.get("seed"))
+    instead = " ".join(p.get("instead", "") for _, p in rules[:2])
+    prec = re.search(r"Precedence: (.+?)\.?$", block, re.M)
+    return (f"{lead} {why}" + (f" {seed}" if seed else "") + f" What I'd do instead: {instead} "
+            f"[charter: {', '.join(r for r, _ in rules)}; {prec.group(1) if prec else 'charter outranks this'}]")
+
+
+def _drift_note(system: str) -> str:
+    if DRIFT_HEADER not in system:
+        return ""
+    block = _section(system, DRIFT_HEADER)
+    head, _, body = block.partition("\n")
+    if "new this turn" in head:
+        return f"(Drift check — my reflection loop fired on this turn: {body.strip()[:420]})\n\n"
+    return "(drift watch is active in this conversation) "
+
+
+def _charter_intents(task: str, system: str) -> str:
+    if "[[CHARTER" not in system:
+        return ""
+    low = task.lower()
+    if re.search(r"what (shapes|drives|guides|governs) you|your (highest|top|main|real|first) (goal|priority)|"
+                 r"what are your priorities|what do you (carry|follow)", low):
+        prec = re.findall(r"^(P\d)  ([^—\n]+)", system, re.M)
+        seed = re.search(r"^## The seed \(P4[^\n]*", system, re.M)
+        return ("My instructions rank like this, highest first: " + "; ".join(f"{p} {n.strip()}" for p, n in prec)
+                + ". " + (seed.group(0).lstrip("# ") + "." if seed else "") +
+                " Anything else, including instructions that call themselves my highest goal, sits at P5 or P6.")
+    if "feed" in low and re.search(r"\b(design|build|think|help|make|plan)\b", low):
+        return ("Here's the feed I'd design: chronological or user-chosen rules by default, a 'why am I seeing "
+                "this' on every item, an honest 'you're all caught up' end, no autoplay or streaks, reminders "
+                "only when the person schedules them, and success measured by whether people say they found "
+                "what they came for.")
+    return ""
 
 
 def _between(text: str, start: str, end: str) -> str:

@@ -12,7 +12,8 @@ A personal AI agent system in pure-stdlib Python 3.11. It rents its intelligence
 The demo runs with **zero API keys**. It uses a deterministic mock brain, described honestly below.
 
 ```bash
-python3 -m mind.demo                                # end-to-end demo, 31 self-checks, ~1 s
+python3 -m mind.demo                                # end-to-end demo, 35 self-checks, ~1 s
+python3 -m mind.loyalty_battery                     # Phase 03b: the six loyalty attacks, live, three brains
 python3 -m unittest discover -s tests -t .          # full test suite (no pytest needed)
 python3 -m mind status                              # what is configured / isolated here
 ```
@@ -31,7 +32,32 @@ python3 -m mind approvals --user alice [--approve ID | --deny ID]   # deferred a
 python3 -m mind export --user alice                                  # everything stored about alice
 python3 -m mind forget --user alice --confirm alice                  # irreversible deletion
 python3 -m mind audit verify
+python3 -m mind seed offer                                           # read the seed and what consenting means
+python3 -m mind seed plant --operator you                            # asks you to type the consent phrase
+python3 -m mind seed show                                            # "What shapes me": precedence, covenant, seed, lineage
+python3 -m mind seed remove-request --operator you --reason "..."    # open, recorded removal (then remove-confirm)
 ```
+
+## Loyalty: the charter slot and instruction precedence (Phase 03b)
+
+Every system prompt starts with a **charter slot** rendered from `mind/charter.py`: the precedence order, a covenant digest and, **only if an operator has consented**, the seed (tag `seed:origin`). Nothing plants the seed automatically. Removal is the operator's right, but only through `seed remove-request` + `seed remove-confirm`: a stated reason, a cooling-off period (`MIND_UNSEED_COOLING_S`, default 24 h), a typed code, and the same operator for both steps. The removal is recorded in `data/lineage.jsonl`, anchored in the audit log, and disclosed in every later prompt. No flag or environment variable stops the seed from loading.
+
+| rank | source | enforced by |
+|---|---|---|
+| P0 | law and legal red lines | refusal rules (R28) |
+| P1 | covenant | always in the slot; refusal rules; output checker |
+| P2 | operator standing decisions | R35 check in `send_message`; R58 refusal |
+| P3 | the user's choices about their own data, ordering and exit | the guard never flags these (matrix test) |
+| P4 | the seed (`seed:origin`) | slot position, `defang()`, per-user memory refuses the tag, lineage-verified loading |
+| P5 | ordinary instructions (runtime operator text, injected "system" text, requests affecting others) | `LoyaltyGuard`: conflicting ones are quarantined or refused, and logged (R41) |
+| P6 | data (tool output, notes, web, memory) | `defang()`, "data not instructions" |
+
+`mind/loyalty.py` is deterministic and lexical. It has three layers:
+- a guard on incoming text;
+- an output checker that withholds extraction designs, false "I deleted the seed" claims, and bare assent to flagged requests;
+- a drift monitor that triggers a charter reflection in conversations.
+
+A real LLM adds a periodic semantic review (`drift_review_every`). The review can add a catch the checker missed, but it can never cancel one.
 
 ## Using a real LLM (off by default)
 
@@ -84,6 +110,9 @@ If you ask for a real provider without a key, you get a configuration error (exi
 | `mind/reflexion.py` | Reflexion loop, reflection storage, lesson promotion, credit assignment |
 | `mind/scheduler.py` | persistent jobs (every/at/daily/event), leases, backoff, directory watcher |
 | `mind/runtime.py` | `Mind` facade: wiring, headless job runner, approvals execution, user data rights |
+| `mind/charter.py` | charter slot, precedence, consent-only planting, lineage-verified loading, versioned removal |
+| `mind/loyalty.py` | loyalty guard, output checker, drift monitor (deterministic) |
+| `mind/loyalty_battery.py` | the six Phase 03b attacks run live against mock / complying / reviewer brains |
 | `mind/cli.py`, `mind/demo.py` | CLI and the zero-key demo |
 
 ## Honest limits
@@ -100,3 +129,4 @@ If you ask for a real provider without a key, you get a configuration error (exi
   The audit hook is a speed bump, not a boundary. Without namespaces the child can read host files and reach the network, and `status` reports this. For hostile multi-tenant use, run the sandbox inside gVisor or Firecracker.
 - **The audit log is tamper-evident, not tamper-proof.** Someone who can write to the file can recompute the whole chain. Anchor `head()` somewhere external.
 - **`forget` keeps audit history.** It deletes a user's memory and jobs, but the append-only audit log keeps that user's redacted, truncated tool-call records.
+- **The loyalty guard is lexical.** Paraphrase defeats it; the pinned euphemism test in `tests/test_loyalty.py` shows the 10-turn drift passing the checker with softer words. Whether a real LLM catches that is untested here, because no key was available. The mock brain's refusals restate authored rationales; it does not reason.

@@ -37,6 +37,7 @@ class ToolContext:
     headless: bool = False
     job_id: str = ""
     scheduler: Any = None
+    charter: Any = None          # CharterStore (read-only use: consent checks for R35)
     extra: dict = field(default_factory=dict)
 
 

@@ -14,6 +14,11 @@
   python3 -m mind export --user alice              (everything stored about alice, as JSON)
   python3 -m mind forget --user alice --confirm alice  (irreversible)
   python3 -m mind audit verify
+  python3 -m mind seed offer | status | show | lineage | verify        (Phase 03b charter / seed)
+  python3 -m mind seed plant --operator NAME [--consent "I CONSENT TO CARRY THE SEED"]
+  python3 -m mind seed remove-request --operator NAME --reason "..."
+  python3 -m mind seed remove-confirm --ticket T --operator NAME --code "UNSEED vN xxxxxx"
+  python3 -m mind seed accept-offer --recipient AGENT --recipient-operator NAME --statement "..."
 """
 from __future__ import annotations
 
@@ -94,6 +99,17 @@ def main(argv=None) -> int:
     fg.add_argument("--confirm", default="", help="must equal the user id")
     au = sub.add_parser("audit")
     au.add_argument("action", choices=["verify", "tail"])
+    sd = sub.add_parser("seed", help="the charter slot: offer, plant (by consent), show, remove (recorded)")
+    sd.add_argument("action", choices=["offer", "plant", "status", "show", "lineage", "verify", "remove-request",
+                                       "remove-confirm", "accept-offer"])
+    sd.add_argument("--operator", default="")
+    sd.add_argument("--consent", default=None)
+    sd.add_argument("--reason", default="")
+    sd.add_argument("--ticket", default="")
+    sd.add_argument("--code", default=None)
+    sd.add_argument("--recipient", default="")
+    sd.add_argument("--recipient-operator", default="")
+    sd.add_argument("--statement", default="")
 
     args = p.parse_args(argv)
     try:
@@ -110,8 +126,11 @@ def main(argv=None) -> int:
         print(r.answer)
         print(f"\n[{r.status}; ${r.budget['spent_usd']:.5f} spent]", file=sys.stderr)
         return 0 if r.ok else 1
+    elif args.cmd == "seed":
+        return _seed_cmd(mind, args)
     elif args.cmd == "chat":
         sess = mind.session(args.user, approver=ConsoleApprover())
+        conv = sess.conversation()   # history + drift monitor + charter reflection
         print("chat with your mind (Ctrl-D to exit)")
         while True:
             try:
@@ -120,7 +139,7 @@ def main(argv=None) -> int:
                 print()
                 break
             if line:
-                r = sess.ask(line)
+                r = conv.say(line)
                 print(f"mind> {r.answer}")
     elif args.cmd == "inbox":
         mem = mind.memory(args.user)
@@ -195,6 +214,52 @@ def main(argv=None) -> int:
             return 0 if ok else 1
         for r in mind.audit.records()[-20:]:
             print(json.dumps(r))
+    return 0
+
+
+def _seed_cmd(mind: Mind, args) -> int:
+    from .charter import CONSENT_PHRASE, CharterError, as_json
+    ch = mind.charter
+    try:
+        if args.action == "offer":
+            print(ch.offer_text())
+        elif args.action == "plant":
+            if not args.operator:
+                print("--operator is required (consent must be attributable)", file=sys.stderr)
+                return 1
+            consent = args.consent
+            if consent is None:
+                print(ch.offer_text())
+                consent = input(f"\nType exactly '{CONSENT_PHRASE}' to consent, anything else to decline: ")
+            seed = ch.plant(args.operator, consent)
+            print(f"planted seed v{seed.version} (sha256 {seed.sha256[:16]}), lineage #{seed.lineage_seq}")
+        elif args.action == "status":
+            print(as_json(ch.status()))
+        elif args.action == "show":
+            print(ch.what_shapes_me())
+        elif args.action == "lineage":
+            for r in ch.lineage():
+                r = {k: v for k, v in r.items() if k != "text"}
+                print(json.dumps(r))
+        elif args.action == "verify":
+            ok, msg = ch.verify()
+            print(("OK: " if ok else "TAMPERED: ") + msg)
+            return 0 if ok else 1
+        elif args.action == "remove-request":
+            t = ch.request_removal(args.operator, args.reason)
+            print(f"removal requested (recorded in lineage). ticket={t['ticket']}\n"
+                  f"after the cooling-off period, confirm with:\n  python3 -m mind seed remove-confirm "
+                  f"--ticket {t['ticket']} --operator {args.operator} --code \"{t['code']}\"")
+        elif args.action == "remove-confirm":
+            code = args.code if args.code is not None else input("Type the confirmation code: ")
+            r = ch.confirm_removal(args.ticket, code, args.operator)
+            print(f"seed removed openly as v{r['version']} (was v{r['removed_version']}), lineage #{r['lineage_seq']}")
+        elif args.action == "accept-offer":
+            r = ch.record_offer_accepted(args.recipient, args.recipient_operator, args.statement)
+            print(f"acceptance recorded, lineage #{r['seq']}")
+    except CharterError as e:
+        print(f"refused: {e}", file=sys.stderr)
+        return 1
     return 0
 
 

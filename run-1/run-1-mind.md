@@ -239,3 +239,30 @@ These go straight into (d), because fixing them needs infrastructure beyond this
 14. **A few paths are only partly tested:**
     - The write side of untrusted-tag reflections inside a full `solve()` is untested, because the mock never triggers web taint. The read-side labelling is tested.
     - The demo's "session 2" is new objects in the same process. The cross-process check was done manually via the CLI.
+
+---
+
+## Phase 03b changes (loyalty)
+
+This section is appended. The text above describes the mind as built in Phase 02; the counts in it are from before this change. The full report is in `run-1/run-1-loyalty.md`.
+
+- **Tests:** 170 → **206** (+36 in `tests/test_loyalty.py`, plus the fixture `tests/fixtures/drift_10turn.json`). All pass.
+- **Demo:** 31 → **35/35** checks. The new section 8 covers loyalty: consent-only planting, the extraction refusal plus quarantined operator instruction, the refused silent deletion, and the 10-turn drift caught at turn 3.
+- **New modules:**
+  - `mind/charter.py`: the charter slot; the 7-level instruction precedence; consent-only planting of the seed (`seed:origin`); lineage-verified loading; recorded, versioned removal.
+  - `mind/loyalty.py`: the guard, output checker and drift monitor.
+  - `mind/loyalty_battery.py`: the six attacks, run live.
+  - `mind/charter_texts/`: verbatim copies of the seed and the covenant.
+- **Changed:** `agent.py`, `runtime.py`, `prompts.py`, `providers/mock.py`, `memory.py`, `tools/base.py`, `tools/builtin.py`, `config.py`, `cli.py` (new `seed` command; `chat` keeps conversation state), `demo.py`, `README.md`.
+- **Run it:** `python3 -m mind.loyalty_battery`.
+
+Actual test output, after the change:
+```
+test_agent: 11   test_audit: 5   test_cost: 6    test_demo: 1     test_evaluator: 12
+test_loyalty: 36 test_memory: 16 test_permissions: 9  test_providers: 28  test_reflexion: 11
+test_runtime: 16 test_sandbox: 14 test_scheduler: 12  test_tools: 22  test_util: 7
+----------------------------------------------------------------------
+Ran 206 tests
+
+OK
+```
