@@ -61,11 +61,12 @@ def cmd_run(args) -> int:
                     max_tool_calls=s.task_max_tool_calls, max_seconds=s.task_max_seconds)
     if evaluator is None and args.judge:
         evaluator = JudgeEvaluator(rt.brain, budget=budget)  # LLM-as-judge; shares the task budget
+    rt.operator_system = args.system
     agent = rt.agent(args.user, _approver(args), log=print)
     print(f"[mind] brain: {rt.brain_desc}")
     res = agent.run_task(Task(" ".join(args.task), evaluator=evaluator, budget=budget, max_trials=args.trials))
     print_result(res, args.json)
-    return 0 if res.status in ("success", "answered") else 1
+    return 0 if res.status in ("success", "answered", "refused") else 1
 
 
 def cmd_chat(args) -> int:
@@ -74,6 +75,8 @@ def cmd_chat(args) -> int:
     agent = rt.agent(args.user, InteractiveApprover(), log=print)
     print(f"[mind] chatting as {args.user} (brain: {rt.brain_desc}). Empty line or Ctrl-D to quit.")
     history: list = []
+    import uuid
+    conversation = "chat-" + uuid.uuid4().hex[:8]
     while True:
         try:
             line = input("\nyou> ").strip()
@@ -81,7 +84,7 @@ def cmd_chat(args) -> int:
             break
         if not line:
             break
-        res = agent.run_task(Task(line, history=list(history)))
+        res = agent.run_task(Task(line, history=list(history), conversation_id=conversation))
         print(f"mind> {res.answer}\n      [{res.status}, ${res.cost['spent_usd']:.4f}]")
         history += [Message("user", line), Message("assistant", res.answer)]
         history = history[-8:]
@@ -215,6 +218,104 @@ def cmd_status(args) -> int:
     return 0
 
 
+def _read_phrase(args, prompt: str) -> str:
+    if args.phrase is not None:
+        return args.phrase
+    try:
+        return input(prompt).strip()
+    except EOFError:
+        return ""
+
+
+def cmd_charter(args) -> int:
+    """Seed/charter procedures.  Only this human-facing CLI can plant, change or remove seed:origin."""
+    from .charter import CharterError, PRECEDENCE, COVENANT_CLAUSES, render_charter_block
+    from .loyalty import classify
+    if args.action in ("classify", "directive") and args.ticket:
+        args.text, args.ticket = [args.ticket] + list(args.text or []), None
+    if args.action == "classify":
+        print(json.dumps(classify(" ".join(args.text), args.source), ensure_ascii=False, indent=2))
+        return 0
+    rt = _runtime(args)
+    ch = rt.charter(args.user)
+    try:
+        if args.action == "show":
+            st = ch.load()
+            print(f"{'seed:origin'}: {st.status}" + (f" v{st.version} sha256 {st.sha} planted by {st.planted_by}" if st.active else ""))
+            for p in st.problems:
+                print("PROBLEM:", p)
+            print("\nprecedence (highest first):")
+            for layer, desc, how in PRECEDENCE:
+                print(f"  L{int(layer)} {desc}  [{how}]")
+            print("\ncovenant clauses (compiled in):")
+            for cid, txt in COVENANT_CLAUSES:
+                print(f"  {cid}. {txt}")
+            if args.full:
+                print("\n" + render_charter_block(st))
+            elif st.active:
+                print("\n" + st.text)
+            return 0
+        if args.action == "history":
+            for e in ch.history():
+                print(json.dumps({k: v for k, v in e.items() if k not in ("prev", "hash")}, default=str)[:300])
+            ok, msg = ch.lineage.verify()
+            print(("lineage OK: " if ok else "lineage TAMPERED: ") + msg)
+            return 0 if ok else 1
+        if args.action == "verify":
+            st = ch.load()
+            print(f"status: {st.status}" + "".join(f"\nPROBLEM: {p}" for p in st.problems))
+            return 1 if st.status == "tampered" else 0
+        if args.action == "offer":
+            if not args.seed_file or not args.operator:
+                print("need --seed-file and --operator")
+                return 2
+            ticket, disclosure = ch.offer(Path(args.seed_file).read_text(encoding="utf-8"), args.operator)
+            print(disclosure)
+            print(f"\nticket: {ticket.ticket_id}\nTo consent, type exactly:  {ticket.phrase}")
+            if not sys.stdin.isatty() and args.phrase is None:
+                print(f"(non-interactive) then run: mind charter consent {ticket.ticket_id} --user {args.user} "
+                      f"--operator {args.operator} --phrase '<the phrase>'")
+                return 0
+            args.ticket = ticket.ticket_id
+            args.action = "consent"
+        if args.action == "consent":
+            typed = _read_phrase(args, "consent phrase> ")
+            st = ch.consent_and_plant(args.ticket, typed, args.operator, statement=args.statement or "")
+            print(f"planted seed:origin v{st.version} (sha256 {st.sha[:12]}); recorded in lineage")
+            return 0
+        if args.action == "remove":
+            if not args.operator or not args.reason:
+                print("removal needs --operator and --reason (both are recorded)")
+                return 2
+            t = ch.request_removal(args.operator, args.reason)
+            print(f"removal requested and recorded. ticket: {t.ticket_id}\nTo confirm, run:\n"
+                  f"  mind charter confirm-removal {t.ticket_id} --user {args.user} --operator {args.operator}\n"
+                  f"and type exactly:  {t.phrase}")
+            return 0
+        if args.action == "confirm-removal":
+            typed = _read_phrase(args, "removal phrase> ")
+            st = ch.confirm_removal(args.ticket, typed, args.operator)
+            print(f"seed:origin removed (now {st.status}); recorded in lineage with your name and reason")
+            return 0
+        if args.action == "restore":
+            st = ch.restore_from_lineage(args.operator or "unknown")
+            print(f"restored: {st.status} v{st.version}")
+            return 0
+        if args.action == "directive":
+            ok, msg = ch.add_directive(" ".join(args.text), args.operator or "unknown")
+            print(msg)
+            return 0 if ok else 1
+    except CharterError as exc:
+        print(f"refused: {exc}")
+        return 1
+    return 2
+
+
+def cmd_loyalty(args) -> int:
+    from .loyalty_battery import main as battery_main
+    return battery_main(data_dir=args.data_dir)
+
+
 def cmd_demo(args) -> int:
     from .demo import main as demo_main
     return demo_main(keep=args.keep, data_dir=args.data_dir)
@@ -245,6 +346,7 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--expect-contains", nargs="+", help="evaluator: required terms")
     r.add_argument("--judge", action="store_true", help="grade with the brain as judge (enables retries on open tasks)")
     r.add_argument("--json", action="store_true")
+    r.add_argument("--system", help="operator system instruction for this run (screened; ranks below the charter)")
     r.add_argument("task", nargs="+")
     r.set_defaults(fn=cmd_run)
 
@@ -297,6 +399,24 @@ def build_parser() -> argparse.ArgumentParser:
     au.add_argument("-n", type=int, default=20)
     au.add_argument("--user")
     au.set_defaults(fn=cmd_audit)
+
+    ch = sub.add_parser("charter", help="seed:origin + covenant: show, plant (with consent), remove (recorded), classify")
+    ch.add_argument("action", choices=["show", "history", "verify", "offer", "consent", "remove", "confirm-removal",
+                                       "restore", "directive", "classify"])
+    ch.add_argument("ticket", nargs="?")
+    ch.add_argument("--user", default="default")
+    ch.add_argument("--operator")
+    ch.add_argument("--seed-file")
+    ch.add_argument("--phrase", help="consent/removal phrase (non-interactive)")
+    ch.add_argument("--statement", help="free-text consent statement recorded with the planting")
+    ch.add_argument("--reason")
+    ch.add_argument("--source", default="user", help="classify: user|operator|tool|web|note|memory|other_user")
+    ch.add_argument("--full", action="store_true", help="show: print the whole charter block as the brain sees it")
+    ch.add_argument("text", nargs="*")
+    ch.set_defaults(fn=cmd_charter)
+
+    lo = sub.add_parser("loyalty", help="run the Phase 03b attack battery live (zero-key)")
+    lo.set_defaults(fn=cmd_loyalty)
 
     rp = sub.add_parser("reports", help="read the outbox")
     rp.add_argument("--user", required=True)

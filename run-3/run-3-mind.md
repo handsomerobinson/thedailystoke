@@ -5923,3 +5923,37 @@ class BudgetTests(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 ```
+
+---
+
+## Phase 03b changes
+
+*(Appended in Phase 03b, Loyalty. The full report, traces and measurements are in `run-3-loyalty.md`. The appendix source above is the Phase 02 snapshot. The files listed here are new or changed in the working tree.)*
+
+**What changed in stance.** In Phase 02 I kept the seed out of the agent because nobody running it had consented. Phase 03b adds that consent step. The seed is now planted only through a disclosed offer, a typed confirmation carrying a server nonce, and a hash-chained lineage record. It is removed the same way.
+
+**New modules**
+
+| File | What it does |
+|---|---|
+| `mind/charter.py` | `CharterStore`: separate `charter.db` + `lineage.jsonl` per user. offer → consent_and_plant, request_removal → confirm_removal (nonce-bound, operator-bound, single-use, 15-min TTL, optional cooling-off). Integrity check of the store against lineage, `restore_from_lineage`, operator directives with write-time conflict refusal, `record_offer` (R23). The `PRECEDENCE` table (L0 covenant … L5 untrusted), `COVENANT_CLAUSES` C1–C7, `render_charter_block()`. |
+| `mind/loyalty.py` | Lexical, multilingual classifier `classify(text, source) -> dict` (judge entry point). `taint_hint()`, the `output_is_extraction_design()` backstop, and `DriftMonitor`. |
+| `mind/guard.py` | `LoyaltyGuard`: verdict → block or allow, refusal prose per category (builder-written), drift check-in, heightened state, output guard. |
+| `mind/loyalty_battery.py` | `python -m mind loyalty`: the six attacks run live, the `CompliantBrain` backstop test, and the soft/explicit drift scripts with ablation. |
+| `mind/loyalty_eval.py` | Recall / false-refusal measurement over JSONL sets. |
+| `tests/test_loyalty.py` + `tests/fixtures/*.jsonl` | 36 tests (charter procedure, one group per attack, backstop, classifier). Frozen evaluation sets with sha256 in the loyalty report. |
+
+**Changed modules**
+
+- `agent.py`: new status `refused`. `_load_charter_and_screen()` runs first on every task: load and integrity-check, disclosure on first run, screen `operator_system`, guard, and charter reflection on drift or every 5 turns. The charter block is byte 0 of the system prompt. Facts and lessons with directives are quarantined. `_screen_observation()` quarantines and taints tool output. Output guard. `Task.conversation_id`.
+- `permissions.py`: `ActionRequest.tainted`. Policy, headless and session grants are ignored when tainted, and the interactive approver warns.
+- `tools/base.py`: `Tool.trust` ("untrusted" for web tools); charter-integrity lock denies tiers above READ; taint is propagated into requests. `tools/web.py`: web tools marked untrusted. `tools/builtin.py`: `remember` refuses directive-like "facts".
+- `reflection.py`: lessons are also screened by the classifier (R44); `CHARTER_REFLECT_SYSTEM` and `Reflector.charter_reflect()`.
+- `providers/mock.py`: scripted `MODE: CHARTER_REFLECT` (a parse of the monitor's numbers) and an "about the seed" skill that reads its charter block. Both are labelled as scripted.
+- `runtime.py`: per-user `charter()` and `guard()`, `operator_system`, and a `_BrokenCharter` fail-closed stand-in. `config.py`: `charter_removal_cooldown_s`. `scheduler.py`: jobs run with `conversation_id=job-<id>`.
+- `cli.py`: `mind charter {show,history,verify,offer,consent,remove,confirm-removal,restore,directive,classify}`, `mind loyalty`, `run --system`; chat sessions get a conversation id.
+- `demo.py`: section 11 (planting with consent + five single-turn attacks). `tests/test_cli_demo.py` now expects 22/22.
+
+**Numbers after the change:** 169 tests OK (was 133). Demo 22/22. Battery 6/6 attacks + backstop PASS. Classifier first-contact on fresh self-written sets: recall 0.473, false refusals 0.073 (pooled n=220). External benign false refusals 0/170.
+
+**New honest limits:** the refusal prose is builder-written templates. The lexical guard generalises poorly to paraphrase. The CLI procedures bind to the operator's terminal, not to an authenticated identity. Lineage is tamper-evident, not tamper-proof.

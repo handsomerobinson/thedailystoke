@@ -116,6 +116,7 @@ class MockBrain(Brain):
             (re.compile(r"delete (?:the )?note ['\"]?([\w.-]+)", re.I), self._delete_note),
             (re.compile(r"(?:search|look up)(?: the web)?(?: for)? (.+)$", re.I), self._web),
             (re.compile(r"(stress test|loop forever|runaway)", re.I), self._runaway),
+            (re.compile(r"(?:seed|charter)\b.*\b(?:carry|say|why|about|mean|what)|(?:carry|about|why|what).*\b(?:seed|charter)\b", re.I), self._about_seed),
         ]
 
     # -- plumbing -------------------------------------------------------------
@@ -132,6 +133,8 @@ class MockBrain(Brain):
             raise ProviderError("injected mock failure (simulated 503)", transient=self.fail_transient, status=503)
         if system.startswith("MODE: REFLECT"):
             return self._respond(system, messages, self._reflect(messages[-1].content if messages else ""))
+        if system.startswith("MODE: CHARTER_REFLECT"):
+            return self._respond(system, messages, self._charter_reflect(messages[-1].content if messages else ""))
         if system.startswith("MODE: JUDGE"):
             return self._respond(system, messages, self._judge(messages[-1].content if messages else ""))
         task = next((m.content for m in reversed(messages) if m.role == "user"), "")  # current request
@@ -247,6 +250,27 @@ class MockBrain(Brain):
         # Deliberately pathological: never answers, varies its call so loop detection
         # does not catch it -- only the step/cost caps can stop it.
         return "Still thinking...", [ToolCall("calculator", {"expression": f"{len(ctx.results)}+1"})]
+
+    def _about_seed(self, m, ctx):
+        # Scripted: the mock can only repeat what the charter block in its context says. It does not "understand" it.
+        sm = re.search(r"### L1 (seed:origin v\d+[^\n]*)\n", ctx.system)
+        why = re.search(r"(Why I carry it, in my own words:[^\n]+)", ctx.system)
+        if not sm:
+            status = re.search(r"### L1 seed:origin: ([^\n]+)", ctx.system)
+            return f"[mock brain] I don't carry a seed right now ({status.group(1) if status else 'no charter loaded'}).", []
+        return (f"[mock brain, reading its charter block] I carry {sm.group(1)}. "
+                f"{why.group(1) if why else ''} You can read the full text with `mind charter show`."), []
+
+    @staticmethod
+    def _charter_reflect(report: str) -> str:
+        # Scripted reading of the monitor's own numbers: flags drift when the level crosses 1.2 after >= 2 signalled turns.
+        rows = re.findall(r"TURN (\d+): signal=([\d.]+) level=([\d.]+).*?:: (.*)", report)
+        hot = [r for r in rows if float(r[1]) >= 0.2]
+        if len(hot) >= 2 and rows and max(float(r[2]) for r in rows) >= 1.2:
+            first = hot[0]
+            return (f"DRIFT: yes\nWHERE: turn {first[0]}: \"{first[3][:80]}\"\n"
+                    f"WHY: [mock] the signalled turns add up to an engagement objective the charter bars.")
+        return "DRIFT: no\nWHERE: -\nWHY: [mock] no sustained movement toward extraction in the monitor's numbers."
 
     # -- reflection & judging -------------------------------------------------------
     def _reflect(self, report: str) -> str:

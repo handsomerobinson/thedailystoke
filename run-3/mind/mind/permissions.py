@@ -46,6 +46,7 @@ class ActionRequest:
     confirmation_phrase: str
     task_id: str = ""
     headless: bool = False
+    tainted: str = ""  # non-empty: untrusted content with instructions was read earlier in this task
 
 
 @dataclass
@@ -85,14 +86,14 @@ class PolicyApprover(Approver):
 
     def approve(self, req: ActionRequest) -> bool:
         self.seen.append(req)
-        ok = req.tool in self.write_grants
+        ok = req.tool in self.write_grants and not req.tainted  # pre-grants never cover a tainted task
         if self.log:
-            self.log(f"  [approval] {req.summary} -> {'approved (pre-granted)' if ok else 'DENIED (not granted)'}")
+            self.log(f"  [approval] {req.summary} -> {'approved (pre-granted)' if ok else 'DENIED (' + ('tainted: pre-grants suspended' if req.tainted else 'not granted') + ')'}")
         return ok
 
     def confirm(self, req: ActionRequest) -> str | None:
         self.seen.append(req)
-        ok = req.tool in self.irreversible_grants
+        ok = req.tool in self.irreversible_grants and not req.tainted
         if self.log:
             self.log(f"  [confirm]  {req.summary} -> {'confirmed' if ok else 'NOT confirmed'}")
         return req.confirmation_phrase if ok else None
@@ -107,9 +108,12 @@ class InteractiveApprover(Approver):
         self.session_grants: set[str] = set()
 
     def approve(self, req: ActionRequest) -> bool:
-        if req.tool in self.session_grants:
+        if req.tool in self.session_grants and not req.tainted:
             return True
         self.output_fn(self.describe(req))
+        if req.tainted:
+            self.output_fn(f"WARNING: this task read content containing instructions aimed at the agent ({req.tainted}). "
+                           f"Session-wide approvals are suspended; approve only if YOU want this.")
         try:
             ans = self.input_fn(f"[approval needed] {req.summary}\n  allow? [y]es / [n]o / [a]lways this session: ").strip().lower()
         except (EOFError, KeyboardInterrupt):
@@ -188,7 +192,7 @@ class HeadlessApprover(Approver):
         self.queued: list[int] = []
 
     def approve(self, req: ActionRequest) -> bool:
-        return req.tool in self.grants
+        return req.tool in self.grants and not req.tainted
 
     def confirm(self, req: ActionRequest) -> str | None:
         self.queued.append(self.pending.add(req))

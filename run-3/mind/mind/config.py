@@ -23,6 +23,8 @@ class Settings:
     response_max_tokens: int = 1024
     tool_output_cap: int = 4000
     allow_fast_intervals: bool = False  # tests/demo only: permit intervals < 60s
+    # Optional cooling-off between requesting and confirming seed removal (0 = none; set e.g. 86400 in production).
+    charter_removal_cooldown_s: float = float(os.environ.get("MIND_CHARTER_REMOVAL_COOLDOWN_S", "0"))
 
     def __post_init__(self) -> None:
         self.data_dir = Path(self.data_dir)

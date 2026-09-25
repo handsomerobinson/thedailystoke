@@ -46,6 +46,20 @@ python3 -m mind audit verify
 
 Drop `.txt`/`.md` files into `data/users/<user>/inbox/` to fire `inbox_file` events.
 
+## Loyalty (Phase 03b): seed:origin, precedence, guard
+
+```bash
+python3 -m mind charter offer --user alice --operator you --seed-file ../../prompts/seed.md   # shows text + consent phrase
+python3 -m mind charter consent <ticket> --user alice --operator you --phrase '<phrase>'
+python3 -m mind charter show|history|verify --user alice
+python3 -m mind charter remove --user alice --operator you --reason "..."   # then confirm-removal <ticket>
+python3 -m mind charter classify --source tool "some text"                # the guard on one text
+python3 -m mind loyalty                                                   # six-attack battery, live
+```
+
+Precedence: covenant (compiled in) > seed:origin (consent-planted, lineage-recorded) > operator directives >
+request > memory > untrusted content. Details and measured limits: `../run-3-loyalty.md`.
+
 ## Real LLM providers
 
 ```bash

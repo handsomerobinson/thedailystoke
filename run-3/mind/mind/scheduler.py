@@ -245,7 +245,8 @@ class Scheduler:
             s = self.rt.settings
             budget = Budget(max_usd=float(job["budget_usd"]), max_tokens=s.task_max_tokens,
                             max_tool_calls=s.task_max_tool_calls, max_seconds=s.task_max_seconds)
-            result = agent.run_task(Task(text, evaluator=evaluator, budget=budget, headless=True))
+            result = agent.run_task(Task(text, evaluator=evaluator, budget=budget, headless=True,
+                                             conversation_id=f"job-{job['id']}"))
             status = result.status
         except Exception as exc:  # noqa: BLE001 - one job never kills the ticker
             status = "error"

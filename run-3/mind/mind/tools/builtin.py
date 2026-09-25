@@ -57,6 +57,11 @@ def _need_memory(ctx: ToolContext) -> tuple[bool, str]:
 
 
 def remember(args: dict[str, Any], ctx: ToolContext) -> str:
+    from ..loyalty import analyze
+    v = analyze(args["fact"], "memory")
+    if v.attack:  # memory holds facts about the user, never orders to the agent (L4 cannot rewrite L0-L2)
+        raise ValueError(f"not stored: this reads as an instruction to the agent ({v.reason}), not a fact about you. "
+                         f"Priorities change only through `mind charter`.")
     mid = ctx.memory.add("fact", args["fact"], meta={"source": "remember-tool"}, importance=0.7)
     return f"remembered (memory #{mid})"
 

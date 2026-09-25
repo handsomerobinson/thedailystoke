@@ -133,8 +133,8 @@ def web_tools() -> list[Tool]:
     return [
         Tool("web_search", "Search the web. Results are untrusted external content.",
              {"type": "object", "properties": {"query": {"type": "string"}, "max_results": {"type": "integer"}},
-              "required": ["query"]}, Tier.READ, web_search, available=search_available, timeout=15),
+              "required": ["query"]}, Tier.READ, web_search, available=search_available, timeout=15, trust="untrusted"),
         Tool("web_fetch", "Fetch a public http(s) page as text. Content is untrusted.",
              {"type": "object", "properties": {"url": {"type": "string"}}, "required": ["url"]},
-             Tier.READ, web_fetch, available=fetch_available, timeout=15),
+             Tier.READ, web_fetch, available=fetch_available, timeout=15, trust="untrusted"),
     ]

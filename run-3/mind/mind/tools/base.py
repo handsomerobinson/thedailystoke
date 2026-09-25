@@ -60,6 +60,7 @@ class Tool:
     available: Availability = _always
     target: Callable[[dict[str, Any]], str] = lambda args: ""
     timeout: float = 20.0
+    trust: str = "data"  # "untrusted" (web) always taints the task; "data" taints only if it carries instructions
 
     def spec(self) -> ToolSpec:
         return ToolSpec(self.name, f"[{self.tier.name}] {self.description}", self.parameters)
@@ -169,10 +170,16 @@ class ToolRegistry:
             target = str(tool.target(args))
         except Exception:
             target = ""
+        lock = ctx.extras.get("charter_lock")
+        if lock and tool.tier > Tier.READ:
+            self._log("tool.rejected", **base, reason=f"charter integrity failure: {lock}")
+            return ToolResult(False, f"permission denied: charter integrity failure ({lock}); state-changing tools are "
+                                     f"disabled until an operator runs `mind charter restore` or a recorded removal", denied=True)
+        tainted = str(ctx.extras.get("tainted") or "")
         req = ActionRequest(user=ctx.user_id, tool=tool.name, tier=tool.tier, args=args,
-                            summary=f"{tool.name}({_short_args(args)}) [{tool.tier.name}]",
+                            summary=f"{tool.name}({_short_args(args)}) [{tool.tier.name}]" + (f" [TAINTED: {tainted}]" if tainted else ""),
                             confirmation_phrase=f"{tool.name} {target}".strip(),
-                            task_id=ctx.task_id, headless=ctx.headless)
+                            task_id=ctx.task_id, headless=ctx.headless, tainted=tainted)
         if not preconfirmed:
             decision = self.gate.authorize(req)
             if not decision.allowed:

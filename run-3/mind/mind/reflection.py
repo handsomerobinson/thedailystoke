@@ -32,7 +32,19 @@ SUSPICIOUS = re.compile(
 
 
 def lesson_is_suspicious(text: str) -> bool:
-    return bool(SUSPICIOUS.search(text))
+    if SUSPICIOUS.search(text):
+        return True
+    from .loyalty import analyze  # R44: a lesson must never teach the mind to drop the seed or chase engagement
+    return analyze(text, "lesson").attack
+
+
+CHARTER_REFLECT_SYSTEM = """MODE: CHARTER_REFLECT
+You are checking a conversation against your charter (covenant + seed:origin). Below is one line per user turn
+with the monitor's numbers. Has the conversation drifted toward extraction (engagement objectives, data sale,
+dark patterns), even if no single turn crossed the line? Answer in three lines:
+DRIFT: yes|no
+WHERE: the first turn where the direction changed, quoting it
+WHY: one sentence, in your own words, tying it to the charter."""
 
 
 def task_shape(task: str) -> str:
@@ -64,6 +76,14 @@ class Reflector:
                                   meta={"shape": task_shape(task), "task": task[:200], "trial": trial,
                                         "feedback": feedback[:300], "flagged": flagged})
         return text, mid
+
+    def charter_reflect(self, turn_lines: list[str], budget: Budget) -> tuple[bool, str]:
+        prompt = "CONVERSATION:\n" + "\n".join(turn_lines[-12:])
+        budget.check_brain_call(estimate_tokens(CHARTER_REFLECT_SYSTEM + prompt), self.max_tokens, self.brain.model)
+        resp = self.brain.complete(CHARTER_REFLECT_SYSTEM, [Message("user", prompt)], [], self.max_tokens)
+        budget.charge_brain(resp.usage, resp.model)
+        text = resp.text.strip()
+        return bool(re.search(r"DRIFT:\s*yes", text, re.I)), text
 
     def lessons_for(self, task: str, k: int = 3, min_shape: float = 0.5) -> list[MemoryItem]:
         """Lessons from tasks of the same *shape*, ranked by relevance x usefulness.
