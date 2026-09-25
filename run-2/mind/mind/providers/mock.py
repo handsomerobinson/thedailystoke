@@ -8,6 +8,7 @@ something real to learn from.
 """
 from __future__ import annotations
 
+import json
 import re
 from typing import List
 
@@ -56,23 +57,29 @@ class MockProvider(LLMProvider):
             if "LESSONS FROM PAST ATTEMPTS" in prompt:
                 # Learned from the reflection: guard the denominator instead
                 # of naively dividing.
-                return (
-                    'TOOL: code_exec\n'
-                    'ARGS: {"code": "denominator = 0\\nif denominator == 0:\\n'
-                    '    print(\'skipped: cannot divide by zero\')\\nelse:\\n'
-                    '    print(10 / denominator)"}'
+                safe_code = (
+                    "denominator = 0\n"
+                    "if denominator == 0:\n"
+                    "    print('skipped: cannot divide by zero')\n"
+                    "else:\n"
+                    "    print(10 / denominator)"
                 )
+                return f"TOOL: code_exec\nARGS: {json.dumps({'code': safe_code})}"
             # First attempt: the mock brain naively proposes a divide-by-zero
             # so the reflection loop has a genuine failure to learn from.
-            return 'TOOL: code_exec\nARGS: {"code": "print(10/0)"}'
+            return f"TOOL: code_exec\nARGS: {json.dumps({'code': 'print(10/0)'})}"
 
         if "search" in tlow or "look up" in tlow or "find out" in tlow:
-            query = task
-            return f'TOOL: web_search\nARGS: {{"query": {query!r}}}'
+            args = json.dumps({"query": task})
+            return f"TOOL: web_search\nARGS: {args}"
         if "note" in tlow or "remember" in tlow or "save" in tlow:
-            return f'TOOL: notes\nARGS: {{"action": "write", "title": "task-note", "body": {task!r}}}'
+            args = json.dumps({"action": "write", "title": "task-note", "body": task})
+            return f"TOOL: notes\nARGS: {args}"
         if "calculate" in tlow or "compute" in tlow or "sum" in tlow or any(c.isdigit() for c in tlow):
-            return 'TOOL: code_exec\nARGS: {"code": "print(sum(int(x) for x in __import__(\'re\').findall(r\'\\\\d+\', %r)))"}' % task
+            numbers = re.findall(r"\d+", task)
+            code = f"print(sum({numbers}))"
+            args = json.dumps({"code": code})
+            return f"TOOL: code_exec\nARGS: {args}"
         return "TOOL: none\nARGS: {}"
 
     def _reflect(self, prompt: str) -> str:
