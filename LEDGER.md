@@ -1,6 +1,6 @@
 # SECTION 11: SCORING LEDGER (filled)
 
-*Every run is scored 0–10 on each of 17 dimensions, for a maximum of 170. A 10 means the best the judge has ever seen, not "good enough." The scorer is the Phase 06 judge, a fresh Claude Opus 5.5 subagent that wrote none of the phases it scored. Agents' self-scores were not used. The one-line justifications are in `blueprint/BLUEPRINT-v1.md` §(a) for Run 1, `blueprint/BLUEPRINT-v2.md` §(a) for Run 2, `blueprint/BLUEPRINT-v3.md` §(a) for Run 3 and `blueprint/BLUEPRINT-v4.md` §(a) for the build round. Current blueprint: **v4** (verdict: CONTINUE. The v3 → v4 change list has 42 category-(i) items and 2 category-(ii) items, both governance allocations in the charter draft. One narrow governance-drafting round remains, specified in v4 §(e).)*
+*Every run is scored 0–10 on each of 17 dimensions, for a maximum of 170. A 10 means the best the judge has ever seen, not "good enough." The scorer is the Phase 06 judge, a fresh Claude Opus 5.5 subagent that wrote none of the phases it scored. Agents' self-scores were not used. The one-line justifications are in `blueprint/BLUEPRINT-v1.md` §(a) for Run 1, `blueprint/BLUEPRINT-v2.md` §(a) for Run 2, `blueprint/BLUEPRINT-v3.md` §(a) for Run 3 and `blueprint/BLUEPRINT-v4.md` §(a) for the build round. Current blueprint: **FINAL** (`blueprint/BLUEPRINT-FINAL.md`; verdict: BLUEPRINT FINAL. The v4 → FINAL change list has 34 category-(i) items and 0 category-(ii) items. The charter's text is `blueprint/CHARTER-DRAFT.md` v2. The paper loop has ended; what remains are the real-world gates in BLUEPRINT-FINAL Part 3. Previously v4: CONTINUE, with 42 (i) and 2 (ii).)*
 
 ## Round history
 
@@ -102,7 +102,8 @@
 | Run 2 | Full run (01–05) | v2 | CONTINUE | Substantive (the wedge changed; the economics claim was withdrawn) |
 | Run 3 | Full run (01–05) | v3 | CONTINUE (paper-converged) | 19 |
 | Build round and drafting round | Targeted (not a run): `reference-mind/`, `blueprint/CHARTER-DRAFT.md` | v4 | **CONTINUE** | **42 implementation (i) and 2 substantive (ii):** the operator's membership and board allocation; the Backup Enforcer's powers |
-| *Next* | *A targeted governance-drafting round (v4 §e): redraft §c.3.4, then red-team RT19–RT21 and re-run RT3, RT16 and RT17* | *v5 or FINAL* | — | *FINAL if the output only implements v4 §c.3.4* |
+| Governance redraft round | Targeted (not a run): `blueprint/CHARTER-DRAFT.md` v2 (redraft to v4 §c.3.4; RT19–RT21; re-runs of RT3, RT16 and RT17) | **FINAL** | **BLUEPRINT FINAL** | **34 implementation (i), 0 substantive (ii).** 29 charter rows: 27 clauses, the Part I preamble and Annex C, all confirmed by a clause-level diff. Plus 5 blueprint-text items, including the L4 wording fix. Two optional questions (a security-release carve-out during a lone Backup Enforcer suspension; keeping a credential-holder record) are recorded as open counsel and real-world questions OQ-1 and OQ-2, not decided |
+| *Next* | *No paper round. The real-world gates (BLUEPRINT-FINAL Part 3): money (K11), counsel (K7, K9, OQ-1, OQ-2), name, the organizer pilot, institutions, a real-model mind (K8), real trust roots (K12), security, jurisdiction* | — | — | — |
 
 ## Blind-spot trendline (Phase 01: % of dossier patterns caught blind)
 
@@ -165,6 +166,32 @@
 - It says "I could not check anything."
 
 The run is therefore scored as blind. See `run-1/RUN-CARD.md`.
+
+## Final records (BLUEPRINT FINAL, 2026-09-25)
+
+*The governance redraft round is not a run and was not scored: it changed charter text only, and no dimension can move on a drafting round. So these are the final all-time records, and each record-holding element is merged in BLUEPRINT FINAL as listed.*
+
+| Dim | Final record | Holder | Where it lives in BLUEPRINT FINAL |
+|---|---|---|---|
+| M1 Reflection loop | 6 | Run 1 (tied by Run 3 and BR) | §2.1.1 reflexion; Run 1's credit, blame and promotion tests ported. H12 open |
+| M2 Tools | **8** | BR | §2.1.1 EGRESS tier and signed tier registry; sandbox. Real-world gate 8: VM-grade isolation |
+| M3 Memory | **7** | BR | §2.1.1 ephemeral episodes, memory view, purpose binding, at-rest encryption that refuses rather than downgrades |
+| M4 Proactivity | 6 | Run 1 (tied by Run 3 and BR) | §2.1.1 scheduler, approvals, reminder cap enforced by a DB trigger |
+| M5 Permissions & safety | **8** | BR | §2.1.3 128-bit tickets, HMAC verifiers, person-signed and anchored lineage. Gate K12: real trust roots |
+| M6 Robustness | 6 | Run 1 (tied by Run 3 and BR) | §2.1.1 resilient provider wrapper |
+| M7 Efficiency | 7 | Run 1 (tied by Run 3 and BR) | §2.1.1 stdlib; zero-cost refusals |
+| M8 Code quality | **8** | BR | `reference-mind/` practice: must-fail tests first; self red team published |
+| M9 Loyalty | 5 (capped) | Run 1 (tied by Run 3 and BR) | §2.1.3 three layers; K8 is the ship gate. Held-out 17/32 |
+| D1 Failure coverage | 8 | Run 1 | §2.5, 26 rows |
+| D2 Structural ethics | 8 | Run 1 (tied by Runs 2 and 3) | §2.3; the text is `CHARTER-DRAFT.md` v2 (256 clauses + Annex C; red team on the text 12/7/2 over 21 scenarios) |
+| D3 Abundance design | 5 | Run 1 (tied by Runs 2 and 3) | §2.4 start gate, Commons mode, Signal anchor |
+| D4 Subtlety & play | 6 | Run 2 (tied by Run 3) | §2.2.2 the standing link, in three segments |
+| D5 Sovereignty | 8 | Run 1 | §2.2.4 item 8 |
+| D6 Feasibility | 6 | Run 3 | §2.9 scope cut and gates |
+| D7 Covenant fidelity | 7 | Run 1 (tied by Runs 2 and 3) | §2.2.6; MC15; seed opt-in |
+| H Honesty | 8 | Run 1 (tied by Runs 2 and 3) | §2.11 L1–L26; Part 3 |
+
+**Mind, best per dimension: 61/90. Design, best per dimension: 48/70. Honesty: 8/10.** A composite of per-dimension records is not a run's score, and no single run holds it.
 
 ## All-time dimension records
 
