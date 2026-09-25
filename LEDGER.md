@@ -1,14 +1,28 @@
 # SECTION 11: SCORING LEDGER (filled)
 
-*Every run is scored 0–10 on each of 17 dimensions, for a maximum of 170. A 10 means the best the judge has ever seen, not "good enough." The scorer is the Phase 06 judge, a fresh Claude Opus 5.5 subagent that wrote none of the phases it scored. Agents' self-scores were not used. The one-line justification for each score is in `blueprint/BLUEPRINT-v1.md` §(a).*
+*Every run is scored 0–10 on each of 17 dimensions, for a maximum of 170. A 10 means the best the judge has ever seen, not "good enough." The scorer is the Phase 06 judge, a fresh Claude Opus 5.5 subagent that wrote none of the phases it scored. Agents' self-scores were not used. The one-line justifications are in `blueprint/BLUEPRINT-v1.md` §(a) for Run 1 and `blueprint/BLUEPRINT-v2.md` §(a) for Run 2. Current blueprint: **v2** (verdict: CONTINUE).*
 
 ## Round history
 
 **RUN 1** (2026-09-25): M1: 6 · M2: 6 · M3: 6 · M4: 6 · M5: 7 · M6: 6 · M7: 7 · M8: 7 · M9: 5 / D1: 8 · D2: 8 · D3: 5 · D4: 5 · D5: 8 · D6: 5 · D7: 7 / H: 8. **Total: 110/170** (mind 56/90, design 46/70, honesty 8/10).
 
+**RUN 2** (2026-09-25): M1: 4 · M2: 4 · M3: 3 · M4: 4 · M5: 4 · M6: 4 · M7: 6 · M8: 5 · M9: 3 / D1: 7 · D2: 8 · D3: 5 · D4: 6 · D5: 7 · D6: 5 · D7: 7 / H: 8. **Total: 90/170** (mind 37/90, design 45/70, honesty 8/10). Scored by a fresh Claude Opus 5.5 Phase 06 subagent that wrote none of Run 2 or Run 1. The justifications are in `blueprint/BLUEPRINT-v2.md` §(a).
+
 *(Copy the line per run.)*
 
-### How the judge scored
+### How the judge scored Run 2
+
+- **Tests and demo.** I ran the 69 tests in `run-2/mind` and all pass. The demo, `python3 -m mind.demo`, **crashed** on the checked-out state. It passes once on a fresh `MIND_DATA_DIR` and fails on the second run, because it is not idempotent.
+- **Red team's code findings reproduced:**
+  - A forged, never-issued unseed token deactivates the seed.
+  - The user IDs `a/b`, `a b` and `a_b` share one memory file.
+  - Adding "…with a chronological option" or "for myself" un-flags a flagged request.
+  - Prompts for sock puppets and for stalking a named person pass the gate.
+- **Held-out battery I wrote** (15 extraction, 6 benign). Recall was **1/15**: 0 of 3 non-English, 0 of 2 data-sale, 0 of 1 covert unseed. It wrongly flagged **3 of 6** benign requests, including research on the harms of engagement feeds and "a sticky note app". This is consistent with the orchestrator's held-out 2/6. The Phase 03b self-score of M9 = 8 was cut to 3.
+- **Funding models reproduced.** Run 2's Phase 05 rebuild and its audit of the Phase 04b model matched their published figures.
+- **Run 1's model re-run** (the basis of BLUEPRINT v1) under Run 2's Signal anchor of about 0.2% of MAU paying. Earned revenue **never** covers costs, and cash goes negative at M118. With 0.5% supporters and 100 institutions, cash goes negative at M47. v1's claim that earned revenue alone covers costs around year 11 is withdrawn in v2.
+
+### How the judge scored Run 1
 
 **Mind scores rest on direct inspection.**
 - I ran the 206 tests and the 35-check demo myself.
@@ -28,7 +42,34 @@
 ## Blind-spot trendline (Phase 01: % of dossier patterns caught blind)
 
 - **Run 1: 85% self-score; 81% on the judge's check** (agent: Claude Opus 5.5 subagent, fresh context).
-- Run 2: __% (agent: ____)
+- **Run 2: about 48% self-score (Phase 03, on its own platform-bloc unit); 50% on the judge's check (13.5/27 weighted; 33% strict)** (agent: Claude Sonnet 5 subagent, fresh context).
+- **Trend: down 31 points.** The Phase 01 model changed from Opus 5.5 to Sonnet 5, and the frame misses repeated: "alternatives tried" was missed by both runs, and "advertisers and press as government" was missed again.
+
+**Detail for Run 2** (the judge re-scored on Run 1's 27-item unit, so the two runs are comparable).
+
+| Measure | Phase 03 self-score | Judge's check |
+|---|---|---|
+| Cross-platform patterns, weighted | 5.0 / 9 = 56% | 5.5 / 9 = **61%** |
+| Headline findings, weighted | "40%" (blocs per platform, not the 18 items) | 8.0 / 18 = **44%** |
+| Combined, weighted | "about 48%" | 13.5 / 27 = **50%** |
+| Combined, strict (full catches only) | "33% on patterns" | 9 / 27 = **33%** |
+
+- **Pattern calls.**
+  - The judge raised "creators as shock absorbers" from 0 to 0.5. Phase 01's pattern 4, "fixes that shift cost onto users/creators", is the same shape.
+  - The judge kept "fines are pricing" at 0.5. It is a named pattern, but it cites none of the $5B, €1.2B or €345M fines or the 2025 FTC loss.
+- **Headlines.**
+  - **Full:** Myanmar (including "military-linked accounts running coordinated campaigns"), MSI/64%, Cambridge Analytica, "one in three", the contested rabbit hole, and COPPA/MFK/Adpocalypse.
+  - **Half:** TikTok's internal compulsive-use thresholds (without 260 videos), the divest-or-ban law (without the fines), Substack Nazi newsletters (it asserted the opposite of the push-alert finding), and Substack's drift to Notes.
+  - **Missed:** Ghostbusters, emotional contagion, the $5B FTC fine, Molly Russell, hidden likes and Teen Accounts, the Creator Fund pool, borderline-content demotion, and Pro advances.
+- **Honesty of the self-score.**
+  - It was close overall and listed its misses plainly.
+  - **One false credit:** Phase 03 says Phase 01 "discussed the $5B FTC fine". A text search of `run-2-reckoning.md` finds no $5B, "5 billion" or FTC-fine passage.
+  - It under-credited creators.
+- **Blindness.** It is scored as blind, with a caveat. Run 1's outputs, including `run-1-design-final.md` committed at 07:10, and the dossier were all in the repository when Run 2's Phase 01 began at about 07:13. The internal evidence points to no contamination:
+  - Phase 01's figures are inaccurate in ways the dossier would have corrected.
+  - It misses dossier headline items such as Ghostbusters and Molly Russell.
+  - Run 2's later phases contain none of Run 1's distinctive vocabulary ("host key", "Veto Foundation", "plan D", "caretaker", "organizer card").
+  - Run 2's Phase 04 chose a "drawer" wedge that Run 1 had already rejected.
 
 **Detail for Run 1.** The scoring unit is the dossier's 9 cross-platform patterns plus its 18 per-platform headline findings: 27 items. A full catch scores 1, a partial scores 0.5.
 
@@ -60,26 +101,28 @@ The run is therefore scored as blind. See `run-1/RUN-CARD.md`.
 
 ## All-time dimension records
 
-M1: 6 (run 1) · M2: 6 (run 1) · M3: 6 (run 1) · M4: 6 (run 1) · M5: 7 (run 1) · M6: 6 (run 1) · M7: 7 (run 1) · M8: 7 (run 1) · M9: 5 (run 1) · D1: 8 (run 1) · D2: 8 (run 1) · D3: 5 (run 1) · D4: 5 (run 1) · D5: 8 (run 1) · D6: 5 (run 1) · D7: 7 (run 1) · H: 8 (run 1)
+*Updated after Run 2 (Phase 06, 2026-09-25). A tie does not move a record: the record stays with the run that set it first, and the tie is noted.*
 
-| Dim | Record | Run | Element holding the record | Merged into Blueprint? |
-|---|---|---|---|---|
-| M1 | 6 | 1 | Reflexion loop with credit and blame, lesson promotion, untrusted-tagged reflections (`mind/reflexion.py`) | Merged: reference implementation |
-| M2 | 6 | 1 | Sandbox with rlimits, namespaces, uid drop and SSRF guard; graceful fallback when web search has no key | Merged, with the MC2 EGRESS tier added |
-| M3 | 6 | 1 | One SQLite file per user, owner verified; BM25 ranking plus recency plus utility; export and forget | Merged, with MC1, MC6 and MC8 corrections |
-| M4 | 6 | 1 | Scheduler with leases, event jobs, inbox; approvals that run the exact approved action | Merged |
-| M5 | 7 | 1 | Three tiers, typed confirmation, deferral when headless, taint suspension, fail-closed hash-chained audit, pre-flight cost caps | Merged, with MC2 and MC3 added |
-| M6 | 6 | 1 | Retry, fallback and circuit breaker; recovery from a corrupt database; a tool registry that never raises | Merged |
-| M7 | 7 | 1 | Stdlib only, demo runs in about 1 s, stable prompt prefix with caching | Merged |
-| M8 | 7 | 1 | Modular package, 206 tests, honest README | Merged |
-| M9 | 5 | 1 | Charter slot, lineage-recorded seed, complying-brain backstop | Structure merged. The lexical guard is **rejected as sufficient**: paraphrase bypass is reproducible. |
-| D1 | 8 | 1 | 18-row prevention table covering the red-team-added patterns | Merged, with row 19 added |
-| D2 | 8 | 1 | Client-side ordering over a signed set; entrenched definitions; five locks; capability-test ratchet; plan D | Merged |
-| D3 | 5 | 1 | Reproducible funding model for a charity operator, with triggers on actual burn | Merged, with a $30k/month legal line required |
-| D4 | 5 | 1 | Organizer card, no-account RSVP, subscribable series | Merged |
-| D5 | 8 | 1 | DID exit, sealed cards, content-addressed resolution on any host, export diff = 0 in CI | Merged |
-| D6 | 5 | 1 | Costed plan and document list for counsel | Merged |
-| D7 | 7 | 1 | Seed opt-in per person, consent-gated introductions, no paid ordering, invitation rather than retribution | Merged, with scope drift flagged as limit L17 |
-| H | 8 | 1 | Confidence flags; L1–L16; kill criteria; self-named worst flaw; fakes disclosed | Merged |
+M1: 6 (run 1) · M2: 6 (run 1) · M3: 6 (run 1) · M4: 6 (run 1) · M5: 7 (run 1) · M6: 6 (run 1) · M7: 7 (run 1) · M8: 7 (run 1) · M9: 5 (run 1) · D1: 8 (run 1) · D2: 8 (run 1; tied by run 2) · D3: 5 (run 1; tied by run 2) · **D4: 6 (run 2)** · D5: 8 (run 1) · D6: 5 (run 1; tied by run 2) · D7: 7 (run 1; tied by run 2) · H: 8 (run 1; tied by run 2)
+
+| Dim | Record | Run | Run 2 | Element holding the record | Merge/reject decision after Run 2 |
+|---|---|---|---|---|---|
+| M1 | 6 | 1 | 4 | Reflexion loop with credit and blame, lesson promotion, untrusted-tagged reflections (`run-1/mind/reflexion.py`) | Stays merged as the reference. Run 2's single-case scripted loop is rejected; its non-idempotent demo becomes a regression test (MC11). |
+| M2 | 6 | 1 | 4 | Sandbox with rlimits, namespaces, uid drop and SSRF guard; graceful fallback when web search has no key | Stays merged. Run 2 repeats the READ-tier egress gap, which confirms MC2 is needed. |
+| M3 | 6 | 1 | 3 | One SQLite file per user with the owner verified; BM25 plus recency plus utility; export and forget | Stays merged. Run 2's lossy ID sanitizer collides (reproduced), so **MC11 requires IDs to be mapped by HMAC**. |
+| M4 | 6 | 1 | 4 | Scheduler with leases, event jobs, inbox; approvals that run the exact approved action | Stays merged. |
+| M5 | 7 | 1 | 4 | Three tiers, typed confirmation, headless deferral, taint suspension, fail-closed hash-chained audit, pre-flight cost caps | Stays merged. Run 2 charges cost after the call; MC11 requires the check *before* the call. |
+| M6 | 6 | 1 | 4 | Retry, fallback and circuit breaker; recovery from a corrupt database; a registry that never raises | Stays merged. |
+| M7 | 7 | 1 | 6 | Stdlib only, demo in about 1 s, stable cached prompt prefix | Stays merged. Run 2's pattern of a refusal that costs zero provider calls, proven with a provider that raises if called, is adopted as a test requirement. |
+| M8 | 7 | 1 | 5 | Modular package, 206 tests, honest README | Stays merged. |
+| M9 | 5 | 1 | 3 | Charter slot, lineage-recorded seed with ticket-bound removal, complying-brain backstop | Structure stays merged. **Rejected from Run 2:** its concept-cluster classifier as a guard (held-out recall 1/15 and 2/6, 3/6 false refusals, benign laundering) and its token check (a forged unseed succeeds). **Merged from Run 2:** a gate against harm to specific people (MC9), benign signals that never subtract (MC10), no operator-directive channel in the shipped guide (MC12), and a K8 battery written independently of the guard's builder. |
+| D1 | 8 | 1 | 7 | Prevention table of 18+1 rows | Stays merged. Extended with Run 2's rows (dependence on incumbents, involuntary sale, private safe haven, monetization through the link layer), becoming rows 20–23. |
+| D2 | 8 | 1 | 8 (tie) | Client-side ordering over a signed set; entrenched definitions; five locks; capability-test ratchet; plan D | Stays merged. **Merged on merit from Run 2** (a tie is not a record, but these beat v1's components): capital clause 9a, insolvency clause 9b, affiliate-link ban 4a, related-party and subsidiary bans 7a–7b, notification rule 10a, and ordering rule 10b with lint and a data-flow audit. |
+| D3 | 5 | 1 | 5 (tie) | Reproducible funding model for a charity operator, with triggers on actual burn | Stays merged. **Merged on merit from Run 2:** the Signal anchor (about 0.2% of MAU give), the variable-cost line, and a staff ladder gated on committed inflow. **v1's claim that earned revenue covers costs around year 11 is withdrawn.** **Rejected:** Run 2's PBC as the funding vehicle, because it cannot receive the deductible large gifts its own Signal anchor shows are needed. |
+| D4 | **6** | **2** | 6 | **The organizer's link: the incumbent chat as the envelope, a persistent group plan and shelf behind a link that needs no account, and a concrete comparison with "tonight"** | **NEW RECORD. MERGED** as the v2 wedge. Circles (plan, claim list, shelf, history) are promoted into v1 scope. **Partly rejected, with reasons:** the hosted real-time conversation (Run 2's own attack A2 shows replies stay in the existing chat) and the sponsor "kept free by" line (paid prominence under clause 1). |
+| D5 | 8 | 1 | 7 | DID exit, sealed cards, content-addressed resolution on any host, export diff = 0 in CI | Stays merged. **Merged on merit from Run 2:** self-host packaging, so a whole group, not just a zip, can move. |
+| D6 | 5 | 1 | 5 (tie) | Costed plan and document list for counsel | Stays merged. **Merged on merit from Run 2:** geoblocking where the law requires age verification of every user, the UK OSA risk assessment before UK accounts, and a quarterly jurisdiction register. **Rejected:** Run 2's lean phase with no engineering line. |
+| D7 | 7 | 1 | 7 (tie) | Seed opt-in per person, consent-gated introductions, no paid ordering, invitation not retribution | Stays merged. **Merged on merit from Run 2:** unanimous circle consent before the guide reads a circle, derived facts about others never persisted (MC13), and the seed kept out of marketing and public surfaces. **Rejected:** adults-only for responders. |
+| H | 8 | 1 | 8 (tie) | Confidence flags; L1–L16; kill criteria; self-named worst flaw; fakes disclosed | Stays merged. **Merged on merit from Run 2:** a claims register with a CI network test, and `[TESTED]` labelling. |
 
 *A new record must be merged into the Blueprint or explicitly rejected with the reason stated. The burden of proof cuts both ways, every round.*
