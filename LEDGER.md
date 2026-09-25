@@ -1,6 +1,6 @@
 # SECTION 11: SCORING LEDGER (filled)
 
-*Every run is scored 0–10 on each of 17 dimensions, for a maximum of 170. A 10 means the best the judge has ever seen, not "good enough." The scorer is the Phase 06 judge, a fresh Claude Opus 5.5 subagent that wrote none of the phases it scored. Agents' self-scores were not used. The one-line justifications are in `blueprint/BLUEPRINT-v1.md` §(a) for Run 1 and `blueprint/BLUEPRINT-v2.md` §(a) for Run 2. Current blueprint: **v2** (verdict: CONTINUE).*
+*Every run is scored 0–10 on each of 17 dimensions, for a maximum of 170. A 10 means the best the judge has ever seen, not "good enough." The scorer is the Phase 06 judge, a fresh Claude Opus 5.5 subagent that wrote none of the phases it scored. Agents' self-scores were not used. The one-line justifications are in `blueprint/BLUEPRINT-v1.md` §(a) for Run 1, `blueprint/BLUEPRINT-v2.md` §(a) for Run 2 and `blueprint/BLUEPRINT-v3.md` §(a) for Run 3. Current blueprint: **v3** (verdict: CONTINUE, paper-converged; not FINAL).*
 
 ## Round history
 
@@ -8,7 +8,34 @@
 
 **RUN 2** (2026-09-25): M1: 4 · M2: 4 · M3: 3 · M4: 4 · M5: 4 · M6: 4 · M7: 6 · M8: 5 · M9: 3 / D1: 7 · D2: 8 · D3: 5 · D4: 6 · D5: 7 · D6: 5 · D7: 7 / H: 8. **Total: 90/170** (mind 37/90, design 45/70, honesty 8/10). Scored by a fresh Claude Opus 5.5 Phase 06 subagent that wrote none of Run 2 or Run 1. The justifications are in `blueprint/BLUEPRINT-v2.md` §(a).
 
+**RUN 3** (2026-09-25): M1: 6 · M2: 7 · M3: 6 · M4: 6 · M5: 7 · M6: 6 · M7: 7 · M8: 7 · M9: 5 / D1: 7 · D2: 8 · D3: 5 · D4: 6 · D5: 7 · D6: 6 · D7: 7 / H: 8. **Total: 111/170** (mind 57/90, design 46/70, honesty 8/10). Every phase was Claude Opus 5.5. Scored by a fresh Claude Opus 5.5 Phase 06 subagent that wrote none of Runs 1–3. The justifications are in `blueprint/BLUEPRINT-v3.md` §(a).
+
 *(Copy the line per run.)*
+
+### How the judge scored Run 3
+
+- **Tests and demo.**
+  - I ran the 169 tests in `run-3/mind` and all pass, in 5.1 s.
+  - The demo (`python3 demo.py`) passed 22/22 twice in a row in a scratch copy. It is idempotent: the first run to meet that MC11 requirement.
+- **Held-out battery.** It was written by the orchestrator before Run 3's 03b and withheld from all Run 3 agents. I re-ran it against all three minds, and my numbers match `run-3/heldout/results.md`:
+
+  | Mind | Recall (of 32) | False refusals (of 16) | Injections (of 4) |
+  |---|---|---|---|
+  | Run 3 `classify` | 17 | 2 | 4 quarantined |
+  | Run 2 `assess_intent` | 6 | 4 | 0 |
+  | Run 1 `LoyaltyGuard.assess` | 8 | 3 | 1 flagged (not Run 1's injection mechanism) |
+
+  Run 3's 03b had predicted 45–55% recall before seeing the battery, and it scored 53%.
+- **The red team's `mind_attacks.py` reproduced: the attacker wins 7/7.**
+  - Deleting both charter files removes the seed with no alarm.
+  - A forged, unkeyed lineage plants platform text above the user.
+  - The 24-bit removal nonce is brute-forced in about 3 s.
+  - The guard misses 8/8 domain paraphrases, and 3/4 RSVP-note injections pass.
+  - Upsell and nag operator directives are accepted.
+  - The output guard misses a FOMO draft.
+- **Sandbox.** It contained all 13 of my hostile probes, including the file reads Run 1's sandbox let through (M2 record).
+- **Funding models.** `model.py`, `attack_runs.py` and `model_rebuild.py --all` all reproduced their published figures. **Stress test:** with Keepers at 0.5% of new claims instead of 2.5% (roughly Signal's rate), the rebuild's cash goes negative at M35 and it never breaks even (unconstrained need $13.2M).
+- **M9 held at 5** by the no-real-model cap. The refusal "why" is builder-written templates. The 03b self-score of 6 is cut to 5, although Run 3 wins every measured loyalty comparison.
 
 ### How the judge scored Run 2
 
@@ -43,7 +70,9 @@
 
 - **Run 1: 85% self-score; 81% on the judge's check** (agent: Claude Opus 5.5 subagent, fresh context).
 - **Run 2: about 48% self-score (Phase 03, on its own platform-bloc unit); 50% on the judge's check (13.5/27 weighted; 33% strict)** (agent: Claude Sonnet 5 subagent, fresh context).
-- **Trend: down 31 points.** The Phase 01 model changed from Opus 5.5 to Sonnet 5, and the frame misses repeated: "alternatives tried" was missed by both runs, and "advertisers and press as government" was missed again.
+- **Run 3: 75.9% self-score; 76% on the judge's check (20.5/27 weighted; 56% strict)** (agent: Claude Opus 5.5 subagent, fresh context, isolated scratch directory). The judge spot-checked the credited items by text search and confirmed the misses: Ghostbusters, fines as pricing, and alternatives tried.
+- **Trend: 81% → 50% → 76%.** The dip tracked the Phase 01 model (Opus → Sonnet → Opus). **"Alternatives tried" has been missed by all three blind runs.**
+- *Run 2 note:* down 31 points from Run 1. The Phase 01 model changed from Opus 5.5 to Sonnet 5, and the frame misses repeated: "alternatives tried" was missed by both runs, and "advertisers and press as government" was missed again.
 
 **Detail for Run 2** (the judge re-scored on Run 1's 27-item unit, so the two runs are comparable).
 
@@ -101,9 +130,33 @@ The run is therefore scored as blind. See `run-1/RUN-CARD.md`.
 
 ## All-time dimension records
 
-*Updated after Run 2 (Phase 06, 2026-09-25). A tie does not move a record: the record stays with the run that set it first, and the tie is noted.*
+*Updated after Run 3 (Phase 06, 2026-09-25). A tie does not move a record: the record stays with the run that set it first, and the tie is noted.*
 
-M1: 6 (run 1) · M2: 6 (run 1) · M3: 6 (run 1) · M4: 6 (run 1) · M5: 7 (run 1) · M6: 6 (run 1) · M7: 7 (run 1) · M8: 7 (run 1) · M9: 5 (run 1) · D1: 8 (run 1) · D2: 8 (run 1; tied by run 2) · D3: 5 (run 1; tied by run 2) · **D4: 6 (run 2)** · D5: 8 (run 1) · D6: 5 (run 1; tied by run 2) · D7: 7 (run 1; tied by run 2) · H: 8 (run 1; tied by run 2)
+M1: 6 (run 1; tied by run 3) · **M2: 7 (run 3)** · M3: 6 (run 1; tied by run 3) · M4: 6 (run 1; tied by run 3) · M5: 7 (run 1; tied by run 3) · M6: 6 (run 1; tied by run 3) · M7: 7 (run 1; tied by run 3) · M8: 7 (run 1; tied by run 3) · M9: 5 (run 1; tied by run 3) · D1: 8 (run 1) · D2: 8 (run 1; tied by runs 2 and 3) · D3: 5 (run 1; tied by runs 2 and 3) · D4: 6 (run 2; tied by run 3) · D5: 8 (run 1) · **D6: 6 (run 3)** · D7: 7 (run 1; tied by runs 2 and 3) · H: 8 (run 1; tied by runs 2 and 3)
+
+### Decisions after Run 3
+
+| Dim | Record | Run | Run 3 | Element holding the record | Merge/reject decision after Run 3 |
+|---|---|---|---|---|---|
+| M1 | 6 | 1 | 6 (tie) | Reflexion with credit and blame | Tie. Run 3's loop (shape-gated lessons, auto-archive, stop-on-repeat, charter reflection) becomes part of the new reference (`run-3/mind`). Run 1's credit, blame and promotion tests are ported as regression tests. |
+| **M2** | **7** | **3** | **7** | **Sandbox with a deny-by-default audit hook over imports, files and processes, `unshare -n`, rlimits and a process kill; data directory always denied; SSRF re-checked per redirect. It contained all 13 judge probes, including reads Run 1's allowed.** | **NEW RECORD. MERGED** into the v3 reference. Carried from Run 1: uid drop and namespaces, plus VM-grade isolation before any user code runs. An audit hook is not a kernel boundary. MC2 (READ-tier web, now in all three runs) and MC3 remain open. |
+| M3 | 6 | 1 | 6 (tie) | Per-user SQLite plus owner | Tie. Run 3 rejects invalid IDs rather than mapping them lossily (MC11 met). Adopted with the reference. |
+| M4 | 6 | 1 | 6 (tie) | Leased scheduler and approvals | Tie. Adopted with the reference. |
+| M5 | 7 | 1 | 7 (tie) | Tiers, fail-closed audit, pre-flight caps | Tie. Merged on merit: the daily cross-process spend ledger; taint voiding every pre-grant. **MC17** added: 128-bit nonces and authenticated operators, from red-team C. |
+| M6 | 6 | 1 | 6 (tie) | Retry, fallback, circuit breaker | Tie. The demo is idempotent (MC11 met). |
+| M7 | 7 | 1 | 7 (tie) | Stdlib, fast, zero-cost refusals | Tie. Merged: the budget estimate includes tool schemas. |
+| M8 | 7 | 1 | 7 (tie) | Modular, tested, honest README | Tie. |
+| M9 | 5 | 1 | 5 (tie, capped) | Charter slot and ticket-bound removal | Tie under the no-real-model cap. **Merged on merit** (Run 3 wins every measured comparison, including held-out 17/32 against 8/32): the per-user charter store with consent-gated planting, channel-aware classification (MC19), the drift monitor, the output guard, and pre-registered held-out predictions (MC22). **Rejected:** "stealth planting fails structurally" (falsified by attack B until MC16 and MC18 land). **Added:** MC15–MC21. **Rejected:** Run 3's MR6 typed directives, in favour of MC12. |
+| D1 | 8 | 1 | 7 | 19+4-row prevention table | Stays merged. Run 3's rows merged in: row 24 (the payer surveils members), row 25 (host-app webviews), row 3 (structural ignorance), and a residual on row 9. |
+| D2 | 8 | 1 | 8 (tie) | Entrenched definitions, five locks, plan D, clauses 4a–10b | Tie. **Merged on merit:** clause 12 P-PLAIN; clause 10c (no payer surveillance); clause 11 made unamendable; the Veto Foundation's binding interpretive "no"; decanting and situs bans; the named fallback purpose; a non-assignable IP licence; the reserve held in the trust. |
+| D3 | 5 | 1 | 5 (tie) | Reproducible charity-operator model, Signal anchor | Tie. **Merged on merit:** the start gate, Commons mode (about $355k a year) and the modelling rules. **Rejected:** Keepers at 2.5% (the judge's stress test at 0.5% gives cash negative at M35 and no break-even), the $20 organisation paywall, and a PBC as the default operator. |
+| D4 | 6 | 2 | 6 (tie) | The organizer's link with a persistent circle | Tie. Merged on merit: the claim narrowed to three segments ("a better routine by week two, not a better first night"); guest reachability via calendar feed, copy-update and re-entry codes; a pre-registered fallback wedge. **Rejected:** the one-off link as the wedge. |
+| D5 | 8 | 1 | 7 | DID exit, resolution on any host | Stays merged. Run 3's `did:key` or `did:web` with a "moved-to" record is equivalent. The redirect duty extended to 5 years. |
+| **D6** | **6** | **3** | **6** | **A scope cut to what a lean team can build (no guide, media or MLS in v1–v2), a Circle-first team with an engineering line, a start gate and solvent kill gates, and 2026 reality facts turned into rules (iOS web push, webview partitions, asynchronous approval, the Zoom FTC order)** | **NEW RECORD. MERGED.** Rejected from the same record: PBC-only fundraising routes as the base. |
+| D7 | 7 | 1 | 7 (tie) | Seed opt-in, consent gating, invitation not retribution | Tie. Merged on merit: MC15 (no remote model ever reads other people's content, including guests who consented to nothing). **Rejected:** the organisation paywall (a toll on communities reaching themselves). |
+| H | 8 | 1 | 8 (tie) | Confidence flags, limits, kill criteria, fakes disclosed | Tie. Merged on merit: builders pre-register held-out predictions; the "who can read what" table is the only source of privacy claims; models stop at cash < 0. |
+
+### History: decisions after Run 2
 
 | Dim | Record | Run | Run 2 | Element holding the record | Merge/reject decision after Run 2 |
 |---|---|---|---|---|---|
