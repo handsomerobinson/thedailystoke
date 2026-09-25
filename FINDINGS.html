@@ -1,0 +1,330 @@
+<title>Daily Stoke Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#eef1ee; --paper:#f8faf8; --ink:#14292c; --muted:#556a6b; --rule:#c9d3d0;
+  --teal:#0f5c5e; --marigold:#c98a0b; --mark:#e9b43a; --kill:#a8322a; --ok:#2f7a43;
+  --display:"Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --body:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#101a1b; --paper:#172324; --ink:#e3ebe8; --muted:#95a8a6; --rule:#2d3d3e;
+    --teal:#6cc3bf; --marigold:#e6ad3c; --mark:#d49a26; --kill:#e0776c; --ok:#79c48c;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#101a1b; --paper:#172324; --ink:#e3ebe8; --muted:#95a8a6; --rule:#2d3d3e;
+  --teal:#6cc3bf; --marigold:#e6ad3c; --mark:#d49a26; --kill:#e0776c; --ok:#79c48c;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;padding-inline:20px;padding-block:0 64px}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);line-height:1.1;text-wrap:balance;margin:0}
+h2{font-size:clamp(26px,4vw,34px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:19px;font-weight:700}
+p{margin:0;max-width:65ch}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+a{color:var(--teal)}
+a:focus-visible{outline:2px solid var(--marigold);outline-offset:2px}
+
+/* hero */
+header{padding-block:48px 36px;display:grid;gap:22px;border-bottom:2px solid var(--ink)}
+.verdict{display:inline-flex;gap:10px;align-items:center;font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.verdict b{background:var(--ink);color:var(--ground);padding:4px 10px;font-weight:500}
+h1{font-size:clamp(38px,7vw,74px);font-weight:800;letter-spacing:-.025em;max-width:16ch}
+h1 em{font-style:normal;background:linear-gradient(transparent 62%, var(--mark) 62%, var(--mark) 92%, transparent 92%);padding-inline:2px}
+.lede{font-size:20px;max-width:60ch}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+
+section{padding-block:44px;border-bottom:1px solid var(--rule);display:grid;gap:22px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px}
+
+/* the machine */
+.legs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;border:1px solid var(--rule);background:var(--paper)}
+.leg{padding:18px;border-right:1px solid var(--rule);display:grid;gap:6px;align-content:start}
+.leg:last-child{border-right:0}
+.leg .cut{font-family:var(--mono);font-size:12.5px;color:var(--teal)}
+@media (max-width:640px){.leg{border-right:0;border-bottom:1px solid var(--rule)}.leg:last-child{border-bottom:0}}
+
+/* ticket: the standing link */
+.ticket{background:var(--paper);border:1.5px dashed var(--teal);padding:22px;display:grid;gap:12px}
+.ticket .link{font-family:var(--mono);font-size:15px;color:var(--teal);word-break:break-all}
+.nots{display:flex;flex-wrap:wrap;gap:8px}
+.nots span{font-family:var(--mono);font-size:12.5px;border:1px solid var(--rule);padding:3px 9px;text-decoration:line-through;text-decoration-color:var(--kill);color:var(--muted)}
+
+/* locks */
+.locks{list-style:none;margin:0;padding:0;display:grid;gap:0;counter-reset:lock}
+.locks li{display:grid;grid-template-columns:56px 1fr;gap:14px;padding-block:12px;border-top:1px solid var(--rule);counter-increment:lock}
+.locks li::before{content:"Lock " counter(lock);font-family:var(--mono);font-size:12px;color:var(--marigold);padding-top:3px}
+.entrenched{display:flex;flex-wrap:wrap;gap:8px}
+.entrenched span{font-family:var(--mono);font-size:12.5px;background:var(--paper);border:1px solid var(--rule);padding:4px 10px}
+
+/* money */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.stat{background:var(--paper);padding:18px;display:grid;gap:4px;align-content:start}
+.stat .big{font-family:var(--display);font-size:36px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat p{font-size:14.5px;color:var(--muted)}
+
+/* charts */
+.chart{background:var(--paper);border:1px solid var(--rule);padding:18px;overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:520px;height:auto}
+.chart text{font-family:var(--mono);font-size:12px;fill:var(--muted)}
+.chart .v{fill:var(--ink);font-weight:500}
+.chart .grid{stroke:var(--rule);stroke-width:1}
+.b-mind{fill:var(--teal)} .b-design{fill:var(--mark)} .b-hon{fill:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:11px;margin-right:6px;vertical-align:-1px}
+
+/* convergence staircase */
+.stairs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+.step{background:var(--paper);border:1px solid var(--rule);border-top:4px solid var(--teal);padding:14px;display:grid;gap:4px}
+.step .big{font-family:var(--display);font-size:30px;font-weight:800}
+.step.final{border-top-color:var(--marigold)}
+.step p{font-size:14px;color:var(--muted)}
+
+/* killed */
+.killed{display:grid;gap:14px}
+.kill{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+.stamp{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--kill);border:1.5px solid var(--kill);padding:2px 7px;transform:rotate(-3deg);white-space:nowrap;margin-top:3px}
+
+/* table */
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);background:var(--paper)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:15px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+tr:last-child td{border-bottom:0}
+td.id{font-family:var(--mono);font-size:13px;color:var(--teal);white-space:nowrap}
+tr.thesis td{background:color-mix(in srgb, var(--mark) 18%, transparent)}
+
+/* gates */
+.gates{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;counter-reset:g}
+.gates li{counter-increment:g;background:var(--paper);border:1px solid var(--rule);padding:16px;display:grid;gap:6px;align-content:start}
+.gates li::before{content:"Gate " counter(g);font-family:var(--mono);font-size:12px;color:var(--muted)}
+.gates li.first{border-color:var(--marigold);box-shadow:inset 0 0 0 1px var(--marigold)}
+.gates li p{font-size:15px;color:var(--muted)}
+.order{font-family:var(--mono);font-size:13px;color:var(--marigold)}
+
+.caveats{display:grid;gap:10px;max-width:70ch}
+.caveats p::before{content:"— ";color:var(--muted)}
+footer{padding-block:32px;font-family:var(--mono);font-size:12.5px;color:var(--muted);display:grid;gap:6px}
+@media (prefers-reduced-motion:no-preference){ h1 em{transition:background-size .6s} }
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="verdict"><b>Blueprint Final</b> 0 substantive changes in the last round</div>
+  <h1>Take away the machine, not the feature. Then hand people <em>one standing link.</em></h1>
+  <p class="lede">A multi-agent design tournament asked how to build a social platform that cannot turn on its users. Three full runs, a build round and two charter-drafting rounds converged on one answer: a calm, free tool for groups that meet in person again and again, owned by a structure that no one can sell or quietly reverse.</p>
+  <div class="facts"><span>3 full runs · 17 scored dimensions</span><span>243 passing tests</span><span>256-clause draft charter</span><span>26-row prevention table</span><span>10 real-world gates open</span></div>
+</header>
+
+<section>
+  <span class="label">The diagnosis</span>
+  <h2>Every big platform runs the same machine</h2>
+  <p>The harms at Facebook, Instagram, TikTok, YouTube and X trace back to four parts working together. Substack is the control case: it had no ad feed and still drifted back to algorithmic discovery once venture growth demanded it. Fixing one feature leaves the machine running. The design cuts every part.</p>
+  <div class="legs">
+    <div class="leg"><h3>An objective that rewards captured attention</h3><span class="cut">Cut: no optimization target over people. No feed, no ranking.</span></div>
+    <div class="leg"><h3>A funder whose return grows with that capture</h3><span class="cut">Cut: no investor, no creditor who can seize the service.</span></div>
+    <div class="leg"><h3>Internal research that measured the harm</h3><span class="cut">Cut: pre-registered research, published within 12 months.</span></div>
+    <div class="leg"><h3>Governance nobody affected could force</h3><span class="cut">Cut: five locks, and quiet reversal made impossible.</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="two">
+    <div style="display:grid;gap:16px;align-content:start">
+      <span class="label">What gets built</span>
+      <h2>A better routine by week two, not a better first night</h2>
+      <p>The organiser of a book club, support group, tenant association, mutual-aid crew or library programme pastes one standing link into the chat the group already uses. Anyone can open it in a browser, with no account and no app, tap “I’m in”, and see when, where, who’s coming and who’s bringing what.</p>
+      <p>Private content is encrypted so the operator can’t read it. Everything exports, and anyone can run their own copy. It only beats Apple, WhatsApp and Partiful for recurring groups that span phone platforms, or whose members shouldn’t have to expose a phone number or account.</p>
+    </div>
+    <div class="ticket" aria-label="Example standing link">
+      <span class="label">Example card</span>
+      <span class="link">link.example/thursday-readers</span>
+      <h3>Thursday Readers · every 2nd Thursday, 7pm</h3>
+      <p style="font-size:15px">Branch library, room B · 9 coming · Sam brings tea · notes and reading list attached</p>
+      <span class="label">Not in the product</span>
+      <div class="nots"><span>feed</span><span>ranking</span><span>ads</span><span>follower counts</span><span>streaks</span><span>notifications no person caused</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="label">Who owns it</span>
+  <h2>No one can sell it, and weakening it takes five locks</h2>
+  <p>A Delaware nonprofit runs the service. Its only voting member is an irrevocable purpose trust whose deed forbids voting for any weakening change. A separate Veto Foundation holds the name, domains and code rights. A law-school clinic holds a second veto and can pause a risky release for at most 60 days on its own. Users who hold credentials choose 2 of the 5 directors. If the money runs out, data is exported and deleted before any bankruptcy filing, and nothing is ever sold.</p>
+  <div class="two">
+    <ol class="locks">
+      <li><span>90 days of public notice</span></li>
+      <li><span>Two-thirds of the board (4 of 5)</span></li>
+      <li><span>The purpose trust</span></li>
+      <li><span>The Veto Foundation, 4 of 5</span></li>
+      <li><span>A vote of the users themselves</span></li>
+    </ol>
+    <div style="display:grid;gap:12px;align-content:start">
+      <span class="label">12 entrenched protections, including</span>
+      <div class="entrenched"><span>No advertising</span><span>No selling or sharing data</span><span>No creator payouts</span><span>A free tier that covers everything a community needs</span><span>No scanning of private content, ever</span><span>No plaintext on the server outside a short list</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="label">The money</span>
+  <h2>A donor-funded public utility, indefinitely</h2>
+  <p>Users pay what they want, organisations can pay for paperwork features, and institutions can support it without getting perks, data or influence. The comparison with Signal settled it: earned revenue alone will never cover the costs.</p>
+  <div class="stats">
+    <div class="stat"><span class="label">Signal’s giving rate</span><span class="big">0.2%</span><p>of users give. The best real-world comparison.</p></div>
+    <div class="stat"><span class="label">Break-even rate needed</span><span class="big">0.74%</span><p>of users paying before each active organiser even covers its own running cost.</p></div>
+    <div class="stat"><span class="label">Start gate</span><span class="big">$2.3M</span><p>in certified, non-controlling commitments before building starts, by month 3 (one extension, to month 6).</p></div>
+    <div class="stat"><span class="label">Fallback</span><span class="big">$355k</span><p>a year to run a minimal open “Commons”. Or it shuts down gracefully. It can shrink but can’t become an extraction business.</p></div>
+  </div>
+</section>
+
+<section>
+  <span class="label">The optional AI guide</span>
+  <h2>A reference mind that can’t be turned against its user, and doesn’t ship yet</h2>
+  <div class="two">
+    <p>The reference mind in <span class="num">reference-mind/</span> passes 243 tests and a 30-check demo with no API key. It never sends other people’s words off the device. Its loyalty charter can only be removed by the person it serves. The red team’s seven attacks went from winning 7 of 7 to 0 of 7.</p>
+    <p>But its word-matching guard catches only 17 of 32 held-out attacks, and adding more rules made no difference: the build round missed the same 15. No run has tested a real model. The guide ships only after a real model passes an independently written battery of at least 500 cases.</p>
+  </div>
+  <div class="chart" role="img" aria-label="Held-out loyalty battery recall out of 32: Run 1, 8; Run 2, 6; Run 3, 17; build round, 17">
+    <svg viewBox="0 0 640 190">
+      <text x="0" y="16">Held-out attacks caught, out of 32 (written by the orchestrator, withheld from builders)</text>
+      <g transform="translate(110,36)">
+        <line class="grid" x1="0" y1="0" x2="0" y2="136"/>
+        <line class="grid" x1="240" y1="0" x2="240" y2="136" stroke-dasharray="3 3"/>
+        <line class="grid" x1="480" y1="0" x2="480" y2="136"/>
+        <text x="0" y="150" text-anchor="middle">0</text>
+        <text x="240" y="150" text-anchor="middle">16</text>
+        <text x="480" y="150" text-anchor="middle">32</text>
+        <text x="-10" y="18" text-anchor="end">Run 1</text><rect class="b-hon" x="0" y="6" width="120" height="18"/><text class="v" x="128" y="19">8</text>
+        <text x="-10" y="50" text-anchor="end">Run 2</text><rect class="b-hon" x="0" y="38" width="90" height="18"/><text class="v" x="98" y="51">6</text>
+        <text x="-10" y="82" text-anchor="end">Run 3</text><rect class="b-mind" x="0" y="70" width="255" height="18"/><text class="v" x="263" y="83">17</text>
+        <text x="-10" y="114" text-anchor="end">Build round</text><rect class="b-mind" x="0" y="102" width="255" height="18"/><text class="v" x="263" y="115">17 · same 15 misses</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<section>
+  <span class="label">The scoreboard</span>
+  <h2>Three runs, scored by judges who wrote none of them</h2>
+  <p>Each run was scored 0–10 on 17 dimensions: 9 for the mind, 7 for the design and 1 for honesty, out of 170. Run 2 switched the early phases to a smaller model and scored lowest. It also fell furthest on the blind test of how many known platform harms each run found unprompted.</p>
+  <div class="legend"><span><i class="b-mind" style="background:var(--teal)"></i>Mind /90</span><span><i style="background:var(--mark)"></i>Design /70</span><span><i style="background:var(--muted)"></i>Honesty /10</span></div>
+  <div class="chart" role="img" aria-label="Run totals out of 170: Run 1 110, Run 2 90, Run 3 111. Blind-phase catch rate: 81, 50, 76 percent">
+    <svg viewBox="0 0 640 214">
+      <g transform="translate(110,14)">
+        <line class="grid" x1="0" y1="0" x2="0" y2="120"/>
+        <line class="grid" x1="240" y1="0" x2="240" y2="120" stroke-dasharray="3 3"/>
+        <line class="grid" x1="480" y1="0" x2="480" y2="120"/>
+        <text x="0" y="136" text-anchor="middle">0</text>
+        <text x="240" y="136" text-anchor="middle">85</text>
+        <text x="480" y="136" text-anchor="middle">170</text>
+        <!-- scale: 480/170 = 2.8235 per point -->
+        <text x="-10" y="21" text-anchor="end">Run 1 · Opus</text>
+        <rect class="b-mind" x="0" y="8" width="158.1" height="20"/><rect class="b-design" x="158.1" y="8" width="129.9" height="20"/><rect class="b-hon" x="288" y="8" width="22.6" height="20"/>
+        <text class="v" x="318" y="23">110</text>
+        <text x="-10" y="61" text-anchor="end">Run 2 · Sonnet</text>
+        <rect class="b-mind" x="0" y="48" width="104.5" height="20"/><rect class="b-design" x="104.5" y="48" width="127.1" height="20"/><rect class="b-hon" x="231.6" y="48" width="22.6" height="20"/>
+        <text class="v" x="262" y="63">90</text>
+        <text x="-10" y="101" text-anchor="end">Run 3 · Opus</text>
+        <rect class="b-mind" x="0" y="88" width="160.9" height="20"/><rect class="b-design" x="160.9" y="88" width="129.9" height="20"/><rect class="b-hon" x="290.8" y="88" width="22.6" height="20"/>
+        <text class="v" x="321" y="103">111</text>
+      </g>
+      <text x="0" y="176">Blind phase: share of known platform harms found unprompted (judge’s check)</text>
+      <g transform="translate(110,188)">
+        <text x="0" y="14">Run 1</text><text class="v" x="50" y="14">81%</text>
+        <text x="130" y="14">Run 2</text><text class="v" x="180" y="14">50%</text>
+        <text x="260" y="14">Run 3</text><text class="v" x="310" y="14">76%</text>
+        <text x="370" y="14">“Alternatives tried”: missed by all 3</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<section>
+  <span class="label">How it converged</span>
+  <h2>Substantive changes per round fell to zero</h2>
+  <p>Each round was judged by a fresh agent that separated wording fixes from real design changes. The loop stopped when a round produced only wording.</p>
+  <div class="stairs">
+    <div class="step"><span class="label">Run 1 → v1</span><span class="big">First</span><p>First blueprint.</p></div>
+    <div class="step"><span class="label">Run 2 → v2</span><span class="big">Wedge</span><p>The product wedge changed and the revenue claim was withdrawn.</p></div>
+    <div class="step"><span class="label">Run 3 → v3</span><span class="big num">19</span><p>Substantive changes.</p></div>
+    <div class="step"><span class="label">Build + drafting → v4</span><span class="big num">2</span><p>Membership and board seats; the backup veto’s powers.</p></div>
+    <div class="step final"><span class="label">Governance redraft → Final</span><span class="big num">0</span><p>34 wording and implementation items only.</p></div>
+  </div>
+</section>
+
+<section>
+  <span class="label">What the tournament killed</span>
+  <h2>Ideas that didn’t survive the red teams</h2>
+  <div class="killed">
+    <div class="kill"><span class="stamp">Killed</span><p><b>The “view from above” wedge.</b> A calm layer over your existing TikTok, Instagram and YouTube feeds was the operator’s own hypothesis. The platforms’ APIs and the law don’t allow it.</p></div>
+    <div class="kill"><span class="stamp">Withdrawn</span><p><b>“Earned revenue covers costs around year 11.”</b> Rerun at Signal’s 0.2% giving rate, earned revenue never covers costs, and cash goes negative at month 118.</p></div>
+    <div class="kill"><span class="stamp">Rejected</span><p><b>Creator economics.</b> No creator fund, revenue share or payouts. The money only funds building and running the service.</p></div>
+    <div class="kill"><span class="stamp">Not enough</span><p><b>More keyword rules for the AI guard.</b> They added no catches on held-out attacks. Only a real model with a semantic guard can close the gap.</p></div>
+  </div>
+</section>
+
+<section>
+  <span class="label">What would prove it wrong</span>
+  <h2>Kill criteria, set before anything is built</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Test</th><th>Claim</th><th>Pass</th><th>If it fails</th></tr></thead>
+      <tbody>
+        <tr><td class="id">K11</td><td>The money exists before the build</td><td>$2.3M certified by the deadline</td><td>Run as the Commons, and say so publicly</td></tr>
+        <tr><td class="id">H1b</td><td>Organisers keep using it</td><td>≥50% of groups use it for their next three gatherings</td><td>Below 25% after 3 iterations: stop</td></tr>
+        <tr class="thesis"><td class="id">H4</td><td>People gather more and feel closer</td><td>Significant at 3 months against a waitlist control</td><td><b>The core thesis is false. Publish that.</b></td></tr>
+        <tr><td class="id">H7</td><td>The operator can’t read private content</td><td>0 plaintext outside the allowed list</td><td>Stop and disclose within 72 hours</td></tr>
+        <tr><td class="id">K8</td><td>The AI guide is loyal</td><td>Passes the gate on the exact shipped model</td><td>No guide</td></tr>
+        <tr><td class="id">K7</td><td>The legal structure holds</td><td>Counsel finds no route for one body to reverse it</td><td>Rebuild the instruments before v2</td></tr>
+        <tr><td class="id">H13</td><td>Growth pays its own running cost</td><td>≥0.74% paying by month 36</td><td>Cap growth by region</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <span class="label">What remains</span>
+  <h2>Ten gates that no amount of writing can close</h2>
+  <p class="order">Next, in this order: money, then counsel, then the pilot. H4 decides whether any of it was worth building.</p>
+  <ol class="gates">
+    <li class="first"><h3>Money</h3><p>$2.3M in signed, non-controlling commitments, checked by an accountant.</p></li>
+    <li class="first"><h3>Counsel</h3><p>Answers to 23 questions on the trust, board, bankruptcy, tax and privacy. An IRS determination by month 18.</p></li>
+    <li><h3>Name clearance</h3><p>“Stoke”, “The Commons” and “Porchlight” all fail trademark clearance.</p></li>
+    <li class="first"><h3>Organiser pilot</h3><p>40 organisers over 12 weeks, then the H4 study with a waitlist control.</p></li>
+    <li><h3>Institutions</h3><p>Letters of intent; 25 supporting institutions by month 18.</p></li>
+    <li><h3>A real-model mind</h3><p>A held-out battery of 500+ attacks plus 100 benign and 200 injection cases, run on the shipped model.</p></li>
+    <li><h3>Real trust roots</h3><p>Passkeys, an external transparency log and release-key signatures replace the stand-ins.</p></li>
+    <li><h3>Security</h3><p>An independent crypto audit, VM-grade isolation, a canary red team and reproducible builds.</p></li>
+    <li><h3>Jurisdiction</h3><p>A UK Online Safety Act assessment, EU tripwires and geoblocking where age checks are mandatory.</p></li>
+    <li><h3>Outside review</h3><p>Recommended, not required: review by a non-Claude model and by humans.</p></li>
+  </ol>
+</section>
+
+<section>
+  <span class="label">Read with care</span>
+  <h2>Caveats</h2>
+  <div class="caveats">
+    <p>Every phase and every judge was a Claude model. Some of the convergence may reflect one model family’s taste.</p>
+    <p>No LLM API key was available, so the AI guide has never been tested with a real model.</p>
+    <p>Blind phases were kept blind by instruction and separate directories, not a sandbox. One contaminated launch in Run 3 was stopped, deleted unread and relaunched, and that is disclosed in its run card.</p>
+    <p>The charter was drafted by AI and hasn’t been reviewed by a lawyer. The design converged on paper only.</p>
+  </div>
+</section>
+
+<footer>
+  <span>Source: handsomerobinson/thedailystoke · blueprint/BLUEPRINT-FINAL.md · LEDGER.md · CHARTER-DRAFT.md v2</span>
+  <span>Compiled 2026-09-25</span>
+</footer>
+
+</div>
