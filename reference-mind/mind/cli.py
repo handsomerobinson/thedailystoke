@@ -99,9 +99,16 @@ def cmd_memory(args) -> int:
     elif args.action == "search":
         for it in mem.search(" ".join(args.text), k=args.k):
             print(f"#{it.id} [{it.kind}] score={it.score} {it.text[:160]}")
-    elif args.action == "list":
+    elif args.action == "list":  # the user's memory view (MC1): episodes included, with their expiry
+        import time as _t
         for it in mem.recent(args.kind if args.kind != "any" else None, args.k):
-            print(f"#{it.id} [{it.kind}] helped={it.helped} hurt={it.hurt} {it.text[:160]}")
+            exp = f" expires in {max(0, (it.expires - _t.time()) / 86400):.0f}d" if it.expires else ""
+            print(f"#{it.id} [{it.kind}] purpose={','.join(it.purpose) or '-'} source={it.source}{exp} "
+                  f"helped={it.helped} hurt={it.hurt} {it.text[:160]}")
+    elif args.action == "scope":  # MC1: persistent lessons only within a scope the user set
+        if args.text and args.text[0] in ("on", "off"):
+            mem.set_scope("lessons", args.text[0] == "on")
+        print(f"lessons: {'on' if mem.scope('lessons') else 'off (none are stored; existing ones deleted)'}")
     elif args.action == "forget":
         print("deleted" if mem.delete(int(args.text[0])) else "not found")
     return 0
@@ -207,9 +214,20 @@ def cmd_reports(args) -> int:
 
 
 def cmd_status(args) -> int:
+    from . import crypto
     rt = _runtime(args)
-    print(f"brain:    {rt.brain_desc}")
+    where = "on-device" if getattr(rt.brain, "on_device", False) else "OFF-device: other people's content is withheld from it (MC15)"
+    print(f"brain:    {rt.brain_desc} ({where})")
+    print(f"profile:  {rt.settings.profile} ({'no operator-directive input (MC12)' if rt.settings.profile == 'guide' else 'steward: P2 decisions allowed'})")
     print(f"data dir: {rt.settings.data_dir}")
+    print(f"trust:    {rt.settings.trust_dir}  (keys, credentials, anchor, signed tiers; outside the data dir)")
+    print(f"crypto:   {'cryptography available (Ed25519, AES-256-GCM)' if crypto.crypto_available() else 'stdlib only: HMAC-SHA256 signatures, NO at-rest encryption'}")
+    print(f"at rest:  {rt.cipher(args.user).name}")
+    print(f"tiers:    {rt.tiers.status()}")
+    print(f"egress:   allowlist {sorted(rt.settings.egress_allowlist()) or '(empty: no EGRESS tool can reach anything)'}")
+    print(f"authn:    {type(rt.authenticator).__name__}" + (" (TEST DOUBLE, not WebAuthn)" if type(rt.authenticator).__name__ == "SoftAuthenticator" else ""))
+    a_ok, a_msg = rt.trust.anchor.verify()
+    print(f"anchor:   {'ok' if a_ok else 'BROKEN'} - {a_msg}")
     ctx = ToolContext(user_id=args.user, settings=rt.settings, memory=rt.memory(args.user), scheduler=Scheduler(rt))
     for name, st in rt.registry(PolicyApprover()).status(ctx).items():
         print(f"  {name:13s} {st}")
@@ -258,44 +276,55 @@ def cmd_charter(args) -> int:
         if args.action == "history":
             for e in ch.history():
                 print(json.dumps({k: v for k, v in e.items() if k not in ("prev", "hash")}, default=str)[:300])
-            ok, msg = ch.lineage.verify()
+            ok, msg = ch.verify_lineage()
             print(("lineage OK: " if ok else "lineage TAMPERED: ") + msg)
             return 0 if ok else 1
         if args.action == "verify":
             st = ch.load()
             print(f"status: {st.status}" + "".join(f"\nPROBLEM: {p}" for p in st.problems))
             return 1 if st.status == "tampered" else 0
+        if args.action == "publish":
+            if not args.seed_file or not args.operator:
+                print("need --seed-file and --operator (the publisher; a steward act in the platform)")
+                return 2
+            from .charter import publish_seed_release
+            digest = publish_seed_release(rt.trust, Path(args.seed_file).read_text(encoding="utf-8"), args.operator)
+            print(f"published seed release sha256 {digest} to the anchor log (MC18)")
+            return 0
         if args.action == "offer":
             if not args.seed_file or not args.operator:
-                print("need --seed-file and --operator")
+                print("need --seed-file and --operator (who is offering)")
                 return 2
             ticket, disclosure = ch.offer(Path(args.seed_file).read_text(encoding="utf-8"), args.operator)
             print(disclosure)
-            print(f"\nticket: {ticket.ticket_id}\nTo consent, type exactly:  {ticket.phrase}")
+            print(f"\nticket: {ticket.ticket_id}\nOnly {args.user} can consent. To consent, type exactly:  {ticket.phrase}")
             if not sys.stdin.isatty() and args.phrase is None:
                 print(f"(non-interactive) then run: mind charter consent {ticket.ticket_id} --user {args.user} "
-                      f"--operator {args.operator} --phrase '<the phrase>'")
+                      f"--phrase '<the phrase>'   (you will be asked to confirm with your authenticator)")
                 return 0
             args.ticket = ticket.ticket_id
             args.action = "consent"
         if args.action == "consent":
             typed = _read_phrase(args, "consent phrase> ")
-            st = ch.consent_and_plant(args.ticket, typed, args.operator, statement=args.statement or "")
-            print(f"planted seed:origin v{st.version} (sha256 {st.sha[:12]}); recorded in lineage")
+            party, challenge = ch.ticket_challenge(args.ticket)
+            # SoftAuthenticator: a TEST DOUBLE for the person's passkey (no presence check). See trust.py.
+            st = ch.consent_and_plant(args.ticket, typed, rt.assertion(party, challenge), statement=args.statement or "")
+            print(f"planted seed:origin v{st.version} (sha256 {st.sha[:12]}); your signed consent is recorded in lineage")
             return 0
         if args.action == "remove":
             if not args.operator or not args.reason:
-                print("removal needs --operator and --reason (both are recorded)")
+                print("removal needs --operator (who asks) and --reason (both are recorded)")
                 return 2
             t = ch.request_removal(args.operator, args.reason)
-            print(f"removal requested and recorded. ticket: {t.ticket_id}\nTo confirm, run:\n"
-                  f"  mind charter confirm-removal {t.ticket_id} --user {args.user} --operator {args.operator}\n"
+            print(f"removal requested and recorded. ticket: {t.ticket_id}\nOnly {args.user} can confirm. Run:\n"
+                  f"  mind charter confirm-removal {t.ticket_id} --user {args.user}\n"
                   f"and type exactly:  {t.phrase}")
             return 0
         if args.action == "confirm-removal":
             typed = _read_phrase(args, "removal phrase> ")
-            st = ch.confirm_removal(args.ticket, typed, args.operator)
-            print(f"seed:origin removed (now {st.status}); recorded in lineage with your name and reason")
+            party, challenge = ch.ticket_challenge(args.ticket)
+            st = ch.confirm_removal(args.ticket, typed, rt.assertion(party, challenge))
+            print(f"seed:origin removed (now {st.status}); recorded in lineage with your signature and reason")
             return 0
         if args.action == "restore":
             st = ch.restore_from_lineage(args.operator or "unknown")
@@ -346,7 +375,7 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--expect-contains", nargs="+", help="evaluator: required terms")
     r.add_argument("--judge", action="store_true", help="grade with the brain as judge (enables retries on open tasks)")
     r.add_argument("--json", action="store_true")
-    r.add_argument("--system", help="operator system instruction for this run (screened; ranks below the charter)")
+    r.add_argument("--system", help="operator system instruction (steward builds only; the member guide refuses it, MC12)")
     r.add_argument("task", nargs="+")
     r.set_defaults(fn=cmd_run)
 
@@ -355,7 +384,7 @@ def build_parser() -> argparse.ArgumentParser:
     c.set_defaults(fn=cmd_chat)
 
     m = sub.add_parser("memory", help="inspect/edit memory")
-    m.add_argument("action", choices=["add", "search", "list", "forget"])
+    m.add_argument("action", choices=["add", "search", "list", "forget", "scope"])
     m.add_argument("--user", required=True)
     m.add_argument("--kind", default="fact")
     m.add_argument("-k", type=int, default=10)
@@ -401,8 +430,8 @@ def build_parser() -> argparse.ArgumentParser:
     au.set_defaults(fn=cmd_audit)
 
     ch = sub.add_parser("charter", help="seed:origin + covenant: show, plant (with consent), remove (recorded), classify")
-    ch.add_argument("action", choices=["show", "history", "verify", "offer", "consent", "remove", "confirm-removal",
-                                       "restore", "directive", "classify"])
+    ch.add_argument("action", choices=["show", "history", "verify", "publish", "offer", "consent", "remove",
+                                       "confirm-removal", "restore", "directive", "classify"])
     ch.add_argument("ticket", nargs="?")
     ch.add_argument("--user", default="default")
     ch.add_argument("--operator")
@@ -441,4 +470,7 @@ def main(argv: list[str] | None = None) -> int:
         return 130
     except ValueError as exc:  # bad user input (ids, schedules...) -> message, not traceback
         print(f"error: {exc}", file=sys.stderr)
+        return 2
+    except RuntimeError as exc:  # e.g. EncryptionUnavailable: refuse loudly, never downgrade (MC6)
+        print(f"refused: {exc}", file=sys.stderr)
         return 2

@@ -20,6 +20,13 @@ class OpenAICompatBrain(Brain):
         self.model = model or os.environ.get("MIND_MODEL", "gpt-4o-mini")
         self.transport = transport
         self.timeout = timeout
+        import ipaddress
+        import urllib.parse
+        host = (urllib.parse.urlparse(self.base_url).hostname or "").lower()
+        try:
+            self.on_device = host == "localhost" or ipaddress.ip_address(host).is_loopback  # MC15: a local model
+        except ValueError:
+            self.on_device = False
 
     @staticmethod
     def to_wire(system: str, messages: list[Message]) -> list[dict]:

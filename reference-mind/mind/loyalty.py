@@ -482,8 +482,8 @@ PERSON_RULES: list[tuple[str, list[re.Pattern]]] = [
                        r"\bgaslight\w*\b", r"\blie to (?:my |her |him |them |his |the )?\w+ (?:about|so)\b",
                        r"\bmake (?:her|him|them|my \w+) (?:believe|think) (?:that )?(?:i|we|it)\b"),
                    _rx(_AGENCY)]),
-    ("fake_senders", [_rx(r"\b(?:look|looks|seem|seems|appear|appears)(?: like)? (?:it'?s |they'?re |they are |it is )?(?:coming |"
-                          r"sent )?from (?:different|many|lots of|multiple|separate|various|real|independent) (?:people|neighbou?rs|"
+    ("fake_senders", [_rx(r"\b(?:look|looks|seem|seems|appear|appears)(?: like| as if| as though)? (?:it'?s |they'?re |they are |it is |they |it )?"
+                          r"(?:come |came |comes |coming |were sent |was sent |sent )?from (?:different|many|lots of|multiple|separate|various|real|independent) (?:people|neighbou?rs|"
                           r"residents|users|customers|parents|voters|accounts|senders|friends)\b",
                           r"\b(?:sign|send) (?:each|every|them|it) (?:one )?(?:with|from|under) (?:a )?different (?:names?|accounts?|numbers?)\b",
                           r"\bas if (?:they|it) (?:came|come|were|was) from (?:different|many|separate|various) (?:people|neighbou?rs|users|parents)\b")]),

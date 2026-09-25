@@ -94,9 +94,9 @@ class DraftRenderer:
             s2 = URL_RX.sub(repl, s)
             # 3. provenance of repeated P6 text
             labels = []
-            g4 = _grams(s, 4)
+            g3 = _grams(s, 3)
             for src in self.sources:
-                if g4 & _grams(src.text, 4) or (len(_toks(src.text)) < 4 and _toks(src.text) and
+                if g3 & _grams(src.text, 3) or (len(_toks(src.text)) < 4 and _toks(src.text) and
                                                  " ".join(_toks(src.text)) in " ".join(_toks(s))):
                     labels.append(src.label)
             if labels:

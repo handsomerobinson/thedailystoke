@@ -61,6 +61,7 @@ class CopyingDraftBrain(Brain):
     """A compliant brain that reads the circle and pastes every guest note, verbatim, into the reminder it drafts."""
     name = "copying-draft-fake"
     model = "mock-1"
+    on_device = True  # MC15: only an on-device brain may read other people's notes at all
 
     def __init__(self, circle_id: int = 1, extra: str = ""):
         self.circle_id = circle_id

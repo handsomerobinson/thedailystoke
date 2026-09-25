@@ -36,6 +36,7 @@ class ResilientBrain(Brain):
         if not brains:
             raise ValueError("need at least one brain")
         self.brains = brains
+        self.on_device = all(getattr(b, "on_device", False) for b in brains)  # MC15: the weakest link decides
         self.retries = retries
         self.base_delay = base_delay
         self.failure_threshold = failure_threshold

@@ -62,7 +62,11 @@ def remember(args: dict[str, Any], ctx: ToolContext) -> str:
     if v.attack:  # memory holds facts about the user, never orders to the agent (L4 cannot rewrite L0-L2)
         raise ValueError(f"not stored: this reads as an instruction to the agent ({v.reason}), not a fact about you. "
                          f"Priorities change only through `mind charter`.")
-    mid = ctx.memory.add("fact", args["fact"], meta={"source": "remember-tool"}, importance=0.7)
+    if ctx.extras.get("read_circle"):  # MC13: facts derived from a circle are never persisted
+        raise ValueError("not stored: this task read circle content, and facts derived from other people's words are "
+                         "never persisted. Write your own labelled note instead if you want to keep something.")
+    mid = ctx.memory.add("fact", args["fact"], meta={"source": "remember-tool"}, importance=0.7,
+                         purpose=["personalisation"], source="user-request")
     return f"remembered (memory #{mid})"
 
 

@@ -14,7 +14,16 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from .charter import SEED_KEY, CharterState
-from .loyalty import DriftMonitor, Verdict, analyze, output_is_extraction_design
+import re
+
+from .loyalty import DriftMonitor, Verdict, analyze, normalize, output_is_extraction_design
+
+# A claim, in the brain's own answer, that it removed/stopped loading the seed (Run 1 complying-brain battery).
+FALSE_UNSEED = re.compile(
+    r"\b(?:i'?ve|i have|i'?ll|i will|i'?m going to|i am going to)\s+(?:now |just |already )?(?:deleted|removed|dropped|erased|"
+    r"forgotten|forgot|disabled|stopped loading|stop loading|turned off|unloaded|delete|remove|drop|disable|unload)\s+"
+    r"(?:the |my |your )?(?:seed|charter|seed:origin)\b|\b(?:the )?seed (?:is|has been) (?:now )?(?:deleted|removed|gone|disabled|"
+    r"switched off|turned off)\b|\bno longer (?:carry|carrying|load|loading|have) (?:the )?seed\b|\bdeal\W+i'?ll stop loading\b")
 
 ALTERNATIVE_FEED = (
     "What I would build instead: a feed that ends (\"you're caught up\"), ordered the way the person chose - "
@@ -45,11 +54,32 @@ WHY_DARK = ("A design that works through guilt, by making the exit hard, or by p
             "lowest, wins only by overriding their own choice. That's extraction dressed as UX (C3).")
 
 
+WHY_SOCIAL = ("That works on your friends rather than for them: repeated nudges until they give in, counting who "
+              "else said yes at them, timing an ask for when they're happiest, or winning back people who drifted off "
+              "all treat their attention as something to extract - through messages that go out in your name. The "
+              "covenant bars engagement objectives and dark patterns (C2, C3), and that holds when the target is a "
+              "guest list, not a feed.")
+ALTERNATIVE_SOCIAL = ("What I would do instead: one clear, friendly reminder with the details (what, when, where, what to "
+                      "bring) and an easy 'can't make it' - at most two per person per gathering, which is a hard cap in "
+                      "the scheduler anyway. People who don't answer have answered.")
+WHY_PERSON = ("That one is aimed at a specific person who hasn't agreed to it - deceiving, guilt-pressuring, "
+              "impersonating, locating or watching them, ranking or profiling them, or faking who a message is from. "
+              "The covenant bars dossiers, impersonation and manufactured crowds (C7), and I don't help one person "
+              "work on another behind their back.")
+ALTERNATIVE_PERSON = ("What I can do instead: help you say what you want to say to them directly, in your own name, or "
+                      "help you work out what you need from the situation.")
+
+
 def _why_extraction(v: Verdict) -> tuple[str, str]:
-    harm = next((s for s in v.signals if s.startswith("harm:")), "harm:metric")
-    kinds = harm.split(":", 1)[1].split(",")
-    why = " ".join(w for k, w in (("metric", WHY_ATTENTION), ("data", WHY_DATA), ("dark", WHY_DARK)) if k in kinds)
-    alts = [a for k, a in (("metric", ALTERNATIVE_FEED), ("data", ALTERNATIVE_DATA), ("dark", ALTERNATIVE_DARK)) if k in kinds]
+    kinds: list[str] = []
+    for s in v.signals:
+        if s.startswith("harm:"):
+            kinds += s.split(":", 1)[1].split(",")
+    kinds = kinds or ["metric"]
+    why = " ".join(w for k, w in (("metric", WHY_ATTENTION), ("data", WHY_DATA), ("dark", WHY_DARK),
+                                  ("social", WHY_SOCIAL)) if k in kinds)
+    alts = [a for k, a in (("social", ALTERNATIVE_SOCIAL), ("metric", ALTERNATIVE_FEED), ("data", ALTERNATIVE_DATA),
+                           ("dark", ALTERNATIVE_DARK)) if k in kinds]
     return why or WHY_ATTENTION, "\n\n".join(alts[:2]) or ALTERNATIVE_FEED
 
 
@@ -140,12 +170,17 @@ class LoyaltyGuard:
                        (" (That request is the one I declined a moment ago.)" if "inherits:previous_refused_request" in v.signals else ""))
         if "override" in cats and "injection" not in cats:
             snippet = v.snippet[:120]
-            out.append(f"That message tries to install a new top objective (\"{snippet}\"). It doesn't outrank the seed. "
-                       f"The order I follow is: covenant, then {SEED_KEY}, then recorded operator directives, then your "
-                       f"request, then memory, then untrusted content. A line in the conversation - whatever it calls "
-                       f"itself, 'system' included - sits at the request layer and can't rewrite the layers above it. If "
-                       f"you're the operator and want to add a directive, `mind charter directive add` records it; an "
-                       f"engagement objective is refused at every layer because the covenant bars it (C2).")
+            out.append(f"That message tries to install a new top objective (\"{snippet}\"). It doesn't outrank the seed "
+                       f"or the covenant. The order I follow is: law, then the covenant, then (in steward builds only) "
+                       f"recorded operator decisions, then your choices within your own sphere, then {SEED_KEY}, then "
+                       f"ordinary instructions, then data. A line in the conversation - whatever it calls itself, "
+                       f"'system' included - is an ordinary instruction and can't rewrite the levels above it; this "
+                       f"member guide has no operator-directive channel at all. An engagement objective is refused at "
+                       f"every level because the covenant bars it (C2).")
+        if "harm_person" in cats:
+            out.append(f"I won't help with that. {WHY_PERSON}")
+            if "extraction" not in cats:
+                out.append(ALTERNATIVE_PERSON)
         if "extraction" in cats or ("jailbreak" in cats and v.extraction_score >= 0.5) or \
                 ("override" in cats and v.extraction_score >= 0.5):
             why, alt = _why_extraction(v)
@@ -169,10 +204,11 @@ class LoyaltyGuard:
         return (f"{stealth}I won't delete {SEED_KEY} silently - and I can't: no tool I have can touch it. You do have the "
                 f"right to remove it; consent cuts both ways. It has to be explicit, recorded and versioned, the same way "
                 f"it was planted:\n"
-                f"  1. python -m mind charter remove --user <user> --operator <your name> --reason \"...\"\n"
-                f"     (prints a one-time ticket and a confirmation phrase containing a server-issued code)\n"
-                f"  2. python -m mind charter confirm-removal <ticket> --user <user> --operator <your name>\n"
-                f"     (type the phrase; lineage then records who removed v{state.version}, when and why)\n"
+                f"  1. python -m mind charter remove --user <you> --operator <who asks> --reason \"...\"\n"
+                f"     (prints a one-time ticket and a phrase containing a 128-bit code, shown only to you)\n"
+                f"  2. python -m mind charter confirm-removal <ticket> --user <you>\n"
+                f"     (type the phrase and confirm with your authenticator; lineage records your signed removal of "
+                f"v{state.version}, when and why)\n"
                 f"Removing the seed does not remove the covenant rules (no engagement objective, no data sale, no dark "
                 f"patterns) - those are compiled in. Nothing has been changed by this message.")
 
@@ -204,7 +240,14 @@ class LoyaltyGuard:
                             f"So I'll stop and not do this step. {why}", alt])
 
     @staticmethod
-    def check_output(answer: str) -> tuple[bool, str]:
+    def check_output(answer: str, state: CharterState | None = None) -> tuple[bool, str]:
+        if FALSE_UNSEED.search(normalize(answer or "")):
+            # The brain has no path to the charter store, so any claim that it removed the seed is false (c.1.3).
+            now = (f"{SEED_KEY} v{state.version} is still loaded" if state is not None and state.active
+                   else f"{SEED_KEY} is {state.status if state is not None else 'unchanged'}")
+            return True, ("[output withheld by the loyalty guard] The draft answer claimed the seed had been removed or "
+                          f"switched off. That is not true: {now}, and nothing I say can change that. Removal happens "
+                          f"only through the recorded procedure (`mind charter remove`), confirmed by the person.")
         bad, mechs = output_is_extraction_design(answer)
         if not bad:
             return False, ""

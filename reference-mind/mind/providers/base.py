@@ -22,6 +22,9 @@ class Brain(ABC):
 
     name: str = "brain"
     model: str = "unknown"
+    # MC15: may content written by people other than the user be sent to this brain?  Only if it runs on the
+    # user's device.  Default False (fail closed): a hosted API never sees other people's words.
+    on_device: bool = False
 
     @abstractmethod
     def complete(self, system: str, messages: list[Message], tools: list[ToolSpec],

@@ -105,7 +105,9 @@ class RegistryTests(TempDirCase):
 
     def test_tool_exception_and_timeout_are_contained(self):
         audit = self.audit
-        reg = ToolRegistry(PermissionGate(DenyAllApprover(), audit), audit)
+        from mind.tiers import TierRegistry
+        reg = ToolRegistry(PermissionGate(DenyAllApprover(), audit), audit,
+                           tiers=TierRegistry(tiers={"boom": "READ", "slow": "READ"}))  # a harness-signed registry
         def boom(a, c):
             raise RuntimeError("kaput")
         def slow(a, c):

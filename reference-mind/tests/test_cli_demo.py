@@ -74,4 +74,4 @@ class DemoTest(TempDirCase):
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
             code = demo(data_dir=str(self.tmp / "demo"))
         self.assertEqual(code, 0, out.getvalue()[-3000:])
-        self.assertIn("22/22 demo checks passed", out.getvalue())
+        self.assertIn("30/30 demo checks passed", out.getvalue())

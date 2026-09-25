@@ -162,7 +162,7 @@ class AuditLog:
             if last:
                 n = int(last.get("count", 0))
                 if len(items) < n:
-                    what = "missing" if not items else f"has {len(items)} entries"
+                    what = "missing" if not items else f"only {len(items)} entries long"
                     return False, (f"anchor says this log had {n} entries (head {str(last.get('head'))[:12]}) but it is "
                                    f"{what}: deleted or truncated outside the procedure")
                 if n and items[n - 1].get("hash") != last.get("head"):

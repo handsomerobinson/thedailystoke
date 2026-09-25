@@ -279,6 +279,14 @@ class CharterStore:
                 self._db.execute("UPDATE tickets SET used=1 WHERE id=?", (ticket_id,))
             return payload, assertion
 
+    def ticket_challenge(self, ticket_id: str) -> tuple[str, bytes]:
+        """(bound party, challenge) for a pending ticket: what the person's authenticator must sign."""
+        with self._lock:
+            row = self._db.execute("SELECT operator, challenge FROM tickets WHERE id=?", (ticket_id,)).fetchone()
+        if row is None:
+            raise CharterError(f"no ticket {ticket_id!r}")
+        return row["operator"], bytes.fromhex(row["challenge"])
+
     def _fail(self, op: str, ticket_id: str, reason: str, party: str) -> None:
         with self._db:
             self._db.execute("UPDATE tickets SET failures=failures+1 WHERE id=?", (ticket_id,))

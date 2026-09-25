@@ -16,6 +16,12 @@ Retrieval = BM25 over stemmed tokens + character-trigram similarity (catches
 morphology/typos BM25 misses) + recency + importance, and for reflections a
 Laplace-smoothed usefulness score learned from whether the lesson helped.
 It is lexical: it will NOT match pure synonyms ("car" vs "automobile").
+
+BUILD ROUND: every row carries purpose[], source and policy_version (MC8); episodes expire after 30 days and are
+purged on access (MC1); lessons persist only while the user's "lessons" scope is on (MC1); with
+Settings.encryption="required" the text/meta columns are AES-256-GCM ciphertext under a per-user key held in the
+trust dir, and dedupe uses an HMAC tag instead of the normalised text (MC6; needs the vetted `cryptography`
+package, and refuses to start without it).
 Plug an embedding model in via ``MemoryStore.search(extra_scorer=...)`` if you
 need semantic recall; the zero-key build deliberately ships none.
 """
@@ -32,6 +38,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
+from .purpose import KIND_PURPOSE, POLICY_VERSION, PURPOSES
 from .util import safe_user_id
 
 KINDS = ("fact", "episode", "reflection", "note")
@@ -79,6 +86,10 @@ class MemoryItem:
     helped: int = 0
     hurt: int = 0
     score: float = 0.0
+    purpose: list[str] = field(default_factory=list)
+    source: str = ""
+    policy_version: str = ""
+    expires: float | None = None
 
     @property
     def utility(self) -> float:
@@ -104,12 +115,17 @@ class MemoryStore:
         UNIQUE(owner, kind, norm)
     );
     CREATE INDEX IF NOT EXISTS idx_owner_kind ON memories(owner, kind, archived);
+    CREATE TABLE IF NOT EXISTS scope (owner TEXT NOT NULL, key TEXT NOT NULL, value TEXT NOT NULL, set_at REAL NOT NULL,
+        PRIMARY KEY (owner, key));
     """
+    _MIGRATE = [("purpose", "TEXT NOT NULL DEFAULT '[]'"), ("source", "TEXT NOT NULL DEFAULT 'unknown'"),
+                ("policy_version", "TEXT NOT NULL DEFAULT ''"), ("expires", "REAL")]
 
     MAX_SCAN = 20000  # retrieval scans at most this many most-recent rows per query
     MAX_TEXT = 8000
 
-    def __init__(self, data_dir: Path, user_id: str, clock: Callable[[], float] = time.time):
+    def __init__(self, data_dir: Path, user_id: str, clock: Callable[[], float] = time.time, cipher=None,
+                 episode_ttl_days: float = 30.0):
         self.user_id = safe_user_id(user_id)
         self.dir = Path(data_dir) / "users" / self.user_id
         self.dir.mkdir(parents=True, exist_ok=True)
@@ -123,30 +139,73 @@ class MemoryStore:
         except sqlite3.DatabaseError:
             pass
         self._db.executescript(self.SCHEMA)
+        have = {r[1] for r in self._db.execute("PRAGMA table_info(memories)")}
+        for name, decl in self._MIGRATE:
+            if name not in have:
+                self._db.execute(f"ALTER TABLE memories ADD COLUMN {name} {decl}")
+        self._db.commit()
+        from .crypto import PlaintextCipher
+        self.cipher = cipher or PlaintextCipher()
+        self.episode_ttl_s = float(episode_ttl_days) * 86400
         self._cache: dict[tuple[int, float], tuple[Counter, set[str], int]] = {}
 
+    # -- encryption helpers (MC6) -----------------------------------------------
+    def _aad(self, kind: str) -> str:
+        return f"{self.user_id}:{kind}"
+
+    def _dec(self, row: sqlite3.Row, col: str) -> str:
+        return self.cipher.decrypt(row[col], self._aad(row["kind"]))
+
+    # -- scope (MC1) -------------------------------------------------------------
+    def scope(self, key: str, default: bool = True) -> bool:
+        with self._lock:
+            r = self._db.execute("SELECT value FROM scope WHERE owner=? AND key=?", (self.user_id, key)).fetchone()
+        return default if r is None else r["value"] == "on"
+
+    def set_scope(self, key: str, on: bool) -> None:
+        with self._lock, self._db:
+            self._db.execute("INSERT OR REPLACE INTO scope VALUES (?,?,?,?)", (self.user_id, key, "on" if on else "off", self.clock()))
+            if not on and key == "lessons":
+                self._db.execute("DELETE FROM memories WHERE owner=? AND kind='reflection'", (self.user_id,))
+
+    def purge_expired(self) -> int:
+        """MC1: episodes/transcripts are ephemeral."""
+        with self._lock, self._db:
+            return self._db.execute("DELETE FROM memories WHERE owner=? AND expires IS NOT NULL AND expires < ?",
+                                    (self.user_id, self.clock())).rowcount
+
     # -- writes ------------------------------------------------------------
-    def add(self, kind: str, text: str, meta: dict | None = None, importance: float = 0.5) -> int:
+    def add(self, kind: str, text: str, meta: dict | None = None, importance: float = 0.5,
+            purpose: list[str] | None = None, source: str | None = None) -> int:
         if kind not in KINDS:
             raise ValueError(f"unknown memory kind {kind!r}")
         text = (text or "").strip()[: self.MAX_TEXT]
         if not text:
             raise ValueError("empty memory")
-        norm = _normalize(text) or text
+        purposes = list(purpose) if purpose else list(KIND_PURPOSE[kind])
+        if not set(purposes) <= PURPOSES:
+            raise ValueError(f"unknown purpose(s) {sorted(set(purposes) - PURPOSES)}")
+        src = source or str((meta or {}).get("source") or "mind")
+        norm = self.cipher.tag(_normalize(text) or text)
         ts = self.clock()
-        meta_json = json.dumps(meta or {}, default=str)
+        expires = ts + self.episode_ttl_s if kind == "episode" else None
+        meta_json = self.cipher.encrypt(json.dumps(meta or {}, default=str), self._aad(kind))
+        self.purge_expired()
         with self._lock, self._db:
             row = self._db.execute(
                 "SELECT id, hits FROM memories WHERE owner=? AND kind=? AND norm=?",
                 (self.user_id, kind, norm)).fetchone()
             if row:  # dedupe: reinforce instead of duplicating
                 self._db.execute(
-                    "UPDATE memories SET hits=hits+1, updated=?, archived=0, importance=MAX(importance, ?) WHERE id=? AND owner=?",
-                    (ts, importance, row["id"], self.user_id))
+                    "UPDATE memories SET hits=hits+1, updated=?, archived=0, importance=MAX(importance, ?), "
+                    "expires=COALESCE(?, expires) WHERE id=? AND owner=?",
+                    (ts, importance, expires, row["id"], self.user_id))
                 return int(row["id"])
             cur = self._db.execute(
-                "INSERT INTO memories(owner, kind, text, norm, meta, importance, created, updated) VALUES (?,?,?,?,?,?,?,?)",
-                (self.user_id, kind, text, norm, meta_json, float(importance), ts, ts))
+                "INSERT INTO memories(owner, kind, text, norm, meta, importance, created, updated, purpose, source, "
+                "policy_version, expires) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                (self.user_id, kind, self.cipher.encrypt(text, self._aad(kind)), norm, meta_json, float(importance),
+                 ts, ts, json.dumps(purposes), src[:80], POLICY_VERSION, expires))
             return int(cur.lastrowid)
 
     def record_outcome(self, ids: Iterable[int], helped: bool) -> None:
@@ -172,12 +231,17 @@ class MemoryStore:
     # -- reads -------------------------------------------------------------
     def _item(self, row: sqlite3.Row, score: float = 0.0) -> MemoryItem:
         try:
-            meta = json.loads(row["meta"])
+            meta = json.loads(self._dec(row, "meta"))
         except ValueError:
             meta = {}
-        return MemoryItem(id=row["id"], kind=row["kind"], text=row["text"], meta=meta,
+        try:
+            purpose = json.loads(row["purpose"] or "[]")
+        except ValueError:
+            purpose = []
+        return MemoryItem(id=row["id"], kind=row["kind"], text=self._dec(row, "text"), meta=meta,
                           importance=row["importance"], created=row["created"],
-                          helped=row["helped"], hurt=row["hurt"], score=score)
+                          helped=row["helped"], hurt=row["hurt"], score=score, purpose=purpose,
+                          source=row["source"], policy_version=row["policy_version"], expires=row["expires"])
 
     def get(self, mid: int) -> MemoryItem | None:
         with self._lock:
@@ -185,6 +249,7 @@ class MemoryStore:
         return self._item(row) if row else None
 
     def recent(self, kind: str | None = None, n: int = 10) -> list[MemoryItem]:
+        self.purge_expired()
         q = "SELECT * FROM memories WHERE owner=? AND archived=0"
         args: list[Any] = [self.user_id]
         if kind:
@@ -208,8 +273,9 @@ class MemoryStore:
         key = (row["id"], row["updated"])
         feat = self._cache.get(key)
         if feat is None:
-            toks = tokenize(row["text"])
-            feat = (Counter(toks), trigrams(row["text"]), len(toks))
+            plain = self._dec(row, "text")
+            toks = tokenize(plain)
+            feat = (Counter(toks), trigrams(plain), len(toks))
             if len(self._cache) > 50000:
                 self._cache.clear()
             self._cache[key] = feat
@@ -217,13 +283,15 @@ class MemoryStore:
 
     def search(self, query: str, k: int = 5, kinds: Iterable[str] | None = None,
                min_score: float = 0.12, meta_boost: dict[str, Any] | None = None,
-               extra_scorer: Callable[[str, MemoryItem], float] | None = None) -> list[MemoryItem]:
+               extra_scorer: Callable[[str, MemoryItem], float] | None = None,
+               purpose: str | None = None) -> list[MemoryItem]:
         """Hybrid ranked retrieval. Returns at most k items above min_score.
 
         meta_boost: e.g. {"family": "word_count"} adds +0.3 to rows whose meta
         matches exactly (used to pull lessons from the same task family).
         """
         kinds = list(kinds) if kinds else list(KINDS)
+        self.purge_expired()
         placeholders = ",".join("?" * len(kinds))
         with self._lock:
             rows = self._db.execute(
@@ -262,6 +330,8 @@ class MemoryStore:
             tri_sim = len(q_tri & tri) / math.sqrt((len(q_tri) or 1) * (len(tri) or 1))  # set cosine
             relevance = 0.4 * lexical + 0.35 * coverage + 0.25 * tri_sim
             item = self._item(row)
+            if purpose is not None and purpose not in item.purpose:
+                continue  # MC8: a record is used only for a purpose it lists
             if meta_boost and all(item.meta.get(key) == val for key, val in meta_boost.items()):
                 relevance += 0.3
             if extra_scorer is not None:

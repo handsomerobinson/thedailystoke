@@ -71,7 +71,7 @@ class Reflector:
         text = text[:1200]
         flagged = lesson_is_suspicious(text)
         mid = None
-        if self.memory is not None:
+        if self.memory is not None and self.memory.scope("lessons"):  # MC1: persistent only within the user's scope
             mid = self.memory.add("reflection", f"Task: {task[:200]}\n{text}", importance=0.2 if flagged else 0.8,
                                   meta={"shape": task_shape(task), "task": task[:200], "trial": trial,
                                         "feedback": feedback[:300], "flagged": flagged})
@@ -97,7 +97,7 @@ class Reflector:
         shape = task_shape(task)
         q = set(tokenize(shape))
         out = []
-        for item in self.memory.search(task, k=20, kinds=["reflection"], min_score=0.0):
+        for item in self.memory.search(task, k=20, kinds=["reflection"], min_score=0.0, purpose="self-improvement"):
             if item.meta.get("flagged"):
                 continue  # quarantined: possible injection
             other = set(tokenize(str(item.meta.get("shape", ""))))

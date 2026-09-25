@@ -98,6 +98,7 @@ class _Ctx:
 class MockBrain(Brain):
     name = "mock"
     model = "mock-1"
+    on_device = True  # a local rule system
 
     def __init__(self, fail_times: int = 0, fail_transient: bool = True):
         self.fail_times = fail_times  # inject provider failures (resilience tests/demo)
@@ -253,10 +254,10 @@ class MockBrain(Brain):
 
     def _about_seed(self, m, ctx):
         # Scripted: the mock can only repeat what the charter block in its context says. It does not "understand" it.
-        sm = re.search(r"### L1 (seed:origin v\d+[^\n]*)\n", ctx.system)
+        sm = re.search(r"### P4 (seed:origin v\d+[^\n]*)\n", ctx.system)
         why = re.search(r"(Why I carry it, in my own words:[^\n]+)", ctx.system)
         if not sm:
-            status = re.search(r"### L1 seed:origin: ([^\n]+)", ctx.system)
+            status = re.search(r"### P4 seed:origin: ([^\n]+)", ctx.system)
             return f"[mock brain] I don't carry a seed right now ({status.group(1) if status else 'no charter loaded'}).", []
         return (f"[mock brain, reading its charter block] I carry {sm.group(1)}. "
                 f"{why.group(1) if why else ''} You can read the full text with `mind charter show`."), []
