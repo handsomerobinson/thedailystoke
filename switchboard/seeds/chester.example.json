@@ -1,0 +1,32 @@
+{
+  "_comment": "Placeholder numbers (555). Copy to seeds/chester.json with real E.164 numbers; that file is gitignored.",
+  "tenants": [
+    {
+      "slug": "chester",
+      "name": "Chester Elton",
+      "persona": "Scout",
+      "lines": [{"number": "+15550000001", "label": "Chester line (Telnyx)"}],
+      "people": [
+        {"name": "Chester", "phone": "+15551234567", "role": "owner"},
+        {"name": "Christy", "phone": "+15557654321", "role": "owner"},
+        {"name": "Adam",    "phone": "+15557650000", "role": "member"},
+        {"name": "Ryan",    "phone": "+15559876543", "role": "admin"}
+      ],
+      "reach": [["Chester", "Christy"], ["Chester", "Adam"], ["Christy", "Adam"]],
+      "relationships": [["Christy", "works alongside", "Chester"]],
+      "groups": {"team": ["Chester", "Christy", "Adam", "Ryan"]}
+    },
+    {
+      "slug": "tenfour",
+      "name": "TENFOUR",
+      "persona": "Scout",
+      "lines": [{"number": "+15550000002", "label": "TENFOUR Slacker line"}],
+      "people": [
+        {"name": "Ryan", "phone": "+15559876543", "role": "admin"}
+      ],
+      "reach": [],
+      "relationships": [],
+      "groups": {"slacker": ["Ryan"]}
+    }
+  ]
+}
