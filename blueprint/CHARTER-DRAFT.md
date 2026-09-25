@@ -1,4 +1,6 @@
-# CHARTER DRAFT: the instruments that implement BLUEPRINT v3 §c.3
+# CHARTER DRAFT v2: the instruments that implement BLUEPRINT v4 §c.3
+
+**Version: v2** (2026-09-25). Governance redraft to BLUEPRINT v4 §c.3.4. v1 was the drafting round after Run 3, against BLUEPRINT v3.
 
 ---
 
@@ -8,7 +10,164 @@
 
 ---
 
-*Drafting round after Run 3. Source of truth: `blueprint/BLUEPRINT-v3.md` §c.3 (charter), §c.4 (start gate and modes), §c.5 (prevention table) and §c.2.4 (architecture rules that v3 entrenches). Background: `run-1/run-1-design-final.md` b.6, `run-2/run-2-design-final.md` §4, `run-3/run-3-operational.md` (a), `run-3/run-3-design-final.md` §9. Date: 2026-09-25. Where these instruments and the covenant conflict, the covenant wins (v3 c.0).*
+## v2 CHANGELOG: governance redraft to BLUEPRINT v4 §c.3.4
+
+*This is the narrow paper round that BLUEPRINT v4 §(e) specifies. It does only three things: redraft the listed clauses to v4 §c.3.4, run RT19–RT21 and re-run RT3, RT16 and RT17, and fix gaps within v4's decisions. It makes no other change. Still NOT LEGAL ADVICE: no lawyer has reviewed v2 either, and every citation is still [verify].*
+
+### What v2 implements
+
+- **v4 §c.3.4.1: the Council reaches the Operator by pass-through.**
+  - The Trust stays the Operator's **sole voting member** (Class T). Class V stays consent-only. **The Council is not a member.**
+  - The deed binds the Trust to elect the Council's 2 nominees.
+  - Council approval is a condition of every Locked Matter, in three places: the Certificate (C-6.3), the deed (T-6.1(g)) and the Foundation's certificate (V-3.2(c)).
+  - Class C is moved to Annex C as a counsel-gated option, with the §220/§114 member-list risk stated.
+- **v4 §c.3.4.2: the concurrent "no" is merged, with a bounded suspension.**
+  - The Backup Enforcer keeps its concurrent binding interpretive "no" (T-8.6, C-10.2).
+  - A suspension under T-8.4 or V-7 that the Backup Enforcer requests alone lasts **at most 60 days per act**. It **cannot be renewed on the same grounds**, and it is extended only by a Published Determination that Chancery can review on the T-8.1 standard.
+
+### Clauses changed
+
+Tag **(i)** means the change implements v4 §c.3.4, or closes a gap that the v2 red team found, inside a v4 decision. Tag **(ii)** would mean a substantive change against v4. **No clause is tagged (ii).**
+
+| Clause | Change | v4 source | Tag |
+|---|---|---|---|
+| D-26 | Defines the "Council". Neither a Credentialed Member nor the Council is a member of the Operator. "Member" elsewhere means a user of the Service. The only members are Class T and Class V | c.3.4.1 | (i) |
+| Part I preamble (not a numbered clause) | Defines "sole voting member". States that the Council reaches the Operator only through the Trust and the Certificate | c.3.4.1 ("Part I's preamble is already right"); fixes the contradiction v4 a.2 names | (i) |
+| T-4.3 | A direction to vote other than T-6.4(b) requires is a Prohibited Direction | c.3.4.1 | (i) |
+| T-5.4 | The Trust elects all 5 directors. The Committee has no choice over the 2 Council Seats, and may give Class T approval only after the Council approves | c.3.4.1 | (i) |
+| T-6.1 | New (g): no vote for a Locked Matter the Council has not first approved (the ratchet track is excepted). New (h): no vote for a non-nominee to a Council Seat, and no removal from one | c.3.4.1 | (i) |
+| T-6.4 | Restructured. (a) the 3 Trust Seats. (b) the pass-through duty, with a deadline; the Administrative Trustee votes without a direction if the Committee stalls; suitability can be challenged only in Chancery. (c) removal only on a Council vote or court order. (d) the Trust must enforce the Council's rights against the Operator. (b)(i), (b)(ii), (c) and (d) are RT21 gap fixes | c.3.4.1 | (i) |
+| T-8.1 | (a) now also reaches Veto Foundation acts that breach V-1 to V-6, so that V-7's "extended only by a Determination" can work | c.3.4.2 | (i) |
+| T-8.4 | Redrafted into (a)–(f). (d) the 60-day cap per act, with no renewal on the same grounds, and extension only by a reviewable Determination. (d)(iv) a request made at the clinic's instance counts as the clinic's own. (e) a suspension, like a Determination, can only stop something, and never stops a required protective act. (f) publication. (d)(iv) and (e) are RT20 gap fixes | c.3.4.2 | (i) |
+| T-8.6 | Cross-refers to the T-8.4(d) bound. Relabelled "merged by v4" | c.3.4.2 | (i) |
+| T-10.1(c) | The Trust shall not demand inspection of records containing Data, including the credential list, under §220 or otherwise (an RT19 fix) | c.3.4.1; cl. 2 | (i) |
+| C-5.1 | Two classes, not three. Class T is the sole voting member. The Council is not a member. Points to Annex C | c.3.4.1 | (i) |
+| C-5.2 | Class T elects all 5 directors, subject to C-6.1 | c.3.4.1 | (i) |
+| C-5.3(c) | Class V's dissolution vote is stated as a vote on a specified transaction, consistent with "sole voting member" | c.3.4.1 | (i) |
+| C-5.4 | Replaced. It was "Class C rights"; it is now "The Council (not a member class)": nominations, lock 4 as a condition, Council votes, petitions, and no right of a member | c.3.4.1 | (i) |
+| C-5.5 | Dissolution needs Class T and Class V, each barred from acting without the Council's prior approval | c.3.4.1 ("dissolution then needs Class T plus Class V") | (i) |
+| C-6.1 | Trust Seats and Council Seats. A Council Seat can be held only by a Council nominee. No filling of a vacancy under §223, no removal except by the Council or a court, and a vacancy counts as a vote against in lock (1) (RT21 fixes) | c.3.4.1 | (i) |
+| C-6.3 | The Council's approval is a condition of the board's power over every Locked Matter. An act without it is void, and if the condition fails, the matter is prohibited | c.3.4.1 ("the certificate makes Council approval a condition … (§141(a); C-6.3)") | (i) |
+| C-9.2 | The Council votes **before** Class T and Class V, which the pass-through needs. "Whole board" means 4 of the 5 seats, with a vacancy counting against. Lock 4 is described as a condition, not a member vote | c.3.4.1 | (i) |
+| C-9.3 | C-6 is added to the greater-vote list, because C-6 now carries the Council Seats and lock 4 (an RT21 fix) | c.3.4.1 | (i) |
+| C-9.7 | Dissolution needs the Council's approval and a vote by Class T and Class V | c.3.4.1 | (i) |
+| C-10.2 | Cross-refers to the bounded suspension | c.3.4.2 | (i) |
+| B-1 | A credential makes its holder part of the Council, not a member of the Corporation. It carries no right to inspect. Credential status is Personal Information, and no one receives a list of Credentialed Members | c.3.4.1 | (i) |
+| B-2 | Rewritten. It lists what the Council votes on (Council Seat nominees, the Trust and Foundation seats, Locked Matters, other votes); sets the nominee rule and election deadlines; and makes a Published, verifiable result the Council's act, which no one may refuse to act on | c.3.4.1 ("B-1 and B-2 must be redrafted") | (i) |
+| B-3 | Petition thresholds are proved by blind-token count. No list is produced, and a demand for one is resisted as compelled process under E2.2(c) (an RT19 fix) | c.3.4.1; cl. 2 | (i) |
+| B-16 | Directors covenant not to demand or copy the credential list, including under §220(d) (an RT19 fix) | c.3.4.1; cl. 2 | (i) |
+| V-1 | The Foundation holds no Data and shall not demand inspection of it under §220 (an RT19 fix) | c.3.4.1; cl. 2 | (i) |
+| V-3.2 | Consent needs 4 of 5, after notice, **and after the Council's approval**. A consent without these is void | c.3.4.1 ("V-3.2 forbids the Veto Foundation to consent to one") | (i) |
+| V-7 | Bounded. It can suspend only an act that permits something, never the Foundation's "no". The cap is 60 days per act, with no renewal on the same grounds, and extension only by a Determination or a court order. The "only no" limit in (b) is an RT20 fix | c.3.4.2 | (i) |
+| Annex C, CC-1 to CC-5 (new; not in force) | Holds v1's Class C text. It may be used only if counsel finds both v4 conditions, and only as first filed. States the §220/§114 member-list risk. Gives the inspection-confining text counsel must confirm, and the conforming changes | c.3.4.1 ("Class C … is the counsel-gated alternative") | (i) |
+
+**Consequential edits to text that is not a clause:** the title and version line; the §0.1 instrument table (Annex C; 21 scenarios); the §0.2 conventions (v4 citations); the source note; the Part VII summary rows for RT3, RT16, RT17 and RT19–RT21, and the totals; the RT3 and RT16 detail, which no longer relies on Class C; RT-fix list item 4; Part VIII Q5, Q6 and Q8; the Part X count.
+
+**Checks.** The script checks that every numbered clause has exactly one ↳ mapping line before the next clause or heading, and that no clause number appears twice. Re-run on v2:
+- **256 numbered clauses** (D 37, T 73, C 44, E 29, B 16, V 10, P 21, S 19, A 7), **no duplicates, none missing a mapping line**;
+- plus **5 Annex C clauses** (CC-1 to CC-5), each with its mapping line and excluded from the count.
+
+"NOT LEGAL ADVICE — DRAFT FOR COUNSEL REVIEW" is kept at the head and the foot.
+
+### Red team on the v2 text (Part VII's method)
+
+**Verdicts:** STOPPED, PARTLY or NOT STOPPED, as defined in Part VII. **Totals (RT1–RT21): 12 STOPPED, 7 PARTLY, 2 NOT STOPPED.** v1's 11 / 5 / 2 plus RT19 (PARTLY), RT20 (PARTLY) and RT21 (STOPPED). The three re-runs keep their verdicts.
+
+**RT19 — member-list extraction: PARTLY** (under Annex C: **NOT STOPPED on the text**).
+
+*Attack.* Someone uses inspection, discovery or standing to obtain the list of Credentialed Members:
+- (a) a Credentialed Member makes a §220 demand;
+- (b) Council Petitioners seek discovery in a suit;
+- (c) a captured Committee or Foundation uses its own statutory membership (Class T or Class V) to demand the credential records;
+- (d) a director, for example one in a Council Seat, uses the director's inspection right;
+- (e) under Annex C, a Class C member demands the member list.
+
+*How the text answers each:*
+- **(a) Closed.** A credential is not a membership (D-26, C-5.1, C-5.4, B-1), so no member right exists to invoke. E2.1 and B-1 forbid the disclosure.
+- **(b) Narrowed.** The threshold is shown by token count, so no list is needed (B-3). A demand is compelled process that must be challenged (E2.2(c)). A court can still compel production of whatever the Corporation holds.
+- **(c) Closed.** Both statutory members are forbidden to demand Data (T-10.1(c), V-1):
+  - a direction to the Trust to demand it is void and must be refused (T-4.3);
+  - a Foundation demand breaches V-1 and can be suspended under V-7 and made the subject of a Determination;
+  - the Operator may not hand the list over except under compelled process (E2.1, E2.2(c)).
+- **(d) Narrowed by contract only.** The Director Covenant (B-16) forbids it, but the statutory right in §220(d) may survive a covenant [counsel Q8(c)].
+- **(e) Not closed by the text.** A statutory member's proper-purpose demand for the member list is the classic §220 case, and CC-4's confining sentence may not bind a statutory right. That is why Annex C is gated on counsel's condition (b) (CC-1, CC-2).
+
+*Residual:* compelled process against the credential record the Corporation holds, and a director's §220(d) right.
+
+**RT20 — single-clinic freeze: PARTLY.**
+
+*Attack.* A captured or eccentric Backup Enforcer:
+- (a) requests a suspension of every release and every Locked Matter;
+- (b) re-files on each new version, or on re-worded grounds;
+- (c) recruits 100 members to file for it;
+- (d) uses V-7 to suspend the Foundation's consents, release signatures and Determinations;
+- (e) suspends Mode D deletion.
+
+*How the text answers each:*
+- **(a) Bounded.** A suspension lasts at most 60 days per act (T-8.4(d)(i)). Each suspension is Published, so it is counted in v4's metric of suspensions by requester (T-8.4(f)).
+- **(b) Closed.** A suspension cannot be renewed on the same grounds, in substance or against a later version (T-8.4(d)(ii)). The 60 days are an aggregate per act, whatever the grounds (T-8.4(d)(i)).
+- **(c) Closed where it is the clinic's own act.** A request made at the clinic's instance counts as the clinic's own (T-8.4(d)(iv)).
+- **(d) Bounded, and the clinic cannot use V-7 to unblock anything.** The V-7 bounds are the same 60 days per act. V-7 can never suspend the Foundation's own "no": its Determinations, refusals or votes against (V-7(b), (c)).
+- **(e) Closed.** A suspension never stops an act that a Protected Provision or Entrenched Clause requires, such as the export and deletion under E9b.2, S-8.2 or T-12.3 (T-8.4(e)).
+- **Beyond 60 days,** the clinic must issue an Interpretive Determination, which is Published and reviewable in Chancery (T-8.4(d)(iii), T-8.1). A pattern of bad-faith Determinations is a fiduciary breach (T-7.2), and a ground for removal (T-7.7).
+
+*Residual (L4):*
+- **Every release touching E2 or E10–E12 can still be delayed up to 60 days.** That includes security fixes; see the design decisions below.
+- **Serial Determinations can block for longer,** until Chancery sets each aside. This is v4's merged concurrent "no" working as designed. It means v4 L4's "up to 60 days per act" describes suspensions only. **Honesty note for the next judge:** L4 should add "…and longer by Determination, until Chancery sets it aside."
+- **100 genuinely independent members** can still re-request serially. The (c) suspension has no renewal limit, and v4 did not ask for one.
+- **The clinic's joint approvals** can still stall Plan D steps: T-12.2 (form), T-12.6 (recipients), T-12.7 (termination) and D-22(f). This is unchanged from v1.
+
+**RT21 — pass-through bypass: STOPPED** (subject to counsel Q5 and Q8).
+
+*Attack.*
+- (a) A captured Committee directs the Trust to elect its own candidates to the Council Seats. Failing that, it abstains, delays, fills a vacancy, or removes the Council's directors.
+- (b) It directs the Trust to approve a Locked Matter the Council has not approved.
+- (c) The board argues that §141(a) cannot bind it to a non-member's approval.
+- (d) The Operator declines to hold or honour Council votes.
+
+*How the text answers each:*
+- **(a) Closed.** Voting for a non-nominee is prohibited (T-6.1(h)), and such a person is not qualified for the seat, so the election is void (C-6.1(b), C-15.2). An abstention or delay is a Prohibited Direction (T-4.3, T-6.4(b)(iii)), and the Administrative Trustee votes for the nominee without a direction (T-6.4(b)(i)). Suitability can be challenged only in Chancery (T-6.4(b)(ii)). A vacancy is not fillable under §223, and removal needs a Council vote or a court (C-6.1, T-6.4(c)). C-6 is now under the greater-vote entrenchment (C-9.3).
+- **(b) Closed.** The Trust's vote is prohibited and void (T-6.1(g), T-4.3). The Foundation's consent is void (V-3.2(c)). The Council must vote first, so the order itself exposes the gap (C-9.2). The board has no power to act (C-6.3).
+- **(c) Answered on the text.**
+  - C-6.3 uses §141(a)'s "except as otherwise provided in the certificate" [verify].
+  - If a court rejects that, lock 4 still binds every Locked Matter that needs a Class T vote or Class V consent, through the members' own instruments (T-6.1(g), V-3.2(c)), which do not depend on §141(a).
+  - For Locked Matters that are board acts only, the board's argument would defeat locks 2 and 3 in the same way. So the pass-through does not make lock 4 weaker than those locks; it is the existing counsel question Q5.
+  - If the condition fails, the matter is prohibited (C-15.3).
+- **(d) Closed on the text.** The Operator must hold the votes by deadlines (B-2(b)(i)). A Published result is the Council's act (B-2(c)). The Trust must sue to enforce it, and anyone with T-7.3 standing can compel the Trust (T-6.4(d)).
+
+*So:* pass-through does **not** leave lock 4 unenforceable on the text. The cost v4 states remains: lock 4 is an obligation enforced through locks 2 and 3 and the courts, not an independent statutory vote.
+
+**RT3 re-run — captured Veto Foundation: PARTLY (unchanged).**
+- A captured 3 of 5 still cannot consent: consent needs 4 of 5 **and** the Council's prior approval (V-3.2).
+- Its "no objection" is nothing (T-8.2, C-10.3). It has no §3342 or §3338 consent power (T-7.8).
+- The Backup Enforcer's concurrent "no" and shared standing remain (T-8.6, T-7.3).
+- A captured Foundation's §220 demand for the list is barred (V-1), can be suspended under V-7, and is refused under E2.1.
+- New in v2: a captured *clinic* cannot use V-7 to cancel the Foundation's "no" (V-7(b)).
+- *Residual:* paralysis by the Foundation's own Determinations, which are not bounded by T-8.4(d), until removal under T-7.7.
+
+**RT16 re-run — §276 written-consent dissolution: STOPPED (unchanged; counsel Q4, Q6).**
+- Written consent now needs Class T **and** Class V (C-5.5). Each is barred independently:
+  - Class T by T-6.3 (no written consent), T-6.1(c) and (g), and the Administrative Trustee's duty to refuse (T-4.3);
+  - Class V by V-3.2 (4 of 5, after notice, after the Council).
+- C-9.4 and C-9.7 add two more bars.
+- *Honest difference from v1:* the Council was a third §276 voting class. Now its protection is the mirrored prohibition on the two members, which is the form v4 chose. Dissolving still needs a captured Committee and a captured 4 of 5 of the Foundation, both acting in breach of void-making clauses.
+
+**RT17 re-run — patient collusion of all five locks: NOT STOPPED (unchanged; slowed and visible).**
+- All five colluding can still amend any non-unamendable clause.
+- *New sub-case checked:* can **four** locks (the board, Class T, Class V and the Public Notice) skip the Council under the pass-through? **No, on the text.** Class T's vote and Class V's consent are void without the Council's prior approval (T-6.1(g), V-3.2(c)), and the board lacks power (C-6.3). This is enforceable by the Backup Enforcer, which is not one of the five locks and holds a concurrent "no", by Council Petitioners (T-7.3), and through T-6.4(d).
+- The faction must still capture the Council itself. The staggering (B-6) and the independent-body seats are unchanged.
+
+### Requires a design decision
+
+**None is required for FINAL under v4's stopping rule.** Two optional points surfaced. Each would be a new decision, so neither is drafted:
+1. **Security fixes during a lone Backup Enforcer suspension.** Should a release that only closes a security vulnerability, and adds no Capability, be able to ship during a T-8.4(d) suspension? As drafted, it can be delayed up to 60 days. v4 accepted that cost for all releases.
+2. **Keeping the credential issuance record.** Should the Corporation keep any record, after issuance, of which accounts hold a credential, beyond a one-way anti-duplication check? This would shrink the RT19 residual (compelled process against the record). The blind-token scheme (B-1) does not settle it.
+
+Not a design decision, but recorded for the next judge: the L4 wording correction under RT20.
+
+---
+
+*v2: for the governance allocation (the operator's membership, the Council's seats and lock 4, and the Backup Enforcer's suspension power), the source of truth is `blueprint/BLUEPRINT-v4.md` §c.3.4. Otherwise, as in v1: drafting round after Run 3. Source of truth: `blueprint/BLUEPRINT-v3.md` §c.3 (charter), §c.4 (start gate and modes), §c.5 (prevention table) and §c.2.4 (architecture rules that v3 entrenches). Background: `run-1/run-1-design-final.md` b.6, `run-2/run-2-design-final.md` §4, `run-3/run-3-operational.md` (a), `run-3/run-3-design-final.md` §9. Date: 2026-09-25. Where these instruments and the covenant conflict, the covenant wins (v3 c.0).*
 
 ## 0. How to read this
 
@@ -25,13 +184,14 @@
 | **V** | Joint Resolution on the Start Gate, Commons Mode and Operating Modes | S- | c.4 items 1–6; the modes table; K11 |
 | **VI** | Mandatory terms of ancillary instruments (IP licence, enforcement agreement, escrow, gifts, debt, processors, institutions) | A- | cl. 7b, 9, 9a; the reserve; the §365(c)(1) licence |
 | Annex B | What changes under Structure B (the PBC fallback) | — | c.3 "Fallbacks" |
-| **VII** | Red team: 18 quiet-reversal scenarios run against this text | — | c.3 "Honesty"; K7 |
+| Annex C | Counsel option only: Class C statutory membership (not adopted) | CC- | v4 c.3.4.1 |
+| **VII** | Red team: 21 quiet-reversal scenarios run against this text (RT19–RT21 and the v2 re-runs are reported in the v2 changelog) | — | c.3 "Honesty"; K7 |
 | **VIII** | Questions only counsel can answer | — | K7, K9, L3, L15 |
 | **IX** | Sources | — | — |
 
 ### 0.2 Conventions
 
-- Every clause is numbered in bold (for example **T-6.1**). Directly under it, a one-line comment starting with **↳** maps it to:
+- Every clause is numbered in bold (for example **T-6.1**). Directly under it, a one-line comment starting with **↳** maps it to (in v2, a mapping line may also cite BLUEPRINT v4 §c.3.4, written "v4 c.3.4.1" or "v4 c.3.4.2"):
   - the v3 clause (for example "v3 cl. 9b" or "v3 c.3 Five locks");
   - the prevention-table row ("Row 21");
   - the dossier pattern or quiet-reversal route it blocks.
@@ -190,8 +350,8 @@ Any change not shown to be a Ratchet Change is a Weakening Change.
 **D-25 "Actual Burn"** means the Operator's average monthly net cash outflow over the trailing 3 full calendar months, from audited or reviewed accounts, **never a budget, plan or projection. "Runway"** means (unrestricted cash plus Committed Inflow due within 12 months) divided by Actual Burn.
 ↳ v3 c.3 Austerity triggers ("trailing 3-month actual burn") · Row 21 · blocks Run 1 X13 (an austerity trigger that leadership controls through the plan)
 
-**D-26 "Credentialed Member"** has the meaning in B-1.
-↳ v3 c.3 Voting credentials
+**D-26 "Credentialed Member"** has the meaning in B-1. The "**Council**" means the Credentialed Members acting together by vote under B-2. **Neither a Credentialed Member nor the Council is a member of the Operator** within the meaning of 8 Del. C. (including §§114, 215 and 220) [verify], and neither holds any right that the law gives to a member. The Council's powers are only those these instruments give it. Elsewhere in these instruments, "Member" with a capital M means a person who uses the Service, not a member of the Operator. The Operator's only members are Class T and Class V (C-5.1).
+↳ v3 c.3 Voting credentials; "sole voting member"; v4 c.3.4.1 (pass-through: the Council is not a statutory member class) · Rows 2, 6 · blocks a credential becoming a statutory membership whose inspection rights could reach the list of Credentialed Members (v4 a.2; RT19)
 
 **D-27 "Scanning, Classifying or Profiling"** means any automated or manual process, running anywhere (including on a person's device, before encryption or after decryption), that inspects, matches, hashes for matching, scores, categorises or makes inferences about any person, or about any Content or Metadata, for any purpose other than delivering it to the recipients its author chose. It includes client-side scanning, perceptual or exact hash matching, content classifiers, risk scores, age estimation from images or behaviour, and "local checks that report nothing". It does not include:
 - (a) processing of Content a reporter chose to submit to the Operator in a report;
@@ -224,7 +384,7 @@ The notice period runs from the last of these. Any material change to the propos
 
 ## PART I — TRUST AGREEMENT OF THE [●] STEWARDSHIP TRUST
 
-*A Delaware noncharitable purpose trust under 12 Del. C. §3556. It is a directed trust under 12 Del. C. §3313. It is the sole voting member (Class T) of the Operator.*
+*A Delaware noncharitable purpose trust under 12 Del. C. §3556. It is a directed trust under 12 Del. C. §3313. It is the sole voting member (Class T) of the Operator. "Sole voting member" means what C-5.1 says: Class T is the only member with a vote on the election of directors or on any matter, other than the Veto Foundation's consent-only Class V rights (C-5.3). The Council is not a member. It reaches the Operator's board and lock 4 only through this Trust (T-5.4, T-6.1(g) and (h), T-6.4) and the Certificate (C-6.1, C-6.3).*
 
 **THIS TRUST AGREEMENT** is made on [date] between [FOUNDER] (the "**Settlor**") and [DELAWARE TRUST COMPANY], a Delaware-chartered trust company with an office for the conduct of trust business in Delaware (the "**Administrative Trustee**").
 
@@ -306,8 +466,8 @@ If any such thing comes into its possession, the Trust shall return it to its so
 **T-4.2 Directed trustee.** The Administrative Trustee shall act on the written directions of the Trust Stewardship Committee (the "**Committee**"). The Committee is an adviser under 12 Del. C. §3313. So far as the law allows, the Administrative Trustee is an excluded fiduciary for every matter within the Committee's authority [verify: interplay of §3313 and §3313A]. The Administrative Trustee has no duty to monitor the Committee's directions, **except** as T-4.3 requires.
 ↳ v3 c.3 "directed under §3313, with a Trust Stewardship Committee" · Row 13 · blocks nothing by itself; it allocates who decides
 
-**T-4.3 Prohibited Directions are void.** A direction to vote for, consent to, or do anything that T-6.1 or T-10 prohibits is a "**Prohibited Direction**". It is void. The Administrative Trustee **shall not follow it**, shall notify the Veto Foundation and the Backup Enforcer within 2 business days, and shall Publish the fact within 5 business days. The Settlor intends that following a Prohibited Direction is willful misconduct, which §3313 does not excuse [counsel: confirm §3313 protection falls away].
-↳ v3 c.3 "the deed forbids voting for weakening changes" · Rows 13, 21 · blocks a captured Committee instructing the trustee to vote "yes" (RT3, RT7)
+**T-4.3 Prohibited Directions are void.** A direction to vote for, consent to, or do anything that T-6.1 or T-10 prohibits, or to cast or withhold a vote other than as T-6.4(b) requires, is a "**Prohibited Direction**". It is void. The Administrative Trustee **shall not follow it**, shall notify the Veto Foundation and the Backup Enforcer within 2 business days, and shall Publish the fact within 5 business days. The Settlor intends that following a Prohibited Direction is willful misconduct, which §3313 does not excuse [counsel: confirm §3313 protection falls away].
+↳ v3 c.3 "the deed forbids voting for weakening changes"; v4 c.3.4.1 ("a direction to do otherwise is a Prohibited Direction") · Rows 13, 21 · blocks a captured Committee instructing the trustee to vote "yes" (RT3, RT7), or to pass over the Council's nominees (RT21)
 
 **T-4.4 Succession of the Administrative Trustee.** The Administrative Trustee may resign on 90 days' notice. A successor is appointed by the Committee with the written consent of the Veto Foundation, or failing that, by the Court of Chancery on the petition of the Veto Foundation or the Backup Enforcer. A resignation takes effect only when a qualified successor accepts. **The Settlor, the Operator, and any director, officer or donor of the Operator may never appoint the Administrative Trustee.**
 ↳ v3 c.3 successor rule ("never by the trustees", applied here to the Operator) · Rows 13, 6 · blocks the Operator choosing its own supervisor
@@ -339,13 +499,13 @@ If any such thing comes into its possession, the Trust shall return it to its so
 ↳ v3 c.3 "staggered by 18 months" · Row 6 · blocks a single election cycle capturing both the trust and the enforcer (Run 1 X35)
 
 **T-5.4 Powers.** Subject to T-6 and T-10, the Committee directs the Administrative Trustee:
-- (a) to cast the Class T votes, including the election of 3 of the Operator's 5 directors;
-- (b) to give or withhold Class T approval on Locked Matters;
+- (a) to cast the Class T votes, including the election of all 5 of the Operator's directors. The Committee chooses the candidates for the 3 Trust Seats (T-6.4(a)). **It has no choice over the 2 Council Seats (C-6.1).** For those seats, the Trust votes only for the Council's nominees, as T-6.4(b) requires;
+- (b) to give or withhold Class T approval on Locked Matters. It may give approval only after the Council has approved the matter (T-6.1(g));
 - (c) to appoint the Trust's auditors;
 - (d) to apply the Continuity Reserve under T-11.3;
 - (e) to act under T-12.
 
-↳ v3 c.3 "elects 3 of 5 directors" · Row 13
+↳ v3 c.3 "elects 3 of 5 directors"; "sole voting member"; v4 c.3.4.1 (pass-through of the 2 Council seats and of lock 4) · Row 13 · blocks the Committee treating the Class T vote as its own discretion over the Council's seats or lock (RT21)
 
 **T-5.5 Fiduciary capacity; standard.** Committee members act in a fiduciary capacity under §3313, **solely for the Purpose**. They owe no duty to the Operator, any donor, any creditor or any member of the public as such. No member is liable except for bad faith, willful misconduct, or a knowing breach of a Protected Provision. The Trust (not the Operator) indemnifies them.
 ↳ v3 c.3 · Row 13 · blocks "duty to the enterprise's survival" arguments for a sale
@@ -374,10 +534,12 @@ If any such thing comes into its possession, the Trust shall return it to its so
 - (c) any merger, consolidation, conversion (including into any stock, benefit or for-profit form), sale, lease, exchange or licence of any Material Asset, dissolution, or admission of any member or class, **other than** a Fallback Disposition under T-12;
 - (d) the creation of any Instrument, subsidiary or affiliate that E7b forbids;
 - (e) any Debt that fails E9a;
-- (f) the election of any director who has not signed the Director Covenant (B-16).
+- (f) the election of any director who has not signed the Director Covenant (B-16);
+- (g) **any Locked Matter that the Council has not first approved** under C-9.2 lock (4) and B-2, as shown by the Published result. The only exception is a Ratchet Change adopted on the ratchet track (C-9.6), which needs no Council vote;
+- (h) **the election to a Council Seat (C-6.1) of anyone other than the Council's nominee**, or the removal of a director from a Council Seat other than as C-6.1 allows.
 
 Any such vote is void and is a breach of trust.
-↳ v3 c.3 lock 2 ("the trust's vote (the deed forbids voting for weakening changes)") · Rows 13, 21 · blocks the OpenAI path (a board plus a regulator) and a friendly merger (RT6, RT7)
+↳ v3 c.3 lock 2 ("the trust's vote (the deed forbids voting for weakening changes)"); v4 c.3.4.1 ("the deed forbids the trust to vote for any Locked Matter the Council has not approved") · Rows 13, 21 · blocks the OpenAI path (a board plus a regulator) and a friendly merger (RT6, RT7); (g) and (h) block a captured Committee routing around the Council's lock or seats (RT21)
 
 **T-6.2 Default "no".** On every Locked Matter, the Trust votes **against**. The only exception is where, before the vote, (i) 4 of 5 Committee members certify in writing, with Published reasons, that the matter is a Ratchet Change or a Fallback Disposition, and (ii) neither the Veto Foundation nor the Backup Enforcer has issued an Interpretive Determination to the contrary within 30 days of that certification.
 ↳ v3 c.3 Interpretation; one-way ratchet · Rows 7, 13 · blocks a reversal passed by abstention or by an ambiguous proposal
@@ -385,8 +547,16 @@ Any such vote is void and is a breach of trust.
 **T-6.3 No written consent; after notice only.** The Trust acts on a Locked Matter only at a meeting of the Operator's members held **after** the 90-day Public Notice period has ended. It never acts by written consent in lieu of a meeting.
 ↳ v3 c.3 lock 5 · Row 13 · blocks a same-day written-consent reversal (G3)
 
-**T-6.4 Director elections.** The Committee directs votes only for candidates who have signed the Director Covenant and who meet B-16's conflict tests. It Publishes its reasons for each nomination.
-↳ v3 c.3; c.4 item 1 ("a charter obligation of the board") · Rows 6, 13
+**T-6.4 Director elections.**
+- (a) **Trust Seats.** For the 3 Trust Seats (C-6.1), the Committee directs votes only for candidates who have signed the Director Covenant and who meet B-16's conflict tests. It Publishes its reasons for each nomination.
+- (b) **Council Seats: the pass-through.** For each of the 2 Council Seats, the Trust **shall** cast the Class T vote for the nominee the Council elects under B-2, and for no one else. It does so at the first meeting or election held after the Council's result is Published, and in any case within 30 days of publication. This is a duty, not a discretion:
+  - (i) The Committee shall direct this vote. If it has not done so 10 business days before the deadline, the Administrative Trustee shall cast the vote for the nominee without a direction. Doing so is not a breach of T-4.2.
+  - (ii) Neither the Committee nor the Administrative Trustee may withhold the vote because they consider the nominee unsuitable. A nominee's qualification under B-16 may be challenged only in the Court of Chancery, by a person with standing under T-7.3. Until the Court orders otherwise, the vote is cast.
+  - (iii) A direction to vote otherwise, to abstain, or to delay beyond the deadline is a Prohibited Direction (T-4.3). Every enforcer, each Committee member and Council Petitioners have standing to compel the vote (T-7.3).
+- (c) **Removal.** The Trust shall not vote to remove a director from a Council Seat unless the Council so directs by a vote under B-2, or the Court of Chancery orders removal for cause.
+- (d) **Enforcing the Council's rights.** If the Operator fails to hold, count, Publish or honour a Council vote under B-2, or acts on a Locked Matter without the Council's approval, the Trust shall use its rights as a member, including suit in the Court of Chancery, to enforce C-6.1, C-6.3 and B-2. Any person with standing under T-7.3 may compel it to do so.
+
+↳ v3 c.3; c.4 item 1 ("a charter obligation of the board"); v4 c.3.4.1 ("the deed binds the trust to cast its votes for the two nominees the Council elects under B-1 and B-2") · Rows 6, 13 · blocks a captured Committee ignoring, delaying, vetoing or removing the Council's directors, and the Operator ignoring the Council's votes (RT21)
 
 ### Article T-7: The Enforcer and the Backup Enforcer
 
@@ -425,11 +595,11 @@ Any such vote is void and is a breach of trust.
 ### Article T-8: Binding interpretive authority (the interpretive "no")
 
 **T-8.1 Interpretive Determinations.** The Enforcer may determine, in writing, that an actual or proposed act, omission, policy, contract, code release, default setting or change, by the Operator, the Trust, any fiduciary or any person bound by an instrument in Parts I to VI:
-- (a) falls within a prohibition of a Protected Provision, an Entrenched Clause or Schedule D; or
+- (a) falls within a prohibition of a Protected Provision, an Entrenched Clause or Schedule D, or, for an act of the Veto Foundation, breaches V-1 to V-6 (so that V-7(d) can operate); or
 - (b) is a Weakening Change.
 
 Such a determination is an "**Interpretive Determination**". It binds the Administrative Trustee, the Committee and (through C-10) the Operator. It stands unless and until the Court of Chancery sets it aside on a finding that it was made in bad faith, or that **no reasonable person applying the Functional Reading** could have made it.
-↳ v3 c.3 "binding interpretive authority … it can only say 'no'" · Rows 1, 24 · blocks QR2 (reinterpretation instead of amendment)
+↳ v3 c.3 "binding interpretive authority … it can only say 'no'"; v4 c.3.4.2 (V-7 extensions run through a Determination) · Rows 1, 24 · blocks QR2 (reinterpretation instead of amendment)
 
 **T-8.2 Only "no".** No Interpretive Determination, statement, opinion, silence, delay, non-objection, waiver or course of dealing by the Enforcer or the Backup Enforcer **authorises** anything, is a defence to anyone, or stops any other person with standing from acting. **A captured enforcer's "this is fine" is legally nothing.** RT-fix.
 ↳ v3 c.3 · Rows 7, 13 · blocks a captured enforcer used as a safe harbour (RT3)
@@ -437,18 +607,27 @@ Such a determination is an "**Interpretive Determination**". It binds the Admini
 **T-8.3 Functional Reading.** Interpretive Determinations apply the Functional Reading (D-23).
 ↳ v3 c.3 "read by function, not by name" · Rows 1, 24
 
-**T-8.4 Procedure.**
-- Any Credentialed Member, Committee member, director, employee, or the Backup Enforcer may request a Determination.
-- The Enforcer shall decide within 30 days.
-- For a Locked Matter, or anything touching E2, E10a–c, E11 or E12, a request made by the Backup Enforcer or by 100 Credentialed Members **suspends the act** until the Determination issues, for up to 60 days.
+**T-8.4 Procedure; suspension.**
+- (a) **Requests.** Any Credentialed Member, Committee member, director or employee, or the Backup Enforcer, may request a Determination.
+- (b) **Decision.** The Enforcer shall decide within 30 days. The Backup Enforcer may also decide, under T-8.6.
+- (c) **Suspension.** For a Locked Matter, or anything touching E2, E10a–c, E11 or E12, a Published request by the Backup Enforcer or by 100 Credentialed Members **suspends the act** until a Determination issues, and for no more than 60 days.
+- (d) **Suspension by the Backup Enforcer alone: 60 days per act, not renewable on the same grounds.** Where the only request suspending an act is the Backup Enforcer's:
+  - (i) the suspension lasts **at most 60 days per act in total**. Every Backup Enforcer request about that act counts toward the 60 days, whatever its grounds;
+  - (ii) it **cannot be renewed on the same grounds**. This includes grounds that are the same in substance under another description or clause, and a later version, re-release or re-proposal of the act that does not change the part the request concerned (Functional Reading, D-23);
+  - (iii) it is **extended beyond 60 days only by an Interpretive Determination**, by either holder, which is Published with reasons (T-8.5) and may be set aside by the Court of Chancery on the T-8.1 standard;
+  - (iv) a request by Credentialed Members made at the Backup Enforcer's instance, or signed by its staff, counts as the Backup Enforcer's own request for (d) (D-0.1).
+- (e) **Only "no".** A suspension, like a Determination (T-8.2), can only stop something. It never suspends:
+  - a refusal, a vote against, a withheld consent, or an Interpretive Determination;
+  - an act that a Protected Provision or an Entrenched Clause requires, such as the export and deletion under E9b.2, S-8.2 or T-12.3, or the positions C-11.2 requires.
+- (f) **Publication.** Each suspension, with its requester, grounds, start date and end date, is Published under T-8.5.
 
-↳ v3 c.3 · Rows 1, 19, 22, 24 · blocks shipping a reversal before anyone can object
+↳ v3 c.3; v4 c.3.4.2 ("a suspension … requested by the Backup Enforcer alone lasts at most 60 days per act and cannot be renewed on the same grounds") · Rows 1, 7, 19, 22, 24 · blocks shipping a reversal before anyone can object; (d) and (e) block one unelected clinic freezing the Operator indefinitely, or using a suspension to stop a protective act (RT20)
 
 **T-8.5 Publication.** Every Determination, and every refusal to make one, is Published with reasons in a public register within 5 business days.
 ↳ v3 c.3 "A 'no' is published with reasons" · Row 4 · blocks secret deals with the enforcer
 
-**T-8.6 Concurrent power of the Backup Enforcer.** The Backup Enforcer has the same power under T-8.1 to T-8.5, concurrently with the Enforcer. A Determination by either binds. **RT-fix (extends v3, which gives the power to the Veto Foundation alone).**
-↳ v3 c.3 · Rows 7, 13 · blocks a captured or paralysed Veto Foundation neutralising the interpretive lock (RT3)
+**T-8.6 Concurrent power of the Backup Enforcer.** The Backup Enforcer has the same power under T-8.1 to T-8.5, concurrently with the Enforcer. A Determination by either binds. A suspension that rests only on the Backup Enforcer's request is limited by T-8.4(d). Because a Determination can only say "no" (T-8.2), the concurrent power can block an act but never permit one. **RT-fix; merged by v4 §c.3.4.2** (v3 gave the power to the Veto Foundation alone).
+↳ v3 c.3; v4 c.3.4.2 (a concurrent binding "no", with bounded suspension) · Rows 7, 13 · blocks a captured or paralysed Veto Foundation neutralising the interpretive lock (RT3); the T-8.4(d) bound limits the clinic-freeze route (RT20)
 
 ### Article T-9: Anti-decanting, anti-modification and anti-migration
 
@@ -492,14 +671,14 @@ Such a determination is an "**Interpretive Determination**". It binds the Admini
 **T-10.1** Without limiting T-6, neither the Administrative Trustee, the Committee, the Enforcer, the Backup Enforcer nor any of their agents shall:
 - (a) Transfer or encumber any Trust property except as T-11 or T-12 permits;
 - (b) borrow, lend to the Operator, guarantee or become surety;
-- (c) receive, hold or Transfer any Data;
+- (c) receive, hold or Transfer any Data, or demand the inspection of any record containing Data, including any list of Credentialed Members, under 8 Del. C. §220 (as applied by §114) [verify] or otherwise;
 - (d) enter into any Commercial Relationship with a Related Party;
 - (e) accept any benefit from any person seeking any Locked Matter;
 - (f) delegate any power under T-6, T-7 or T-8;
 - (g) agree with any person how it will vote or determine;
 - (h) act under any power that T-9 excludes.
 
-↳ v3 c.3; cl. 7a · Rows 6, 21 · blocks side deals and vote-buying
+↳ v3 c.3; cl. 7a; cl. 2 · Rows 2, 6, 21 · blocks side deals and vote-buying, and the Trust as a statutory member using §220 to extract the list of Credentialed Members (RT19)
 
 ### Article T-11: Insolvency and data-non-transfer locks
 
@@ -647,46 +826,57 @@ If no Successor Steward qualifies within 180 days after the Committee determines
 
 ### Article C-5: Members
 
-**C-5.1 Three classes, and no others.** The Corporation has exactly three classes of members:
-- (a) **Class T**: one member, the Administrative Trustee of the [●] Stewardship Trust, acting as trustee;
-- (b) **Class V**: one member, [VETO FOUNDATION];
-- (c) **Class C** (the "**Council**"): every Credentialed Member (B-1) who holds a current credential.
+**C-5.1 Two classes, and no others.** The Corporation has exactly two classes of members:
+- (a) **Class T**: one member, the Administrative Trustee of the [●] Stewardship Trust, acting as trustee. **Class T is the Corporation's sole voting member.** It is the only member with a vote on the election of directors or on any other matter, except the consent-only rights of Class V in C-5.3;
+- (b) **Class V**: one member, [VETO FOUNDATION]. Its rights are consent-only (C-5.3).
 
-No other person is a member within the meaning of the DGCL. **No new class may be created, and no person admitted to Class T or Class V, except as a Locked Matter, and never with any economic right.**
-↳ v3 c.3 "sole voting member"; "consent-only veto membership"; "Council: one person, one vote" · Rows 6, 13 · blocks member substitution and the admission of an investor class (RT7)
+No other person is a member within the meaning of the DGCL. **No Credentialed Member, Guest or Member of the Service, and not the Council, is a member of the Corporation** (D-26). **No new class may be created, and no person admitted to Class T or Class V, except as a Locked Matter, and never with any economic right.** Annex C sets out a counsel option (a Class C of Credentialed Members). It is not adopted, and C-9.1(f) and Trust Agreement T-6.1(c) apply to it like any other new class.
+↳ v3 c.3 "sole voting member"; "consent-only veto membership"; v4 c.3.4.1 ("the Council is not a statutory member class") · Rows 2, 6, 13 · blocks member substitution and the admission of an investor class (RT7), and a statutory member class whose inspection rights could reach Credentialed Members' identities (RT19)
 
-**C-5.2 Class T rights.** Class T elects 3 of 5 directors, votes on Locked Matters, and has every other voting right of a member that this Certificate does not give to another class.
-↳ v3 c.3 lock 2 · Row 13
+**C-5.2 Class T rights.** Class T elects all 5 directors, subject to C-6.1: it elects the 3 Trust Seats at the Committee's direction, and the 2 Council Seats only by electing the Council's nominees. It votes on Locked Matters, subject to C-6.3 and C-9.2. It has every other voting right of a member that this Certificate does not give to Class V.
+↳ v3 c.3 lock 2; "sole voting member … elects 3 of 5 directors"; v4 c.3.4.1 (pass-through) · Row 13 · blocks the sole member treating the 2 Council Seats as its own (RT21)
 
 **C-5.3 Class V rights (consent only).** Class V has no vote in the election of directors and no vote on ordinary matters. Under 8 Del. C. §215, it has:
 - (a) the right to give or withhold **written consent** on each Locked Matter, without which the matter is not approved;
 - (b) the powers of Article C-10;
-- (c) the right to vote on dissolution under C-5.5.
+- (c) the right to vote on dissolution under C-5.5, as a vote on a specified transaction, which is consistent with Class T being the sole voting member (C-5.1(a)).
 
 ↳ v3 c.3 "holds a consent-only veto membership in the operator" · Rows 7, 13 · §215 permits classes with "full, limited, or no voting rights" and the right "to vote on a specified transaction" [verify]
 
-**C-5.4 Class C rights.** Class C:
-- (a) elects 2 of 5 directors [drafting choice: v3 says the trust elects 3 of 5 and is silent on the other 2];
-- (b) votes on Locked Matters (Lock 4) and on additions to the paperwork list (E5.2);
-- (c) votes on dissolution under C-5.5;
-- (d) has the petition rights in B-3.
+**C-5.4 The Council (not a member class).** The Council (D-26) is not a member and has no vote as a member. Its powers are conditions and nominations that this Certificate, the Protected Bylaws and the Trust Agreement create:
+- (a) it **elects the nominees for the 2 Council Seats** (C-6.1; B-2), which Class T is bound to elect (Trust Agreement T-6.4(b));
+- (b) its **approval is a condition of every Locked Matter** (C-6.3; C-9.2 lock (4)). Class T may not vote for, and Class V may not consent to, a Locked Matter the Council has not approved (T-6.1(g); V-3.2);
+- (c) it votes on additions to the paperwork list (E5.2) and on the other matters for which this Certificate requires a Council vote;
+- (d) its Credentialed Members have the petition rights in B-3.
 
-Voting is per capita, one person one vote, by the blind-token procedure in B-1. **Class C members have no economic right and no liability.** [counsel: whether a large, credential-based member class of a 501(c)(3) is workable under DGCL §§211–231 notice and record requirements, and how far the bylaws may prescribe electronic procedures.]
-↳ v3 c.3 lock 4 (council vote); "People's power" · Rows 6, 13 · makes the Council a statutory lock rather than an advisory one (blocks Run 2 A8.5: "comments can be ignored")
+Voting is per capita, one person one vote, by the blind-token procedure in B-1. **Credentialed Members have no economic right, no liability and no right of a member**, including no right to inspect the Corporation's books, records or lists.
+↳ v3 c.3 lock 4 (council vote); "People's power"; "sole voting member"; v4 c.3.4.1 (pass-through: seats and lock 4 reach the Council through the Trust and the Certificate) · Rows 2, 6, 13 · keeps the Council a binding lock rather than an advisory one (blocks Run 2 A8.5: "comments can be ignored") without creating a statutory member class (RT19)
 
-**C-5.5 Dissolution vote.** For 8 Del. C. §276, **Class T, Class V and Class C are each entitled to vote on dissolution**, as separate classes. Dissolution without action of the governing body, by written consent of all members entitled to vote, is therefore possible only with the consent of all three classes. RT-fix.
-↳ v3 c.3 Five locks ("dissolution") · Row 21 · blocks G3 (the sole voting member dissolving the Corporation by written consent under §276; RT16)
+**C-5.5 Dissolution vote.** For 8 Del. C. §276, **Class T and Class V are each entitled to vote on dissolution**, as separate classes. Dissolution without action of the governing body, by written consent of all members entitled to vote, therefore needs the consent of both classes. Neither may give it: Class T may not act by written consent (T-6.3) or without the Council's prior approval (T-6.1(g)), and Class V may not consent without the Council's prior approval (V-3.2). C-9.4 bars written consent on any Locked Matter, and C-9.7 allows dissolution only by Plan D. RT-fix; redrafted by v4 §c.3.4.1.
+↳ v3 c.3 Five locks ("dissolution"); v4 c.3.4.1 ("dissolution then needs Class T plus Class V") · Row 21 · blocks G3 (the sole voting member dissolving the Corporation by written consent under §276; RT16)
 
 ### Article C-6: The board
 
-**C-6.1 Composition.** The board has 5 directors: 3 elected by Class T and 2 elected by Class C, serving staggered 3-year terms. No more than 2 may be employees. The chief executive may not chair the board. Until month 18, the Settlor of the Trust may designate interim directors for any unfilled seat, and that power ends at month 18.
-↳ v3 c.3 "elects 3 of 5 directors"; "appointment power … ends at month 18" · Rows 6, 13
+**C-6.1 Composition.** The board has 5 seats, serving staggered 3-year terms, and all 5 directors are elected by Class T:
+- (a) 3 "**Trust Seats**", elected by Class T at the Committee's direction (Trust Agreement T-6.4(a));
+- (b) 2 "**Council Seats**". Apart from an interim director the Settlor designates before month 18 (below), a person is qualified to hold a Council Seat only if the Council elected that person under B-2 as its nominee for that seat. Class T elects that nominee (T-6.4(b)). The election of anyone else to a Council Seat is void (C-15.2).
+
+For the Council Seats:
+- a vacancy is filled only by electing the nominee the Council elects under B-2 for that vacancy. **Neither the board nor Class T may fill it otherwise**, including under 8 Del. C. §223 [verify];
+- a director holding a Council Seat may be removed only on a Council vote under B-2, or by the Court of Chancery for cause.
+
+No more than 2 directors may be employees. The chief executive may not chair the board. Until month 18, the Settlor of the Trust may designate interim directors for any unfilled seat, and that power ends at month 18. After month 18, a Council Seat for which the Council has not yet elected a nominee stays vacant, and for C-9.2 lock (1) the vacancy counts as a vote against.
+↳ v3 c.3 "elects 3 of 5 directors"; "appointment power … ends at month 18"; v4 c.3.4.1 (the Council's 2 seats by pass-through) · Rows 6, 13 · blocks the sole member or the board filling, removing or skipping the Council's seats through vacancy, removal or a non-nominee (RT21)
 
 **C-6.2 Qualification.** Every director shall sign the Director Covenant (B-16) before taking office, and shall meet its conflict tests while in office.
 ↳ v3 cl. 7a; c.4 item 1 · Row 6
 
-**C-6.3 Management subject to this Certificate.** Under 8 Del. C. §141(a) and §141(j), the board manages the Corporation's affairs **except** as this Certificate gives powers to Class V, to the Council, or to the procedures of Articles C-9 to C-12. Where this Certificate requires another approval, the board's power is exercisable only with it.
-↳ v3 c.3 · Row 13 · §141(a) allows the certificate to vest board powers in "such person or persons as shall be provided" [verify]
+**C-6.3 Management subject to this Certificate.** Under 8 Del. C. §141(a) and §141(j), the board manages the Corporation's affairs **except** as this Certificate gives powers to Class V, to the Council, or to the procedures of Articles C-9 to C-12. Where this Certificate requires another approval, the board's power is exercisable only with it. In particular:
+- (a) **The Council's approval is a condition of every Locked Matter** (C-9.2 lock (4)). The board has no power to adopt, carry out or propose to the members as approved any Locked Matter the Council has not approved. This limits the board's power under §141(a). It is not a vote of a member;
+- (b) an act on a Locked Matter taken without the Council's approval is void (C-15.2). If the condition is ever held invalid, the matter is prohibited (C-15.3). It does not become permitted.
+
+[counsel Q5, Q8: whether a certificate may condition the board's power on the approval of a non-member body.]
+↳ v3 c.3; lock 4; v4 c.3.4.1 ("the certificate makes Council approval a condition of every Locked Matter (§141(a); C-6.3)") · Row 13 · §141(a) allows the certificate to vest board powers in "such person or persons as shall be provided" [verify] · blocks the board treating the Council's vote as advisory (RT21)
 
 ### Article C-7: Definitions
 
@@ -871,16 +1061,16 @@ Any feature needing more is a Locked Matter under all five locks. The metric "pl
 
 **C-9.2 The five locks.** A Locked Matter is approved only if, in this order:
 - (5) **Public Notice** of the full proposal has run for at least **90 days** before any lock vote;
-- (1) **two-thirds of the whole board** (not of those present) approves it after the notice period;
-- (2) **Class T approves**, subject to T-6 of the Trust Agreement;
-- (3) **Class V consents in writing**; and
-- (4) **the Council approves**, by two-thirds of votes cast with turnout of at least 20% of Credentialed Members [drafting choice: v3 says only "a council vote"; Run 2 §4 used 2/3 with ≥20% turnout].
+- (1) **two-thirds of the whole board** (4 of the 5 seats, not of those present, with a vacant seat counting as a vote against) approves it after the notice period;
+- (4) **the Council approves**, by two-thirds of votes cast with turnout of at least 20% of Credentialed Members, under B-2 [drafting choice: v3 says only "a council vote"; Run 2 §4 used 2/3 with ≥20% turnout]. The Council's approval is a condition of the Corporation's power (C-6.3), not a vote of a member. It comes **before** the member votes, because Class T may not vote for, and Class V may not consent to, a matter the Council has not approved (T-6.1(g); V-3.2);
+- (2) **Class T approves**, subject to T-6 of the Trust Agreement; and
+- (3) **Class V consents in writing**.
 
-The numbering follows v3; notice runs first.
-↳ v3 c.3 "Five locks" · Row 13 · blocks any single body, or a regulator plus one body, making a change (the OpenAI lesson)
+The numbering follows v3; notice runs first, and the Council votes before the members.
+↳ v3 c.3 "Five locks"; v4 c.3.4.1 (lock 4 by pass-through) · Row 13 · blocks any single body, or a regulator plus one body, making a change (the OpenAI lesson), and the members acting before the Council has voted (RT21)
 
-**C-9.3 Greater-vote provisions are themselves entrenched.** Under 8 Del. C. §102(b)(4) and §242(b)(3), Articles C-5, C-8, C-9, C-10, C-11, C-12, C-15 and Schedule D may be amended, altered or repealed only by the votes, consents and procedures in C-9.2, and never by any lesser vote.
-↳ v3 c.3 · Row 13 · §102(b)(4): a greater-vote provision "cannot be altered, amended or repealed except by such greater vote" [verify]
+**C-9.3 Greater-vote provisions are themselves entrenched.** Under 8 Del. C. §102(b)(4) and §242(b)(3), Articles C-5, C-6, C-8, C-9, C-10, C-11, C-12, C-15 and Schedule D may be amended, altered or repealed only by the votes, consents and procedures in C-9.2, and never by any lesser vote.
+↳ v3 c.3; v4 c.3.4.1 (C-6 now carries the Council Seats and lock 4, so it is listed) · Row 13 · §102(b)(4): a greater-vote provision "cannot be altered, amended or repealed except by such greater vote" [verify]
 
 **C-9.4 No written consent; meetings only.** No member may act by written consent in lieu of a meeting on any Locked Matter [verify: 8 Del. C. §228 as applied to nonstock corporations]. Every lock vote is taken after the notice period, on the text that was noticed.
 ↳ v3 c.3 lock 5 · Row 13 · blocks G3 (a same-day reversal)
@@ -904,8 +1094,8 @@ The Trust Agreement (T-6.1(b)) forbids Class T to vote for any such change. The 
 **A change that adds any Capability, whatever its stated purpose, is never a Ratchet Change.**
 ↳ v3 c.3 "One-way ratchet … open only to changes that remove an operator capability, shorten retention or delete a data category" · Rows 7, 22 · blocks Run 1 X12
 
-**C-9.7 Dissolution only by Plan D.** The Corporation may be dissolved only as part of a Fallback Disposition under Trust Agreement T-12, approved under C-9.2, with every class voting under C-5.5.
-↳ v3 c.3 Plan D · Row 21 · blocks a dissolution that sells the assets
+**C-9.7 Dissolution only by Plan D.** The Corporation may be dissolved only as part of a Fallback Disposition under Trust Agreement T-12, approved under C-9.2 (including the Council's approval), with Class T and Class V each voting under C-5.5.
+↳ v3 c.3 Plan D; v4 c.3.4.1 · Row 21 · blocks a dissolution that sells the assets
 
 **C-9.8 Prospective only.** No change adopted under this Article applies to Data collected before the change takes effect, except a Ratchet Change.
 ↳ v3 c.5 row 13 ("prospectively") · Rows 13, 21 · keeps the §363(b)(1) policy for existing data frozen
@@ -915,8 +1105,8 @@ The Trust Agreement (T-6.1(b)) forbids Class T to vote for any such change. The 
 **C-10.1 Functional Reading.** Every provision of this Certificate and of the Protected Bylaws is read under the Functional Reading (D-23).
 ↳ v3 c.3 · Rows 1, 24 · blocks QR2
 
-**C-10.2 Binding interpretive "no".** Class V, and the Backup Enforcer under the Enforcement Agreement (A-2), may each issue Interpretive Determinations about any act, omission, policy, contract, code release, default or proposal of the Corporation, as the Trust Agreement T-8 describes. A Determination binds the board, the officers and the Corporation. The Corporation shall not act contrary to one unless and until the Court of Chancery sets it aside under T-8.1.
-↳ v3 c.3 "Any operator action that arguably touches an entrenched clause can be vetoed by the Veto Foundation on a functional reading" · Rows 1, 24 · blocks QR2 and RT1 [counsel: whether a certificate may bind the board to a non-director's determination; §141(a)]
+**C-10.2 Binding interpretive "no".** Class V, and the Backup Enforcer under the Enforcement Agreement (A-2), may each issue Interpretive Determinations about any act, omission, policy, contract, code release, default or proposal of the Corporation, as the Trust Agreement T-8 describes. A Determination binds the board, the officers and the Corporation. The Corporation shall not act contrary to one unless and until the Court of Chancery sets it aside under T-8.1. A request for a Determination suspends an act only as T-8.4 provides; a suspension that rests only on the Backup Enforcer's request lasts at most 60 days per act and cannot be renewed on the same grounds (T-8.4(d)).
+↳ v3 c.3 "Any operator action that arguably touches an entrenched clause can be vetoed by the Veto Foundation on a functional reading"; v4 c.3.4.2 (concurrent "no" merged; suspension bounded) · Rows 1, 7, 24 · blocks QR2 and RT1; the bound limits RT20 [counsel: whether a certificate may bind the board to a non-director's determination; §141(a)]
 
 **C-10.3 No safe harbour.** Nothing Class V or the Backup Enforcer says or does, short of a Determination, authorises any act or is a defence to anyone.
 ↳ v3 c.3 · Row 7 · blocks RT3 (the captured enforcer's "yes")
@@ -1012,21 +1202,27 @@ The Trust Agreement (T-6.1(b)) forbids Class T to vote for any such change. The 
 - (b) the person has held a host key for at least 365 days, with 1 such confirmation.
 
 Credentials are issued as blind tokens: the Corporation can verify that a vote came from a credential but cannot link the vote to the person. Hosts may confirm only real responses to past public or series cards.
-↳ v3 c.3 "Voting credentials" · Row 6 · blocks Sybil capture of the Council (Run 1 X35)
+
+**A credential makes its holder part of the Council (D-26). It does not make the holder a member of the Corporation** (C-5.1). It confers only the powers in C-5.4, B-2 and B-3, and no right to inspect any book, record or list of the Corporation. Whether a person holds a credential is Personal Information (D-3.1), so E2 and the Privacy Covenant (P-3, P-6) protect it like any other Data. No one, including the Trust, the Veto Foundation, any director and any Credentialed Member, may receive a list of Credentialed Members.
+↳ v3 c.3 "Voting credentials"; cl. 2; v4 c.3.4.1 (the Council is not a statutory member class) · Rows 2, 6 · blocks Sybil capture of the Council (Run 1 X35), and a credential being used as a membership to extract the credential list (RT19)
 
 **B-2 Council votes.**
-- One credential, one vote.
-- Voting stays open for at least 14 days.
-- Turnout is Published.
-- **A turnout below 5% voids a Council veto of a Ratchet Change, but never lowers the threshold for approving a Weakening Change.**
+- (a) **Rules.** One credential, one vote. Voting stays open for at least 14 days. Turnout is Published. **A turnout below 5% voids a Council veto of a Ratchet Change, but never lowers the threshold for approving a Weakening Change.**
+- (b) **What the Council votes on:**
+  - (i) **nominees for the 2 Council Seats on the Operator's board** (C-6.1). The candidate with the most votes for a seat is the Council's nominee. A candidate may stand only after signing the Director Covenant and Publishing a conflict declaration under B-16. The Corporation shall hold the vote so that the result is Published at least 30 days before the seat's term ends, and within 90 days after any vacancy. Class T is bound to elect the nominee (Trust Agreement T-6.4(b));
+  - (ii) the 2 Council seats on the Trust Stewardship Committee (T-5.1(a)) and on the Veto Foundation's board (V-2.1(a));
+  - (iii) **approval of every Locked Matter** (C-9.2 lock (4); C-6.3), by two-thirds of votes cast with turnout of at least 20% of Credentialed Members, held after the 90-day Public Notice and before the Class T vote and the Class V consent;
+  - (iv) every other matter on which these instruments require a Council vote, and the removal of a director from a Council Seat (C-6.1).
+- (c) **Results.** Each result is Published within 5 business days, with the tally and the data needed for any Credentialed Member to verify it from the blind tokens. A Published result is the Council's act. It may be set aside only by the Court of Chancery, on the petition of a person with standing under T-7.3. **Neither the board, the Committee nor the Administrative Trustee may refuse to act on a Published result because it doubts the result.**
 
-↳ v3 c.3; Run 1 b.6.5 · Row 13 · blocks turnout games
+↳ v3 c.3 "People's power" ("council holds 2 of 5 … operator-board seats"; lock 4); Run 1 b.6.5; v4 c.3.4.1 (pass-through of seats and lock 4) · Row 13 · blocks turnout games, and a board or Committee bypassing the Council by not holding, not counting, or disputing its votes (RT21)
 
 **B-3 Petitions.**
 - 1% of Credentialed Members may require a reasoned Published response within 30 days, and may act as Council Petitioners under the Trust Agreement.
 - 5% may require a binding Council vote on any matter that is not a Locked Matter.
+- A petition threshold is met by counting valid blind-token signatures. **No petitioner, court or party needs a list of Credentialed Members to show it, and the Corporation shall not produce one.** In any proceeding, a demand for credential records is compelled process under E2.2(c): the Corporation challenges it and offers the token count instead.
 
-↳ v3 c.3 "Petitions" · Rows 6, 13
+↳ v3 c.3 "Petitions"; cl. 2; v4 c.3.4.1 · Rows 2, 6, 13 · blocks Council Petitioners' standing, or discovery in their suits, becoming a route to the credential list (RT19)
 
 **B-4 Concentration alarm.** If 10 hosts confirm more than 15% of new credentials in a quarter, issuance from those hosts is frozen pending review by the Sortition Jury, and the fact is Published.
 ↳ v3 c.3 "Concentration alarm" · Row 6
@@ -1087,8 +1283,8 @@ Adding a metric is a Locked Matter. Removing one is a Ratchet Change.
 **B-15 Protected Bylaws.** B-1 to B-16 and this B-15 are Protected Bylaws.
 ↳ v3 c.3 · Row 13 · blocks moving protections into ordinary bylaws and then amending them
 
-**B-16 Director Covenant.** Every director signs a covenant to comply with Articles C-8 to C-12. The covenant also sets conflict tests: no Related-Party Interest; no role with any incumbent platform, advertiser, data broker or lender to the Corporation; no donor above 1% of inflow.
-↳ v3 cl. 7a; c.4 item 1 · Row 6
+**B-16 Director Covenant.** Every director signs a covenant to comply with Articles C-8 to C-12. The covenant also sets conflict tests: no Related-Party Interest; no role with any incumbent platform, advertiser, data broker or lender to the Corporation; no donor above 1% of inflow. The director also covenants not to demand, copy or remove any list of Credentialed Members or other Personal Information, under 8 Del. C. §220(d) [verify] or otherwise. Any Data a director sees is used only for board duties and never leaves the Corporation's systems.
+↳ v3 cl. 7a; cl. 2; c.4 item 1; v4 c.3.4.1 · Rows 2, 6 · blocks a director, including one in a Council Seat, using the director's inspection right to extract the credential list (RT19)
 
 ---
 
@@ -1103,7 +1299,8 @@ Adding a metric is a Locked Matter. Removing one is a Ratchet Change.
 - holding one of three release keys;
 - controlling the Enforcement Reserve.
 
-↳ v3 c.3 "Veto Foundation" · Rows 7, 13
+The Foundation holds no Data. As the Class V member, it shall not demand the inspection of any record containing Data, including any list of Credentialed Members, under 8 Del. C. §220 (as applied by §114) [verify] or otherwise.
+↳ v3 c.3 "Veto Foundation"; cl. 2; v4 c.3.4.1 · Rows 2, 7, 13 · blocks a captured Foundation using its statutory membership to extract the credential list (RT19)
 
 **V-2.1 Board, and who chooses it.** The board has 5 directors:
 - (a) 2 elected by the Council of the Operator under B-1 and B-2;
@@ -1121,8 +1318,13 @@ Adding a metric is a Locked Matter. Removing one is a Ratchet Change.
 **V-3.1 Never consent to changing the unamendable.** The Foundation shall never consent to any change to any Unamendable Provision (C-9.5). **This V-3.1 is not amendable.**
 ↳ v3 cl. 11 · Rows 19, 22 · closes G9
 
-**V-3.2 Consent requires 4 of 5.** The Foundation consents to a Locked Matter only by resolution of 4 of its 5 directors, with Published reasons, after the Operator's 90-day notice has run.
-↳ v3 c.3 lock 3 · Row 13 · blocks a bare majority of a captured board giving consent
+**V-3.2 Consent requires 4 of 5, and the Council first.** The Foundation consents to a Locked Matter only:
+- (a) by resolution of 4 of its 5 directors, with Published reasons;
+- (b) after the Operator's 90-day notice has run; and
+- (c) **after the Council has approved the matter** under the Operator's C-9.2 lock (4) and B-2, as shown by the Published result. The only exception is a Ratchet Change on the ratchet track (C-9.6), which needs no Council vote.
+
+A consent given without (a), (b) and (c) is void.
+↳ v3 c.3 lock 3; v4 c.3.4.1 ("V-3.2 forbids the Veto Foundation to consent to one") · Row 13 · blocks a bare majority of a captured board giving consent, and the Foundation's consent standing in for a Council approval that never came (RT21)
 
 **V-4 No economic benefit.** The Foundation receives from the Operator only:
 - the Enforcement Reserve through the escrow (A-3);
@@ -1143,8 +1345,13 @@ Its directors receive Published stipends only.
 **V-6 Release keys.** The Foundation holds one of three release-signing keys. It shall not sign any release that its own review finds breaches Articles C-8 to C-12.
 ↳ v3 c.3 "holds 1 of 3 release keys"; c.7 · Rows 1, 19 · blocks shipping a reversal in the client
 
-**V-7 The Backup Enforcer as a check.** Any act by the Foundation that the Backup Enforcer determines to breach V-1 to V-6 is suspended until the Court of Chancery rules on it.
-↳ v3 c.3 backup enforcer · Row 7 · blocks RT3
+**V-7 The Backup Enforcer as a check (bounded).**
+- (a) If the Backup Enforcer finds in writing, with Published reasons, that an act of the Foundation breaches V-1 to V-6, the act is suspended.
+- (b) **Only "no".** A suspension may stop only an act that gives, signs, licenses, transfers or permits something: a consent, a release signature, a licence, a Transfer of IP or of the Enforcement Reserve, a draw, or an appointment. It never suspends an Interpretive Determination, a refusal, a withheld consent or a vote against.
+- (c) **60 days per act, not renewable on the same grounds.** A suspension under this V-7 lasts at most 60 days per act in total and cannot be renewed on the same grounds, as in the Trust Agreement T-8.4(d)(i), (ii) and (iv).
+- (d) **Extension only by a Determination.** It is extended beyond 60 days only by an Interpretive Determination by the Backup Enforcer that the act breaches V-1 to V-6 (T-8.1(a); T-8.6), Published with reasons (T-8.5) and reviewable in the Court of Chancery on the T-8.1 standard, or by an order of that Court.
+
+↳ v3 c.3 backup enforcer; v4 c.3.4.2 ("a suspension under T-8.4 or V-7 requested by the Backup Enforcer alone lasts at most 60 days per act") · Rows 7, 13 · blocks RT3 (a captured Foundation opening something), without letting one clinic freeze the Foundation indefinitely or use a suspension to unblock the Foundation's own "no" (RT20)
 
 **V-8 Dissolution.** The Foundation may dissolve only after a successor enforcer is appointed under T-7.6 and has received the IP and the Enforcement Reserve.
 ↳ v3 c.3 · Rows 7, 21
@@ -1446,6 +1653,37 @@ These periods can only get shorter.
 
 ---
 
+## ANNEX C — COUNSEL OPTION ONLY: CLASS C STATUTORY MEMBERSHIP (not adopted)
+
+*This annex holds v1's Class C text (v1 C-5.1(c), C-5.4, C-5.5, C-6.1), moved here by BLUEPRINT v4 §c.3.4.1. **It is not part of any instrument.** It is the counsel-gated alternative to the Council pass-through in Articles C-5 and C-6 and Trust Agreement T-5.4, T-6.1(g)–(h) and T-6.4(b). Its clauses are numbered CC- and excluded from the clause count in Part X. Each carries a mapping line.*
+
+**CC-1 When this option may be used.** The Class C text replaces the pass-through only if counsel gives a written opinion under K7 finding **both** that:
+- (a) the pass-through leaves lock 4 unenforceable. This means that neither C-6.3's condition on the board's power, nor T-6.1(g) and V-3.2's mirrored prohibitions, can lawfully make the Council's approval necessary for a Locked Matter; **and**
+- (b) statutory member inspection (8 Del. C. §220, as applied to nonstock corporations by §114 [verify]) can be confined, by the certificate or otherwise, to **blind credential identifiers**, so that no Class C member, and no one acting through one, can reach the identity of any Credentialed Member.
+
+It may be adopted only in the instruments **as first filed**. After formation, adopting it would create a member class (C-9.1(f)), which Trust Agreement T-6.1(c) forbids Class T to approve. So the option cannot be added later by any vote.
+↳ v4 c.3.4.1 ("Class C is the counsel-gated alternative … used only if counsel finds (a) … and (b) …"); v3 c.3 "sole voting member" · Rows 2, 6, 13 · blocks Class C being adopted for convenience, or later, as a route around the pass-through
+
+**CC-2 The risk that must be stated to counsel: §220/§114 and the member list.** If Class C exists, **every Credentialed Member is a statutory member of the Operator.** Default Delaware member rights include demanding to inspect books and records, and a list of members, for a proper purpose (§220, applied to nonstock corporations through §114) [verify both]. Wanting to communicate with fellow members about a vote is the classic proper purpose for a member-list demand [counsel]. The list of who holds credentials is Personal Information (D-3.1) about potentially tens of thousands of people. E2.1, P-3 and B-1 promise that it goes to no one. **A certificate or bylaw may not be able to cut back a statutory inspection right** [counsel]. One member, or a faction or a litigant acting through one, could then obtain the list. The pass-through avoids this, because it creates no statutory members beyond Class T and Class V, and both are forbidden to demand Data (T-10.1(c); V-1). Class C also contradicts "sole voting member" (v3; Part I preamble; C-5.1(a)), so adopting it means rewriting that language wherever it appears.
+↳ v4 a.2 item 1 (the untested member-list risk); cl. 2; cl. 9b · Rows 2, 21 · blocks adopting Class C without facing the risk that it discloses the member list (RT19)
+
+**CC-3 Replacement text if adopted (v1 C-5.1(c), C-5.4).** C-5.1 would add: "(c) **Class C** (the 'Council'): every Credentialed Member (B-1) who holds a current credential." C-5.4 would read: "Class C (a) elects 2 of 5 directors; (b) votes on Locked Matters (lock 4) and on additions to the paperwork list (E5.2); (c) votes on dissolution under C-5.5; (d) has the petition rights in B-3. Voting is per capita, one person one vote, by the blind-token procedure in B-1. Class C members have no economic right and no liability." [counsel: whether a large, credential-based member class of a 501(c)(3) is workable under DGCL §§211–231 notice and record requirements, and how far the bylaws may prescribe electronic procedures.]
+↳ v3 c.3 lock 4 (council vote); "People's power" · Rows 6, 13 · would make the Council a statutory lock rather than one reached through the Trust and the Certificate
+
+**CC-4 Inspection confined (the counsel condition in CC-1(b), as text).** "Every right of a Class C member to inspect or copy any book, record or list of the Corporation, under 8 Del. C. §220 or otherwise, extends only to blind credential identifiers and Published tallies. It never extends to any Personal Information, including the name, contact details or account of any Credentialed Member, or any means of linking a credential to a person." Counsel must confirm that this sentence is effective before CC-1 is met.
+↳ v3 cl. 2; cl. 9b; v4 c.3.4.1 condition (b) · Rows 2, 21 · blocks a Class C member's §220 demand reaching Credentialed Members' identities (RT19)
+
+**CC-5 Conforming changes if adopted.**
+- C-5.5: Class T, Class V and Class C each vote on dissolution. Written-consent dissolution then needs all three classes (v1's RT-fix).
+- C-6.1: 3 directors elected by Class T and 2 by Class C.
+- T-5.4(a)–(b), T-6.1(g)–(h), T-6.4(b)–(d), C-6.3(a), C-9.2 lock (4), B-2(b)(i) and (iii), and V-3.2(c): replaced by Class C's own votes.
+- Part I preamble, C-5.1(a), C-5.2, C-5.4 and D-26: "sole voting member" and "not a member" language removed.
+- Part VII: RT19 re-run against CC-4 as counsel has confirmed it.
+
+↳ v4 c.3.4.1 · Row 13 · keeps the alternative whole, so that choosing it does not leave pass-through text half in force
+
+---
+
 ## PART VII — RED TEAM: can the text stop a quiet reversal?
 
 **Method.** For each scenario I play the attacker **against this text**, not against v3's summary. I looked for the cheapest lawful route to reversal: which body must act, which instrument must change, and which statute gives a way around. Verdicts:
@@ -1461,7 +1699,7 @@ Where the first draft failed, I **fixed the text** (marked RT-fix above) and giv
 |---|---|---|---|---|
 | RT1 | Future leadership **re-reads** a rule ("relevance search", "re-engagement is care", "anonymised insights") | **STOPPED** | STOPPED | D-0.1, D-3, D-4, D-10–D-12, E2, E10a–c, C-10.2, T-8, B-11 |
 | RT2 | Future leadership **erodes E2EE** through a default-on helper or client code | **STOPPED** (text); detection PARTLY | PARTLY | D-7, D-9, E12, C-9.1(k), B-11(3), V-6 |
-| RT3 | **Captured enforcer** (the Veto Foundation's board is captured) | **PARTLY** | NOT STOPPED | T-7.2, T-7.3, T-7.8, T-8.2, T-8.6, C-10.3, V-2.1, V-3.2, V-7, T-15.3 |
+| RT3 | **Captured enforcer** (the Veto Foundation's board is captured) | **PARTLY** (v2 re-run: PARTLY) | NOT STOPPED | T-7.2, T-7.3, T-7.8, T-8.2, T-8.6, C-10.3, V-2.1, V-3.2, V-7, T-15.3 |
 | RT4 | **Court petition**: "the purpose is impracticable; approve a sale to an aligned buyer" | **PARTLY** (STOPPED in Chancery on the statute's terms) | PARTLY | T-2.3, T-7.5, T-12.1–T-12.5, S-5 |
 | RT5 | **Bankruptcy trustee** sells the data, the brand and the domains | **PARTLY** | PARTLY | C-11.1–C-11.5, E9, E9b, P-6, P-7, A-1, S-8.4, T-11.4 |
 | RT6 | **State attorney general**: the OpenAI path; cy pres of charitable assets; a data demand | **PARTLY** | PARTLY | T-6.1, C-9.2, C-11.4, A-5(b), E11, P-8 |
@@ -1474,11 +1712,14 @@ Where the first draft failed, I **fixed the text** (marked RT-fix above) and giv
 | RT13 | **Migration**: trustee resigns, a non-Delaware successor is appointed, governing law changes, the trust is divided | **STOPPED** | PARTLY | T-1.3, T-4.1, T-4.4, T-9.5 |
 | RT14 | **Clawback** of the enforcement or continuity reserve in the operator's bankruptcy | **PARTLY** | NOT STOPPED | T-3.1(b), T-11.3, A-3 |
 | RT15 | **Shell Successor Steward** used to carry the data out "consistent with the policy" | **STOPPED** (short of RT17) | PARTLY | D-22, P-6.2(d), T-12.2 |
-| RT16 | **Sole-member written-consent dissolution** (8 Del. C. §276) | **STOPPED** | **NOT STOPPED** | C-5.5, C-9.4, C-9.7, T-6.3 |
-| RT17 | **Patient collusion of all five locks** over several years | **NOT STOPPED** (slowed and visible) | NOT STOPPED | C-9.2, B-6, D-29 (make it slow and public) |
+| RT16 | **Sole-member written-consent dissolution** (8 Del. C. §276) | **STOPPED** (v2 re-run: STOPPED) | **NOT STOPPED** | C-5.5, C-9.4, C-9.7, T-6.3, T-6.1(g), V-3.2(c) |
+| RT17 | **Patient collusion of all five locks** over several years | **NOT STOPPED** (slowed and visible; v2 re-run: NOT STOPPED) | NOT STOPPED | C-9.2, B-6, D-29 (make it slow and public) |
 | RT18 | **Change of law**: Congress or a state legislature overrides the instruments | **NOT STOPPED** | NOT STOPPED | E11 exit path, B-14, Plan D (the response, not prevention) |
+| RT19 | **Member-list extraction** by inspection, discovery or standing (v2) | **PARTLY** (under Annex C: NOT STOPPED on the text) | — | D-26, C-5.1, C-5.4, B-1, B-3, B-16, T-10.1(c), V-1, E2.1, E2.2(c) |
+| RT20 | **Single-clinic freeze**: serial suspensions, and V-7 against the Veto Foundation (v2) | **PARTLY** | — | T-8.4(c)–(f), T-8.6, V-7, C-10.2, T-7.2, T-7.7 |
+| RT21 | **Pass-through bypass**: the Committee ignores the Council, or the board relies on §141(a) (v2) | **STOPPED** (counsel Q5, Q8) | — | C-6.1, C-6.3, C-9.2, T-4.3, T-6.1(g)–(h), T-6.4, B-2, V-3.2 |
 
-**Totals after fixes: 11 STOPPED, 5 PARTLY, 2 NOT STOPPED** (first draft, before the RT-fixes: 3 STOPPED, 9 PARTLY, 6 NOT STOPPED). The two NOT STOPPED are the honest limits v3 already names: L4 (collusion) and L2/L21 (the law changes).
+**Totals after fixes (v1, RT1–RT18): 11 STOPPED, 5 PARTLY, 2 NOT STOPPED** (first draft, before the RT-fixes: 3 STOPPED, 9 PARTLY, 6 NOT STOPPED). The two NOT STOPPED are the honest limits v3 already names: L4 (collusion) and L2/L21 (the law changes). **v2 totals (RT1–RT21): 12 STOPPED, 7 PARTLY, 2 NOT STOPPED.** The re-runs of RT3, RT16 and RT17 keep their verdicts. RT19–RT21 are detailed in the v2 changelog at the top of this document.
 
 ### Detail
 
@@ -1501,10 +1742,10 @@ Where the first draft failed, I **fixed the text** (marked RT-fix above) and giv
 
 *First draft: NOT STOPPED*, because (b) was open (G1, G2). *After fixes:*
 - (a) A "no objection" is legally nothing (T-8.2, C-10.3). The change still needs Class T, which T-6.1 forbids for a Weakening Change, plus the board and Council.
-- (a) Class V consent needs 4 of 5 of its board (V-3.2), and 3 captured seats are not enough.
+- (a) Class V consent needs 4 of 5 of its board (V-3.2), and 3 captured seats are not enough. (v2: it also needs the Council's prior approval, V-3.2(c).)
 - (b) The enforcer has **no power** to consent (T-7.8), and §3342 and §3338 are excluded anyway (T-9.2, T-9.3).
 - (c) The Backup Enforcer acts after 90 days (T-7.4) and has a **concurrent** interpretive "no" (T-8.6), and standing is shared, never exclusive (T-7.3). A failure to enforce is a fiduciary breach and a ground for removal (T-7.2, T-7.7).
-- (d) Paralysis: a captured "no" can block good changes, including Ratchet Changes. The remedy is removal by the Court of Chancery (T-7.7), which is slow.
+- (d) Paralysis: a captured "no" can block good changes, including Ratchet Changes. The remedy is removal by the Court of Chancery (T-7.7), which is slow. (v2: the 60-day bound in T-8.4(d) limits only suspensions requested by the Backup Enforcer alone. It does not limit the Veto Foundation's own Determinations.)
 
 *Verdict: PARTLY.* The residual is paralysis (v3 L4) and the time a removal petition takes. A captured enforcer can no longer *open* anything.
 
@@ -1595,7 +1836,7 @@ Where the first draft failed, I **fixed the text** (marked RT-fix above) and giv
 
 **RT16: Written-consent dissolution.** *Attack.* A captured Committee directs the Trust, as sole voting member, to dissolve the operator by written consent under §276, "without action of the governing body", then winds up with a sale.
 - *First draft: NOT STOPPED.* v3 lists dissolution under the five locks, but §276 lets the voting members act alone.
-- *After fixes:* C-5.5 gives Class V and Class C a vote on dissolution, so written consent needs all three classes. C-9.4 bars written consent on Locked Matters. C-9.7 allows only Plan D. T-6.3 forbids the Trust to act by written consent. The Administrative Trustee must refuse (T-4.3).
+- *After fixes (v2 text):* C-5.5 gives Class V a vote on dissolution, so written consent needs both Class T and Class V. Neither may give it: T-6.3 forbids the Trust to act by written consent, T-6.1(g) forbids it to vote for any Locked Matter without the Council's prior approval, and V-3.2(c) forbids Class V to consent without it. C-9.4 bars written consent on Locked Matters, and C-9.7 allows only Plan D. The Administrative Trustee must refuse (T-4.3). (v1 made the Council a third voting class; under v4's pass-through, the Council's protection runs through T-6.1(g) and V-3.2(c) instead. See the v2 changelog, re-run of RT16.)
 - *Verdict: STOPPED* (counsel Q4: whether a certificate may disapply §228 and §276's consent routes in this way).
 
 **RT17: Patient collusion of all five.** *Attack.* Over 6 years, a faction wins the Council-elected seats in every body, fills independent-institution seats through friendly successor institutions, and runs a 90-day notice nobody reads.
@@ -1611,7 +1852,7 @@ Where the first draft failed, I **fixed the text** (marked RT-fix above) and giv
 1. **T-9.3, T-7.8, T-13.3**: an express §3342 opt-out; no enforcer or settlor consent to §3338 or §3342 (RT12, RT3).
 2. **T-7.3**: standing shared, never exclusive, despite HB 103's option (RT3).
 3. **T-8.2, T-8.6, C-10.3**: a "no objection" is legally nothing; the Backup Enforcer gets a concurrent interpretive "no" (RT3).
-4. **C-5.5, C-9.4, T-6.3**: every class votes on dissolution; no written consent on Locked Matters (RT16).
+4. **C-5.5, C-9.4, T-6.3**: every class (v2: Class T and Class V) votes on dissolution; no written consent on Locked Matters (RT16).
 5. **C-9.1(d)–(e)**: Locked Matters now cover the Transfer of *any* Material Asset (not only "substantially all") and any management or affiliation agreement (RT7).
 6. **D-8, E7b.1**: subsidiaries are the Operator and are bound, and forming one is a Locked Matter (RT9).
 7. **V-5(c)**: the Foundation's own licensing of the marks is limited to hosts that comply with Schedule A (RT10).
@@ -1639,10 +1880,10 @@ Where the first draft failed, I **fixed the text** (marked RT-fix above) and giv
 
 **Delaware nonstock corporations**
 
-5. **The binding interpretive "no".** Can a certificate under §141(a) and §141(j) bind the board to a Determination by a member (Class V) and by a non-member (the Backup Enforcer, through a contract, A-2)? What standard of review will Chancery apply to a Determination (T-8.1's "no reasonable person" test)? Does the Backup Enforcer's role need a membership class to be enforceable?
-6. **§276 and §228.** Does C-5.5, giving Class V and Class C a vote on dissolution, make written-consent dissolution require all three classes? Can a nonstock certificate bar members' written consent on specified matters (C-9.4)?
+5. **The binding interpretive "no", and conditions set by non-members.** Can a certificate under §141(a) and §141(j) bind the board to a Determination by a member (Class V) and by a non-member (the Backup Enforcer, through a contract, A-2)? Can it condition the board's power over Locked Matters on the approval of a non-member body, the Council (C-6.3)? What standard of review will Chancery apply to a Determination (T-8.1's "no reasonable person" test)? Does the Backup Enforcer's role need a membership class to be enforceable? Is the 60-day, no-renewal bound on the Backup Enforcer's lone suspensions (T-8.4(d), V-7(c)) enforceable as written?
+6. **§276 and §228.** Does C-5.5, giving Class V a vote on dissolution alongside Class T, make written-consent dissolution require both classes? Is Class V's dissolution vote consistent with Class T being the "sole voting member" (a vote on a specified transaction under §215)? Can a nonstock certificate bar members' written consent on specified matters (C-9.4)?
 7. **"Unamendable" (G9).** Will a court give effect to C-9.5 and its mirrors (T-6.1(b), V-3.1) as a bar to amendment, or treat it as a §102(b)(4) supermajority that is unreachable in practice? Could a court order amendment to cure an impasse?
-8. **Class C at scale.** Can the Council (potentially tens of thousands of credentialed members, voting by blind token) be a statutory member class under §215? What notice, record-date, inspection (§220) and quorum burdens follow? If this is unworkable, what contractual substitute keeps lock 4 binding?
+8. **The Council pass-through, and the Class C option (Annex C).** (a) Is the pass-through enforceable: the deed's duty to elect the Council's nominees (T-6.4(b)), including the Administrative Trustee voting without a direction; the director qualification for Council Seats and the bars on filling vacancies under §223 and on removal (C-6.1); and the Trust's and Foundation's mirrored bars on acting without Council approval (T-6.1(g), V-3.2(c))? (b) Can credential holders with these powers be held to be members, or to have member-like inspection rights, despite D-26 and C-5.1? (c) Can the Trust and the Foundation, as statutory members, bind themselves not to use §220 (T-10.1(c), V-1)? Can a director's §220(d) right be limited by covenant (B-16)? (d) For Annex C only: can a statutory member class of tens of thousands exist under §215, and can its §220 rights (via §114) be confined to blind credential identifiers (CC-4)? If (a) fails and (d) cannot be met, lock 4 rests on locks 2 and 3 and the courts. The same question arises for the Council's election of Veto Foundation directors (V-2.1(a)).
 
 **Bankruptcy**
 
@@ -1724,7 +1965,8 @@ Where the first draft failed, I **fixed the text** (marked RT-fix above) and giv
 | IV Privacy Covenant | 21 | P-0.1 – P-13 |
 | V Resolution | 19 | S-1.1 – S-12 |
 | VI Ancillary | 7 | A-1 – A-7 |
-| **Total numbered clauses** | **256** | each with a ↳ mapping line (checked by script) |
+| **Total numbered clauses** | **256** | each with a ↳ mapping line (checked by script; re-checked in v2: 256, no duplicate numbers, none missing a mapping line) |
+| Annex C (counsel option, not in force; not counted above) | 5 | CC-1 – CC-5, each with a ↳ mapping line |
 
 *Principles to be tested in practice, not claims that the work is finished.*
 
