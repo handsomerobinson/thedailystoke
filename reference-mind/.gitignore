@@ -1,0 +1,6 @@
+# runtime state (memory, notes, audit log, schedules, outbox) - never commit
+data/
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/

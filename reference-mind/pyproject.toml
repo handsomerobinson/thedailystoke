@@ -1,0 +1,9 @@
+[project]
+name = "mind"
+version = "0.3.0"
+description = "The mind around the brain: a personal agent with reflection, sandboxed tools, per-user memory, schedules, permissions and cost caps."
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+mind = "mind.cli:main"
