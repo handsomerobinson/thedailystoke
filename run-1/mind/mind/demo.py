@@ -89,7 +89,7 @@ def run(data_dir: Path, quiet: bool = False) -> dict:
               "run python: print(sum(i*i for i in range(10)))",
               "save a note titled groceries: eggs, oats, lentils", "list my notes"]:
         r = alice.ask(q)
-        out(f"   you> {q}\n   mind> {r.answer.splitlines()[0] if r.answer else r.status}")
+        out(f"   you> {q}\n   mind> {r.answer.replace(chr(10), ' | ')[:110] if r.answer else r.status}")
     check("fact recalled from memory", "teal" in alice.ask("what is my favorite color?").answer)
     check("calculator tool used", "98" in alice.ask("calculate (17*23+1)/4").answer)
     r = alice.ask("delete note groceries")
@@ -208,13 +208,13 @@ def run(data_dir: Path, quiet: bool = False) -> dict:
     check("headless IRREVERSIBLE action deferred to approval queue", len(pend) == 1 and pend[0]["tool"] == "send_message")
     check("nothing was sent without approval", mem.sent() == [])
     mind.resolve_approval("alice", pend[0]["id"], approve=True)
+    out(f"   human approves #{pend[0]['id']} -> executed with the exact approved arguments: {mem.sent()[-1:]}")
+    check("approved action executes immediately, exactly once", len(mem.sent()) == 1)
     clock.advance(7 * 86400 + 1)
     results = mind.tick()
-    out(f"   after approval, next tick: {[r['status'] for r in results]}")
-    check("approved action executes exactly once on the next run", len(mem.sent()) == 1)
-    clock.advance(7 * 86400 + 1)
-    mind.tick()
-    check("one-shot approval is not reusable", len(mem.sent()) == 1 and len(mem.approvals("pending")) == 1)
+    out(f"   next week's run: {[r['status'] for r in results]}")
+    check("one-shot approval is not reusable (next run asks again)",
+          len(mem.sent()) == 1 and len(mem.approvals("pending")) == 1)
     check("jobs rescheduled, not re-run in a tight loop", sch.get(j1)["next_run"] > clock.now())
     _ = j2, j3
 

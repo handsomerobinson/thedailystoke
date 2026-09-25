@@ -7,6 +7,7 @@ it has NOT been exercised against the live API from this build environment (no k
 from __future__ import annotations
 
 import json
+import math
 import os
 
 from .base import (LLMResponse, Provider, ProviderError, ToolCall, ToolSpec, Transport, Usage,
@@ -21,7 +22,7 @@ class AnthropicProvider(Provider):
     name = "anthropic"
 
     def __init__(self, api_key: str | None = None, model: str = "", transport: Transport | None = None,
-                 timeout: float = 120.0, url: str = API_URL):
+                 timeout: float = 120.0, url: str = API_URL, prompt_cache: bool = True):
         self.api_key = api_key if api_key is not None else os.environ.get("ANTHROPIC_API_KEY", "")
         if not self.api_key:
             raise ProviderError("AnthropicProvider requires ANTHROPIC_API_KEY (provider is off by default)")
@@ -29,6 +30,7 @@ class AnthropicProvider(Provider):
         self.transport = transport or urllib_transport
         self.timeout = timeout
         self.url = url
+        self.prompt_cache = prompt_cache
 
     # -- conversion ----------------------------------------------------------------------
     @staticmethod
@@ -90,9 +92,10 @@ class AnthropicProvider(Provider):
         return LLMResponse(
             text="".join(text_parts).strip(),
             tool_calls=calls,
-            usage=Usage(int(usage.get("input_tokens", 0) or 0)
-                        + int(usage.get("cache_read_input_tokens", 0) or 0)
-                        + int(usage.get("cache_creation_input_tokens", 0) or 0),
+            # billed-equivalent input tokens: 5-minute cache writes cost 1.25x input, cache reads 0.1x
+            usage=Usage(math.ceil(int(usage.get("input_tokens", 0) or 0)
+                                  + 1.25 * int(usage.get("cache_creation_input_tokens", 0) or 0)
+                                  + 0.10 * int(usage.get("cache_read_input_tokens", 0) or 0)),
                         int(usage.get("output_tokens", 0) or 0)),
             model=data.get("model", model),
             stop_reason=data.get("stop_reason") or "end_turn",
@@ -110,6 +113,9 @@ class AnthropicProvider(Provider):
         }
         if tools:
             body["tools"] = self.tools_to_wire(tools)
+        if self.prompt_cache:
+            # top-level automatic prompt caching: the tool loop re-sends the same prefix every step
+            body["cache_control"] = {"type": "ephemeral"}
         headers = {
             "content-type": "application/json",
             "x-api-key": self.api_key,

@@ -5,7 +5,6 @@ from mind.config import Config
 from mind.prompts import FACTS_HEADER, LESSONS_HEADER, REFLECT_SYSTEM
 from mind.providers import (AnthropicProvider, MockBrain, OpenAIProvider, ProviderError, ResilientProvider,
                             ToolSpec, make_provider)
-from mind.providers.base import classify_http_error
 from mind.util import FakeClock
 
 TOOLS = [ToolSpec(n, n, {"type": "object", "properties": {}}) for n in
@@ -250,3 +249,16 @@ class FactoryTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PromptCacheTests(unittest.TestCase):
+    def test_anthropic_requests_prompt_caching(self):
+        t = FakeTransport([(200, {"content": [{"type": "text", "text": "x"}], "usage": {}})])
+        AnthropicProvider(api_key="k", transport=t).complete("s", [{"role": "user", "content": "q"}], [])
+        self.assertEqual(t.requests[0][2]["cache_control"], {"type": "ephemeral"})
+
+    def test_cache_tokens_billed_at_equivalent_rates(self):
+        r = AnthropicProvider.from_wire({"content": [], "usage": {"input_tokens": 10, "cache_read_input_tokens": 100,
+                                                                  "cache_creation_input_tokens": 100,
+                                                                  "output_tokens": 5}}, "m")
+        self.assertEqual(r.usage.input_tokens, 10 + 125 + 10)

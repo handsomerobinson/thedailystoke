@@ -24,6 +24,7 @@ class ToolResult:
     data: Any = None
     denied: bool = False
     deferred: bool = False
+    taint: str = ""        # set by a tool whose output carries untrusted content (e.g. a tainted note)
 
 
 @dataclass
@@ -44,6 +45,7 @@ class Tool:
     description: str = ""
     tier: Tier = Tier.READ
     parameters: dict = {"type": "object", "properties": {}, "required": []}
+    taints: bool = False   # output is untrusted third-party content (suspends WRITE grants afterwards)
 
     def tier_for(self, args: dict) -> Tier:
         """Tools may escalate their tier based on arguments (never lower it)."""
@@ -121,7 +123,8 @@ class ToolRegistry:
             tier = max(tool.tier, tool.tier_for(call.arguments))
         except Exception:
             tier = Tier.IRREVERSIBLE  # if we cannot classify it, treat it as the most dangerous
-        req = ActionRequest(ctx.user, call.name, Tier(tier), call.arguments, ctx.task_id, ctx.headless, ctx.job_id)
+        req = ActionRequest(ctx.user, call.name, Tier(tier), call.arguments, ctx.task_id, ctx.headless, ctx.job_id,
+                            tainted_by=ctx.extra.get("tainted_by", ""))
         decision: Decision = self.gate.check(req)
         fail_closed = tier > Tier.READ
         if not self._audit("tool.decision", fail_closed, **base, tier=Tier(tier).name, allowed=decision.allowed,
@@ -139,6 +142,9 @@ class ToolRegistry:
         except Exception as e:
             result = ToolResult(False, f"{call.name} raised {type(e).__name__}: {e}")
         result.content = truncate(str(result.content), self.output_limit)
+        if (tool.taints and result.ok) or result.taint:
+            # prompt-injection containment for the rest of this trial
+            ctx.extra.setdefault("tainted_by", result.taint or tool.name)
         self._audit("tool.result", False, **base, ok=result.ok, ms=int((time.monotonic() - t0) * 1000),
                     result=result.content[:500])
         return result

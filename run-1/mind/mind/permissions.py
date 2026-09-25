@@ -34,6 +34,7 @@ class ActionRequest:
     task_id: str = ""
     headless: bool = False
     job_id: str = ""
+    tainted_by: str = ""   # set when untrusted content (web) is already in this trial's context
 
     @property
     def digest(self) -> str:
@@ -130,8 +131,10 @@ class PermissionGate:
         if self.memory is not None and self.memory.consume_approval(req.digest):
             return Decision(True, "previously approved by human (one-shot)")
 
-        if req.tier == Tier.WRITE and req.tool in self.grants:
+        if req.tier == Tier.WRITE and req.tool in self.grants and not req.tainted_by:
             return Decision(True, f"granted for this {'job' if self.headless else 'session'}")
+        taint_note = (f" (grant suspended: untrusted content from {req.tainted_by} is in context)"
+                      if req.tainted_by and req.tool in self.grants else "")
 
         if self.headless:
             aid = None
@@ -139,13 +142,13 @@ class PermissionGate:
                 aid = self.memory.add_approval(req.tool, req.args, req.digest,
                                                f"{req.tier.name} action requested by headless job",
                                                req.job_id)
-            return Decision(False, f"deferred: {req.tier.name} action needs a human; queued as approval #{aid}",
-                            deferred=True, approval_id=aid)
+            return Decision(False, f"deferred: {req.tier.name} action needs a human; queued as approval #{aid}"
+                                   + taint_note, deferred=True, approval_id=aid)
 
         try:
             if req.tier == Tier.WRITE:
                 ok = self.approver.approve_write(req)
-                return Decision(ok, "approved by user" if ok else "denied by user")
+                return Decision(ok, ("approved by user" if ok else "denied by user") + taint_note)
             ok = self.approver.confirm_irreversible(req)
             return Decision(ok, "explicitly confirmed by user" if ok else "irreversible action not confirmed")
         except Exception as e:  # a broken approver must fail closed

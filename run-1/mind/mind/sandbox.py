@@ -77,11 +77,18 @@ def _hook(event, args):
             if isinstance(a, (str, bytes, os.PathLike)) and not _inside(a):
                 raise PermissionError(f"sandbox: {event} outside the work dir is not allowed")
 
-sys.addaudithook(_hook)
+_post = None
+if os.path.exists("post_code.py"):          # evaluator harness: read, then deleted from disk
+    _post = open("post_code.py", encoding="utf-8").read()
+    os.remove("post_code.py")
+if os.environ.get("MIND_SBX_HOOK", "1") == "1":
+    sys.addaudithook(_hook)
 del _hook
 _src = open("user_code.py", encoding="utf-8").read()
 _g = {"__name__": "__main__", "__builtins__": __builtins__}
 exec(compile(_src, "user_code.py", "exec"), _g)
+if _post is not None:
+    exec(compile(_post, "post_code.py", "exec"), _g)
 '''
 
 
@@ -128,7 +135,13 @@ def namespaces_available() -> bool:
     exe = shutil.which("unshare")
     if exe and sys.platform.startswith("linux"):
         try:
-            r = subprocess.run([exe, "-rnpfm", "--mount-proc", "true"], capture_output=True, timeout=5)
+            def as_nobody():
+                if os.geteuid() == 0:
+                    os.setgroups([])
+                    os.setgid(NOBODY)
+                    os.setuid(NOBODY)
+            r = subprocess.run([exe, "-rnpfm", "--mount-proc", "true"], capture_output=True, timeout=5,
+                               preexec_fn=as_nobody)
             ok = r.returncode == 0
         except Exception:
             ok = False
@@ -136,9 +149,16 @@ def namespaces_available() -> bool:
     return ok
 
 
-def _limits(policy: SandboxPolicy):
+NOBODY = 65534
+
+
+def _limits(policy: SandboxPolicy, drop: bool):
     def apply():
         os.setsid()
+        if drop:  # root in the parent must not mean root-owned host files are writable by the child
+            os.setgroups([])
+            os.setgid(NOBODY)
+            os.setuid(NOBODY)
         cpu = max(1, int(policy.cpu_seconds))
         resource.setrlimit(resource.RLIMIT_CPU, (cpu, cpu + 1))
         mem = policy.memory_mb * 1024 * 1024
@@ -171,7 +191,9 @@ def _drain(stream, cap: int, sink: dict):
 
 
 def run_python(code: str, policy: SandboxPolicy | None = None, extra_hide: tuple = (),
-               stdin_text: str = "") -> SandboxResult:
+               stdin_text: str = "", post_code: str = "") -> SandboxResult:
+    """Run `code`; if `post_code` is given it runs afterwards in the same namespace, but its
+    source is removed from disk before `code` starts (used by the evaluator harness)."""
     policy = policy or SandboxPolicy()
     work = tempfile.mkdtemp(prefix="mind-sbx-")
     use_ns = policy.use_namespaces and namespaces_available()
@@ -185,8 +207,16 @@ def run_python(code: str, policy: SandboxPolicy | None = None, extra_hide: tuple
     try:
         Path(work, "user_code.py").write_text(code, encoding="utf-8")
         Path(work, "runner.py").write_text(_PRELUDE, encoding="utf-8")
+        if post_code:
+            Path(work, "post_code.py").write_text(post_code, encoding="utf-8")
+        drop = bool(policy.drop_privileges and hasattr(os, "geteuid") and os.geteuid() == 0)
+        if drop:
+            for f in [work] + [os.path.join(work, n) for n in os.listdir(work)]:
+                os.chown(f, NOBODY, NOBODY)
+        isolation["uid"] = NOBODY if drop else os.geteuid()
         env = {"PATH": "/usr/bin:/bin", "HOME": "/tmp" if use_ns else work, "TMPDIR": "/tmp" if use_ns else work,
-               "LANG": "C.UTF-8", "PYTHONIOENCODING": "utf-8", "PYTHONDONTWRITEBYTECODE": "1"}
+               "LANG": "C.UTF-8", "PYTHONIOENCODING": "utf-8", "PYTHONDONTWRITEBYTECODE": "1",
+               "MIND_SBX_HOOK": "1" if policy.audit_hook else "0"}
         py = [exe, "-I", "-S", "-B", "runner.py"]
         if use_ns:
             hide = []
@@ -209,7 +239,7 @@ def run_python(code: str, policy: SandboxPolicy | None = None, extra_hide: tuple
             cmd, cwd = py, work
         t0 = time.monotonic()
         proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdin=subprocess.PIPE if stdin_text else subprocess.DEVNULL,
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=_limits(policy),
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=_limits(policy, drop),
                                 close_fds=True)
         if stdin_text:
             try:
@@ -234,6 +264,11 @@ def run_python(code: str, policy: SandboxPolicy | None = None, extra_hide: tuple
             proc.wait()
         for t in threads:
             t.join(timeout=2)
+        for stream in (proc.stdout, proc.stderr):
+            try:
+                stream.close()
+            except Exception:
+                pass
         dur = time.monotonic() - t0
         stdout = out.get("data", b"").decode("utf-8", "replace")
         stderr = err.get("data", b"").decode("utf-8", "replace")

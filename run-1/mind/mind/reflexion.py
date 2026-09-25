@@ -35,7 +35,7 @@ class TrialRecord:
     status: str
     eval: EvalResult | None
     reflection: str = ""
-    reflection_source: str = ""   # "llm" | "heuristic" | ""
+    reflection_source: str = ""   # "brain" (provider wrote it) | "heuristic" | ""
     lessons_in_prompt: int = 0
     cost_usd: float = 0.0
 
@@ -81,16 +81,18 @@ class ReflexionRunner:
             budget.record(resp.usage.input_tokens, resp.usage.output_tokens, self.reflect_provider.billed_price())
             text = resp.text.strip()
             if text:
-                return truncate(text, 600), "llm"
+                return truncate(text, 600), "brain"
         except BudgetExceeded:
             raise
         except Exception:
             pass
         # Degraded path: no brain available for reflection -> a templated note built from the
         # evaluator's feedback. Clearly labelled; still better than nothing.
-        first = next((ln for ln in ev.feedback.splitlines() if ln.strip()), "unknown failure")
-        return (f"Previous attempt failed: {truncate(first, 300)}. Do not repeat the same answer; "
-                f"address this failing case directly.", "heuristic")
+        lines = [ln.strip().rstrip(".") for ln in ev.feedback.splitlines() if ln.strip()]
+        specific = [ln for ln in lines if "expected" in ln or "error" in ln.lower() or "raised" in ln] or lines[:1]
+        detail = "; ".join(specific[:3]) or "unknown failure"
+        return (f"Previous attempt failed: {truncate(detail, 400)}. Do not repeat the same answer; "
+                f"address these failing cases directly.", "heuristic")
 
     def solve(self, task: TaskSpec, budget: Budget, headless: bool = False, job_id: str = "") -> SolveResult:
         sig = task_signature(task.text)
@@ -146,7 +148,8 @@ class ReflexionRunner:
                 break
             rec.reflection, rec.reflection_source = text, source
             session_reflections.append(text)
-            self._safe(self.memory.add_item, "reflection", text, " ".join(task.tags), sig, 0.6)
+            tags = " ".join(task.tags) + (" untrusted" if traj.tainted_by else "")
+            self._safe(self.memory.add_item, "reflection", text, tags.strip(), sig, 0.3 if traj.tainted_by else 0.6)
             rec.cost_usd = budget.spent_usd - spent_before
 
         outcome = "succeeded" if result.success else "failed"

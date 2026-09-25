@@ -44,6 +44,8 @@ class SandboxPolicy:
     max_open_files: int = 64
     use_namespaces: bool = True          # try `unshare` for net/pid/mount isolation
     hide_paths: tuple = ("/home", "/root", "/srv", "/mnt")
+    drop_privileges: bool = True         # when running as root, run the child as uid/gid 65534 (nobody)
+    audit_hook: bool = True              # Python-level speed bump (disable only to test lower layers)
 
 
 @dataclass

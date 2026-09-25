@@ -11,6 +11,8 @@
   python3 -m mind tick                               (run due jobs once, headless)
   python3 -m mind serve --interval 30 [--watch DIR --user alice]
   python3 -m mind approvals --user alice [--approve ID | --deny ID]
+  python3 -m mind export --user alice              (everything stored about alice, as JSON)
+  python3 -m mind forget --user alice --confirm alice  (irreversible)
   python3 -m mind audit verify
 """
 from __future__ import annotations
@@ -63,6 +65,7 @@ def main(argv=None) -> int:
     g.add_argument("--event")
     ja.add_argument("--grant", action="append", default=[])
     ja.add_argument("--budget", type=float)
+    ja.add_argument("--now", action="store_true", help="first run immediately (every-jobs only)")
     ja.add_argument("task")
     jl = jsub.add_parser("list")
     jl.add_argument("--user")
@@ -84,6 +87,11 @@ def main(argv=None) -> int:
     ap.add_argument("--user", required=True)
     ap.add_argument("--approve", type=int)
     ap.add_argument("--deny", type=int)
+    ex = sub.add_parser("export", help="print everything stored about a user as JSON")
+    ex.add_argument("--user", required=True)
+    fg = sub.add_parser("forget", help="IRREVERSIBLY delete a user's memory and jobs")
+    fg.add_argument("--user", required=True)
+    fg.add_argument("--confirm", default="", help="must equal the user id")
     au = sub.add_parser("audit")
     au.add_argument("action", choices=["verify", "tail"])
 
@@ -124,7 +132,7 @@ def main(argv=None) -> int:
         if args.jcmd == "add":
             jid = mind.scheduler.add_job(args.user, name=args.task[:60], task=args.task, every_s=args.every,
                                          at=args.at, daily=args.daily, event=args.event, grants=args.grant,
-                                         budget_usd=args.budget)
+                                         budget_usd=args.budget, start_now=args.now)
             print(jid)
         elif args.jcmd == "list":
             for jb in mind.scheduler.list_jobs(args.user):
@@ -147,9 +155,12 @@ def main(argv=None) -> int:
             return 3
         watcher = DirectoryWatcher(mind.scheduler, args.watch, args.user) if args.watch else None
         n = 0
+        stop = {"flag": False}
+        import signal as _signal
+        _signal.signal(_signal.SIGTERM, lambda *_: stop.update(flag=True))  # finish the tick, then exit
         print(f"serving (interval {args.interval}s); Ctrl-C to stop")
         try:
-            while True:
+            while not stop["flag"]:
                 if watcher:
                     watcher.poll()
                 for r in mind.tick():
@@ -169,6 +180,14 @@ def main(argv=None) -> int:
         else:
             for a in mem.approvals("pending"):
                 print(f"#{a['id']} {a['tool']} {a['args']} — {a['reason']} (job {a['job_id']})")
+    elif args.cmd == "export":
+        print(json.dumps(mind.export_user(args.user), indent=2, default=str))
+    elif args.cmd == "forget":
+        confirm = args.confirm or input(f"Type the user id '{args.user}' to irreversibly delete their memory: ")
+        if confirm.strip() != args.user:
+            print("not confirmed; nothing deleted", file=sys.stderr)
+            return 1
+        print(json.dumps(mind.forget_user(args.user)))
     elif args.cmd == "audit":
         if args.action == "verify":
             ok, msg = mind.audit.verify()

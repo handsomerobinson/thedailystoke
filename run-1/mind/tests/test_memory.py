@@ -118,3 +118,30 @@ class MemoryTests(TempDirCase):
         m = self.mem()
         m.add_item("lesson", 'quote " and * and NEAR( and -minus')
         m.search('"unbalanced * NEAR( OR AND -')
+
+
+class Round1MemoryTests(TempDirCase):
+    def test_kind_filter_is_applied_before_limit(self):
+        m = MemoryStore(self.tmp, "alice", self.clock)
+        for i in range(150):
+            m.add_item("episode", f"widget episode {i} widget widget")
+        lesson = m.add_item("lesson", "widget lesson")
+        hits = m.search("widget", kinds=["lesson"])
+        self.assertEqual([h.id for h in hits], [lesson])
+
+
+class CompactTests(TempDirCase):
+    def test_compact_removes_harmful_and_oldest_but_keeps_lessons(self):
+        m = MemoryStore(self.tmp, "alice", self.clock)
+        bad = m.add_item("reflection", "misleading advice")
+        m.feedback(bad, False)
+        m.feedback(bad, False)
+        lessons = [m.add_item("lesson", f"lesson {i}") for i in range(3)]
+        for i in range(20):
+            m.add_item("episode", f"episode {i}")
+        removed = m.compact(max_items=10)
+        self.assertGreaterEqual(removed, 1)
+        self.assertIsNone(m.get_item(bad))
+        self.assertTrue(all(m.get_item(i) for i in lessons))
+        self.assertLessEqual(len(m.items(limit=1000)), 10)
+        self.assertEqual(m.search("misleading"), [])

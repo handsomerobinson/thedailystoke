@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS items (
     helpful INTEGER DEFAULT 0, harmful INTEGER DEFAULT 0, importance REAL DEFAULT 0.5);
 CREATE INDEX IF NOT EXISTS items_kind ON items(kind);
 CREATE INDEX IF NOT EXISTS items_sig ON items(task_sig);
-CREATE TABLE IF NOT EXISTS notes (title TEXT PRIMARY KEY, body TEXT NOT NULL, version INTEGER, updated_at REAL);
+CREATE TABLE IF NOT EXISTS notes (title TEXT PRIMARY KEY, body TEXT NOT NULL, version INTEGER, updated_at REAL,
+    provenance TEXT DEFAULT '');
 CREATE TABLE IF NOT EXISTS note_history (title TEXT, body TEXT, version INTEGER, saved_at REAL);
 CREATE TABLE IF NOT EXISTS inbox (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at REAL, source TEXT,
     title TEXT, body TEXT, read INTEGER DEFAULT 0);
@@ -112,11 +113,17 @@ class MemoryStore:
                 self.db.execute("CREATE VIRTUAL TABLE IF NOT EXISTS items_fts USING fts5(text, tags, "
                                 "tokenize='porter unicode61')")
             self._check_owner()
+            self._migrate()
             self.db.commit()
         except MemoryIsolationError:
             raise
         except sqlite3.Error as e:
             raise MemoryUnavailable(f"cannot open memory for {user_id}: {e}") from e
+
+    def _migrate(self):
+        cols = {r["name"] for r in self.db.execute("PRAGMA table_info(notes)")}
+        if "provenance" not in cols:  # files created by an older build
+            self.db.execute("ALTER TABLE notes ADD COLUMN provenance TEXT DEFAULT ''")
 
     def _check_owner(self):
         row = self.db.execute("SELECT v FROM meta WHERE k='owner'").fetchone()
@@ -259,16 +266,25 @@ class MemoryStore:
 
     def _fts_scores(self, toks: list[str], kinds) -> dict[int, float]:
         q = " OR ".join('"' + t.replace('"', "") + '"' for t in toks[:32])
+        kind_sql, params = "", [q]
+        if kinds:  # filter inside the query so other kinds cannot crowd the LIMIT
+            kind_sql = f" AND items.kind IN ({','.join('?' * len(kinds))})"
+            params += list(kinds)
         try:
-            rows = self._q("SELECT rowid, bm25(items_fts) AS s FROM items_fts WHERE items_fts MATCH ? "
-                           "ORDER BY s LIMIT 100", (q,))
+            rows = self._q("SELECT items_fts.rowid AS rowid, bm25(items_fts) AS s FROM items_fts "
+                           "JOIN items ON items.id = items_fts.rowid WHERE items_fts MATCH ?"
+                           + kind_sql + " ORDER BY s LIMIT 100", params)
         except sqlite3.Error:
             return self._py_bm25(toks, kinds)
         return {r["rowid"]: -r["s"] for r in rows if -r["s"] > 0}
 
     def _py_bm25(self, toks: list[str], kinds) -> dict[int, float]:
         """Pure-Python BM25 fallback for SQLite builds without FTS5 (bounded to 2000 recent items)."""
-        rows = self._q("SELECT id, text, tags FROM items ORDER BY id DESC LIMIT 2000")
+        if kinds:
+            rows = self._q(f"SELECT id, text, tags FROM items WHERE kind IN ({','.join('?' * len(kinds))}) "
+                           "ORDER BY id DESC LIMIT 2000", tuple(kinds))
+        else:
+            rows = self._q("SELECT id, text, tags FROM items ORDER BY id DESC LIMIT 2000")
         docs = {r["id"]: [stem(t) for t in tokenize(r["text"] + " " + (r["tags"] or ""))] for r in rows}
         if not docs:
             return {}
@@ -291,7 +307,8 @@ class MemoryStore:
         return out
 
     # ---- notes (versioned) --------------------------------------------------------------
-    def write_note(self, title: str, body: str) -> int:
+    def write_note(self, title: str, body: str, provenance: str = "") -> int:
+        """`provenance` non-empty = written while untrusted content was in context (tainted)."""
         title = title.strip()[:200]
         now = self.clock.now()
         with self._lock:
@@ -301,9 +318,10 @@ class MemoryStore:
                 self.db.execute("INSERT INTO note_history(title, body, version, saved_at) VALUES(?,?,?,?)",
                                 (title, row["body"], row["version"], now))
                 version = row["version"] + 1
-            self.db.execute("INSERT INTO notes(title, body, version, updated_at) VALUES(?,?,?,?) "
+            self.db.execute("INSERT INTO notes(title, body, version, updated_at, provenance) VALUES(?,?,?,?,?) "
                             "ON CONFLICT(title) DO UPDATE SET body=excluded.body, version=excluded.version, "
-                            "updated_at=excluded.updated_at", (title, body[:20000], version, now))
+                            "updated_at=excluded.updated_at, provenance=excluded.provenance",
+                            (title, body[:20000], version, now, provenance))
             self.db.commit()
             return version
 
@@ -402,6 +420,37 @@ class MemoryStore:
 
     def sent(self) -> list[dict]:
         return [dict(r) for r in self._q("SELECT * FROM outbox ORDER BY id")]
+
+    def compact(self, max_items: int = 5000) -> int:
+        """Bound memory growth: drop repeatedly-harmful reflections, then the least useful oldest
+        episodes until at most `max_items` items remain. Lessons are never auto-deleted."""
+        removed = 0
+        with self._lock:
+            bad = [r["id"] for r in self.db.execute(
+                "SELECT id FROM items WHERE kind IN ('reflection','lesson') AND harmful>=2 AND harmful>2*helpful")]
+            count = self.db.execute("SELECT COUNT(*) FROM items").fetchone()[0] - len(bad)
+            extra = []
+            if count > max_items:
+                extra = [r["id"] for r in self.db.execute(
+                    "SELECT id FROM items WHERE kind IN ('episode','reflection') AND harmful<=helpful "
+                    "ORDER BY uses ASC, last_used ASC LIMIT ?", (count - max_items,))]
+            for iid in bad + extra:
+                self.db.execute("DELETE FROM items WHERE id=?", (iid,))
+                if self.use_fts:
+                    self.db.execute("DELETE FROM items_fts WHERE rowid=?", (iid,))
+                removed += 1
+            self.db.commit()
+        return removed
+
+    def export(self) -> dict:
+        """Everything stored about this user, as plain data (for inspection / portability)."""
+        def rows(sql):
+            return [dict(r) for r in self._q(sql)]
+        return {"user": self.user_id, "facts": self.facts(limit=10_000),
+                "items": rows("SELECT id, kind, text, tags, task_sig, created_at, uses, helpful, harmful FROM items"),
+                "notes": rows("SELECT * FROM notes"), "note_history": rows("SELECT * FROM note_history"),
+                "inbox": rows("SELECT * FROM inbox"), "approvals": rows("SELECT * FROM approvals"),
+                "spend": rows("SELECT * FROM spend"), "outbox": rows("SELECT * FROM outbox")}
 
     def stats(self) -> dict:
         def n(t):

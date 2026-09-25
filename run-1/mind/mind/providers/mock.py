@@ -19,7 +19,7 @@ import re
 
 from ..prompts import FACTS_HEADER, JUDGE_MARKER, LESSONS_HEADER, REFLECT_MARKER
 from ..util import estimate_tokens
-from .base import LLMResponse, Provider, ToolCall, ToolSpec, Usage
+from .base import LLMResponse, Provider, ToolCall, Usage
 
 # --- A tiny library of alternative solutions, ordered naive -> robust ----------------------
 SKILLS: dict[str, list[tuple[str, str]]] = {

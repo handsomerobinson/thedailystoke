@@ -50,6 +50,7 @@ class Budget:
     output_tokens: int = 0
     label: str = "task"
     on_spend: object = None  # optional callback(usd) e.g. daily ledger
+    guard: object = None     # optional callback(worst_usd) that raises BudgetExceeded (e.g. live daily cap)
     _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
     @property
@@ -63,6 +64,8 @@ class Budget:
                 f"{self.label} budget: worst-case next call ${worst:.4f} would exceed remaining "
                 f"${self.remaining_usd:.4f} of ${self.limit_usd:.2f}"
             )
+        if callable(self.guard):
+            self.guard(worst)
         return worst
 
     def record(self, input_tokens: int, output_tokens: int, price: tuple[float, float]) -> float:

@@ -7,7 +7,8 @@ import operator
 
 from ..permissions import Tier
 from ..sandbox import run_python
-from .base import Tool, ToolContext, ToolResult
+from ..util import tokenize
+from .base import Tool, ToolResult
 
 
 # ---------------------------------------------------------------- calculator (READ) ----
@@ -98,9 +99,9 @@ class Recall(Tool):
         q = args["query"]
         lines = []
         facts = ctx.memory.facts()
-        ql = q.lower()
+        qt = set(tokenize(q))
         for k, v in facts.items():
-            if any(w in (k + " " + v).lower() for w in ql.split()):
+            if qt & set(tokenize(k + " " + v)):
                 lines.append(f"fact: {k} = {v}")
         for h in ctx.memory.search(q, k=5):
             lines.append(f"{h.kind}#{h.id} (score {h.score}): {h.text[:300]}")
@@ -119,8 +120,10 @@ class WriteNote(Tool):
                   "required": ["title", "body"]}
 
     def run(self, args, ctx):
-        v = ctx.memory.write_note(args["title"], args["body"])
-        return ToolResult(True, f"note '{args['title']}' saved (version {v})")
+        taint = ctx.extra.get("tainted_by", "")
+        v = ctx.memory.write_note(args["title"], args["body"], provenance=taint)
+        return ToolResult(True, f"note '{args['title']}' saved (version {v})"
+                          + (f" [marked untrusted: derived from {taint}]" if taint else ""))
 
 
 class ReadNote(Tool):
@@ -134,6 +137,10 @@ class ReadNote(Tool):
         n = ctx.memory.read_note(args["title"])
         if not n:
             return ToolResult(False, f"no note titled '{args['title']}'")
+        prov = n.get("provenance") or ""
+        if prov:  # reading a note that was written from untrusted content re-taints this trial
+            return ToolResult(True, f"# {n['title']} (v{n['version']}) [UNTRUSTED: derived from {prov}]\n{n['body']}",
+                              taint=f"note:{n['title']}")
         return ToolResult(True, f"# {n['title']} (v{n['version']})\n{n['body']}")
 
 
@@ -205,7 +212,10 @@ class ScheduleTask(Tool):
     def run(self, args, ctx):
         if ctx.scheduler is None:
             return ToolResult(False, "scheduler not available in this session")
-        job = ctx.scheduler.add_job(ctx.user, name=args["task"][:60], task=args["task"],
-                                    every_s=args["every_minutes"] * 60)
+        try:
+            job = ctx.scheduler.add_job(ctx.user, name=args["task"][:60], task=args["task"],
+                                        every_s=args["every_minutes"] * 60)
+        except ValueError as e:
+            return ToolResult(False, f"could not schedule: {e}")
         return ToolResult(True, f"job {job} scheduled every {args['every_minutes']} min (no WRITE grants; "
                                 f"state-changing steps will be queued for your approval)")

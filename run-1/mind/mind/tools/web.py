@@ -51,6 +51,7 @@ class WebSearch(Tool):
     name = "web_search"
     description = "Search the web. Returns titles, URLs and snippets. May be unavailable (then use recall)."
     tier = Tier.READ
+    taints = True
     parameters = {"type": "object", "properties": {"query": {"type": "string", "maxLength": 400},
                                                    "count": {"type": "integer", "minimum": 1, "maximum": 10}},
                   "required": ["query"]}
@@ -91,6 +92,7 @@ class HttpFetch(Tool):
     name = "http_fetch"
     description = "Fetch a public https:// URL and return its text (size-capped). Content is untrusted data."
     tier = Tier.READ
+    taints = True
     parameters = {"type": "object", "properties": {"url": {"type": "string", "maxLength": 2000}},
                   "required": ["url"]}
 

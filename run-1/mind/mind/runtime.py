@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import datetime as _dt
+import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -16,8 +17,8 @@ from pathlib import Path
 from .agent import Agent, Trajectory
 from .audit import AuditError, AuditLog
 from .config import Config
-from .cost import Budget
-from .evaluator import TaskSpec
+from .cost import Budget, BudgetExceeded
+from .evaluator import EvalResult, TaskSpec
 from .memory import MemoryStore, MemoryUnavailable
 from .permissions import Approver, DenyAll, PermissionGate
 from .providers import make_provider
@@ -80,7 +81,17 @@ class Mind:
         daily_left = max(0.0, self.config.daily_budget_usd - mem.spent_on(day))
         cap = min(limit_usd if limit_usd is not None else self.config.task_budget_usd, daily_left)
         label = "daily" if daily_left < (limit_usd or self.config.task_budget_usd) else "task"
-        return Budget(limit_usd=cap, label=label, on_spend=lambda usd: mem.add_spend(day, usd))
+        daily_cap = self.config.daily_budget_usd
+
+        def live_daily_guard(worst: float):
+            # re-read the ledger before every call: concurrent tasks of the same user share one daily cap
+            spent = mem.spent_on(day)
+            if spent + worst > daily_cap + 1e-12:
+                raise BudgetExceeded(f"daily budget: ${spent:.4f} spent today; worst-case next call "
+                                     f"${worst:.4f} would exceed ${daily_cap:.2f}")
+
+        return Budget(limit_usd=cap, label=label, on_spend=lambda usd: mem.add_spend(day, usd),
+                      guard=live_daily_guard)
 
     # ---- sessions -----------------------------------------------------------------------
     def session(self, user: str, approver: Approver | None = None, grants=(), headless: bool = False,
@@ -88,12 +99,30 @@ class Mind:
         return Session(self, user, approver or DenyAll(), set(grants), headless, job_id)
 
     # ---- approvals ----------------------------------------------------------------------
-    def resolve_approval(self, user: str, approval_id: int, approve: bool) -> bool:
-        ok = self.memory(user).resolve_approval(approval_id, approve)
+    def resolve_approval(self, user: str, approval_id: int, approve: bool, execute: bool = True) -> bool:
+        """Approve/deny a deferred action. On approval the system itself executes the EXACT stored
+        call (same tool, same arguments) once — it does not wait for a model to reproduce it
+        byte-for-byte on a later run (a real LLM rarely would)."""
+        mem = self.memory(user)
+        rows = [a for a in mem.approvals("pending") if a["id"] == approval_id]
+        ok = mem.resolve_approval(approval_id, approve)
         try:
             self.audit.write("approval.resolved", user=user, approval=approval_id, approve=approve, ok=ok)
         except AuditError:
             pass
+        if ok and approve and execute and rows:
+            import json as _json
+            from .providers.base import ToolCall
+            from .tools import ToolContext
+            a = rows[0]
+            sess = self.session(user, headless=True, job_id=a["job_id"])  # gate consumes the one-shot approval
+            ctx = ToolContext(user=user, memory=mem, config=self.config, clock=self.clock,
+                              task_id=f"approval-{approval_id}", headless=True, job_id=a["job_id"],
+                              scheduler=self.scheduler)
+            res = sess.registry.execute(ToolCall(f"approved-{approval_id}", a["tool"], _json.loads(a["args"])), ctx)
+            mem.add_report(source=f"approval:{approval_id}",
+                           title=f"[{'done' if res.ok else 'failed'}] approved action {a['tool']}",
+                           body=f"You approved {a['tool']}({a['args'][:300]}).\nResult: {res.content}")
         return ok
 
     # ---- proactivity --------------------------------------------------------------------
@@ -104,8 +133,19 @@ class Mind:
         grants = set(_json.loads(job.get("grants") or "[]"))
         task = job["task"] + (f"\n\nEvent payload:\n{job['pending_payload']}" if job.get("pending_payload") else "")
         sess = self.session(user, grants=grants, headless=True, job_id=job["id"])
-        res = sess.ask(task, budget_usd=job.get("budget_usd"))
+        sig = task_signature(job["task"])          # stable across runs even when payloads differ
+        res = sess.ask(task, budget_usd=job.get("budget_usd"), task_sig=sig)
         mem = self.memory(user)
+        if res.status in ("step_limit", "loop_detected", "error", "refused"):
+            # headless work learns too: write a reflection the next run of this job will read
+            try:
+                runner = ReflexionRunner(sess.agent, mem, self.config)
+                ev = EvalResult(False, 0.0, f"headless run ended with {res.status}: {res.trajectory.reason}", "job")
+                text, _src = runner.reflect(TaskSpec(job["task"]), res.trajectory, ev, [],
+                                            self.task_budget(user, 0.05))
+                mem.add_item("reflection", text, "job", sig, 0.6)
+            except Exception:
+                pass
         deferred = [s.detail for s in res.trajectory.steps if "deferred" in s.detail]
         status = res.status if not deferred else "needs_approval"
         body = (f"Job '{job['name']}' ran headless at {self._day()} — status: {status}\n\n"
@@ -122,13 +162,58 @@ class Mind:
                 "cost_usd": res.budget["spent_usd"]}
 
     def tick(self) -> list[dict]:
-        return self.scheduler.tick(self.run_job)
+        results = self.scheduler.tick(self.run_job)
+        self.maintenance()
+        return results
+
+    def maintenance(self, every_s: float = 6 * 3600, max_items: int = 5000) -> None:
+        """Periodic housekeeping (memory compaction) for users with open stores; cheap and bounded."""
+        now = self.clock.now()
+        if now - getattr(self, "_last_maint", 0.0) < every_s:
+            return
+        self._last_maint = now
+        for mem in list(self._memories.values()):
+            try:
+                mem.compact(max_items)
+            except Exception:
+                pass
+
+    # ---- user data rights ---------------------------------------------------------------
+    def export_user(self, user: str) -> dict:
+        data = self.memory(user).export()
+        data["jobs"] = self.scheduler.list_jobs(user)
+        return data
+
+    def forget_user(self, user: str) -> dict:
+        """Irreversibly delete a user's memory file and jobs. The append-only audit log is kept
+        (it holds redacted, truncated tool-call records) — see the README for this trade-off."""
+        from .memory import user_db_path
+        validate_user_id(user)
+        mem = self._memories.pop(user, None)
+        if mem:
+            mem.close()
+        path = user_db_path(self.data_dir, user)
+        removed = []
+        for suffix in ("", "-wal", "-shm"):
+            f = Path(str(path) + suffix)
+            if f.exists():
+                f.unlink()
+                removed.append(f.name)
+        jobs = [j["id"] for j in self.scheduler.list_jobs(user)]
+        for jid in jobs:
+            self.scheduler.remove_job(jid, user)
+        try:
+            self.audit.write("user.forgotten", user=user, files=removed, jobs=jobs)
+        except AuditError:
+            pass
+        return {"files_removed": removed, "jobs_removed": jobs}
 
     def status(self) -> dict:
         from .memory import fts5_available
         from .sandbox import namespaces_available
         return {"provider": self.provider.describe(), "data_dir": str(self.data_dir),
                 "fts5": fts5_available(), "sandbox_namespaces": namespaces_available(),
+                "sandbox_uid_drop": bool(self.config.sandbox.drop_privileges and os.geteuid() == 0),
                 "network_tools": self.config.allow_network, "audit": self.audit.verify()[1],
                 "task_budget_usd": self.config.task_budget_usd, "daily_budget_usd": self.config.daily_budget_usd,
                 "warnings": self.warnings}
@@ -147,10 +232,10 @@ class Session:
         self.job_id = job_id
         self.id = new_id("sess_")
 
-    def ask(self, text: str, budget_usd: float | None = None) -> AskResult:
+    def ask(self, text: str, budget_usd: float | None = None, task_sig: str | None = None) -> AskResult:
         budget = self.mind.task_budget(self.user, budget_usd)
         traj = self.agent.run_trial(text, budget, headless=self.headless, job_id=self.job_id,
-                                    task_sig=task_signature(text))
+                                    task_sig=task_sig or task_signature(text))
         try:
             self.mind.audit.write("task.ask", user=self.user, session=self.id, status=traj.status,
                                   tools=traj.tool_calls, cost=budget.spent_usd, headless=self.headless)

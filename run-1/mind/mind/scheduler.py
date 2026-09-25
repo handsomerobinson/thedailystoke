@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS runs (
 """
 
 LEASE_S = 600
+MAX_JOBS_PER_USER = 50   # a model with schedule_task cannot create unbounded proactive work
 MAX_BACKOFF_S = 3600
 
 
@@ -80,6 +81,9 @@ class Scheduler:
         if len(kinds) != 1:
             raise ValueError("exactly one of every_s / at / daily / event is required")
         kind = kinds[0]
+        n = self.db.execute("SELECT COUNT(*) FROM jobs WHERE user=? AND enabled=1", (user,)).fetchone()[0]
+        if n >= MAX_JOBS_PER_USER:
+            raise ValueError(f"{user} already has {n} active jobs (limit {MAX_JOBS_PER_USER})")
         now = self.clock.now()
         if kind == "every":
             if every_s < 60:

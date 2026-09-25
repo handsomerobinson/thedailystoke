@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import re
+import secrets
 from dataclasses import dataclass, field
 
 from .config import SandboxPolicy
@@ -94,7 +95,7 @@ else:
         except Exception as _e:
             _res["failed"].append({"args": _c["args"], "expected": _c["expected"],
                                    "error": type(_e).__name__ + ": " + str(_e)[:200]})
-print("@@RESULT@@" + json.dumps(_res))
+print("@@RESULT-__NONCE__@@" + json.dumps(_res))
 '''
 
 
@@ -111,15 +112,17 @@ class PythonTests(Checker):
         code = extract_code(answer)
         if not code:
             return EvalResult(False, 0.0, "no Python code block found in the answer", self.kind)
+        nonce = secrets.token_hex(8)
+        tag = f"@@RESULT-{nonce}@@"
         harness = (_HARNESS.replace("__CASES__", repr(json.dumps(self.cases)))
-                   .replace("__FN__", repr(self.fn_name)))
-        res = run_python(code + "\n\n" + harness, self.policy)
-        marker = [ln for ln in res.stdout.splitlines() if ln.startswith("@@RESULT@@")]
+                   .replace("__FN__", repr(self.fn_name)).replace("__NONCE__", nonce))
+        res = run_python(code, self.policy, post_code=harness)
+        marker = [ln for ln in res.stdout.splitlines() if ln.startswith(tag)]
         if not marker:
             tail = (res.stderr or res.stdout)[-600:]
             return EvalResult(False, 0.0, f"code did not run to completion ({res.limit_hit or 'error'}): {tail}",
                               self.kind)
-        data = json.loads(marker[-1][len("@@RESULT@@"):])
+        data = json.loads(marker[-1][len(tag):])
         total = len(self.cases)
         passed = data["passed"]
         if not data["failed"]:
