@@ -109,7 +109,9 @@ class MockBrain(Provider):
         task = _between(prompt, "TASK:", "ATTEMPT")
         attempt = _between(prompt, "ATTEMPT", "TRAJECTORY")
         feedback = _between(prompt, "EVALUATOR FEEDBACK:", "EARLIER REFLECTIONS").strip()
-        first_fail = next((ln.strip() for ln in feedback.splitlines() if ln.strip()), "no feedback")
+        lines = [ln.strip() for ln in feedback.splitlines() if ln.strip()]
+        first_fail = next((ln for ln in lines if "expected" in ln or "error" in ln.lower()),
+                          lines[0] if lines else "no feedback").rstrip(".")
         fn = _function_name(task) or "the task"
         m = _APPROACH.search(attempt)
         if m:
