@@ -1,0 +1,22 @@
+0 as published (reproduces model.py)                       BE=  71  capital-to-BE/end=$  1,594,179  unfunded=$         0  min_cash=$   -307,805  m89 rev/cost=  363,979/  339,529 heads=6
+1 +count unfunded cash deficit                             BE=  71  capital-to-BE/end=$  1,916,984  unfunded=$   322,805  min_cash=$     15,000  m89 rev/cost=  363,979/  339,529 heads=6
+2 +interest paid in cash, not capitalised                  BE=  75  capital-to-BE/end=$  2,078,550  unfunded=$   423,550  min_cash=$     15,000  m89 rev/cost=  363,979/  343,154 heads=6
+3 +T&S floor per the deed (1 FTE/50k rooms)                BE=None  capital-to-BE/end=$  3,883,834  unfunded=$ 2,228,834  min_cash=$     15,000  m89 rev/cost=  363,979/  418,034 heads=15
+4 +support scaling (1 FTE/150k users)                      BE=None  capital-to-BE/end=$  5,945,444  unfunded=$ 4,290,444  min_cash=$     15,000  m89 rev/cost=  363,979/  494,834 heads=27
+5 +engineering realism (3 clients, E2E, SRE)               BE=None  capital-to-BE/end=$ 11,578,542  unfunded=$ 9,923,542  min_cash=$     15,000  m89 rev/cost=  363,979/  618,034 heads=34
+6 +legal/insurance/audit realism                           BE=None  capital-to-BE/end=$ 13,480,131  unfunded=$11,825,131  min_cash=$     15,000  m89 rev/cost=  363,979/  640,334 heads=34
+7 +media storage accrues (B2 $6.95/TB x2)                  BE=None  capital-to-BE/end=$ 17,994,440  unfunded=$16,339,440  min_cash=$     15,000  m89 rev/cost=  363,979/  830,189 heads=34
+8 +30% of payers via app-store IAP at 15%                  BE=None  capital-to-BE/end=$ 18,578,016  unfunded=$16,923,016  min_cash=$     15,000  m89 rev/cost=  345,303/  830,189 heads=34
+9 +mind LLM cost ($0.60/mo, 25% adoption)                  BE=None  capital-to-BE/end=$ 26,617,105  unfunded=$24,962,105  min_cash=$     15,000  m89 rev/cost=  345,303/1,102,023 heads=34
+10 +paid churn 8%/mo (RevenueCat-anchored)                 BE=None  capital-to-BE/end=$ 30,243,297  unfunded=$28,588,297  min_cash=$     15,000  m89 rev/cost=  195,647/1,077,381 heads=34
+11 +conversion 2.2% (RevenueCat freemium median)           BE=None  capital-to-BE/end=$ 33,413,398  unfunded=$31,758,398  min_cash=$     15,000  m89 rev/cost=   86,085/1,056,853 heads=34
+
+Isolated single corrections applied to the ORIGINAL (one at a time):
+paid churn 8%/mo only                                      BE=None  capital-to-BE/end=$  6,081,877  unfunded=$ 4,476,472  min_cash=$     15,000  m89 rev/cost=  206,229/  339,529 heads=6
+conversion 2.2% only                                       BE=None  capital-to-BE/end=$  8,072,307  unfunded=$ 6,460,128  min_cash=$     15,000  m89 rev/cost=  160,151/  339,529 heads=6
+T&S deed floor only                                        BE=None  capital-to-BE/end=$  3,659,192  unfunded=$ 2,058,459  min_cash=$     15,000  m89 rev/cost=  363,979/  414,409 heads=15
+storage accrual only                                       BE=None  capital-to-BE/end=$  6,218,174  unfunded=$ 4,612,070  min_cash=$     15,000  m89 rev/cost=  363,979/  529,384 heads=6
+mind LLM cost only                                         BE=None  capital-to-BE/end=$  9,742,326  unfunded=$ 8,126,967  min_cash=$     15,000  m89 rev/cost=  363,979/  611,363 heads=6
+legal realism only                                         BE=None  capital-to-BE/end=$  3,593,513  unfunded=$ 1,980,423  min_cash=$     15,000  m89 rev/cost=  363,979/  361,829 heads=6
+
+At published break-even (m71): monthly surplus $608 vs interest on $1,551,123 loan = $3,878/mo -> surplus does not cover interest.
