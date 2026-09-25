@@ -25,6 +25,12 @@ AUDIT_LOG_PATH = DATA_DIR / "audit.log.jsonl"
 SCHEDULE_STORE_PATH = DATA_DIR / "schedules.json"
 NOTES_DIR = DATA_DIR / "notes"
 SANDBOX_DIR = DATA_DIR / "sandbox"
+GOVERNANCE_DIR = DATA_DIR / "governance"
+# Decision (Phase 03b/LOYALTY): the seed's plant/removal-request/removal
+# history lives in its own append-only file, separate from the general
+# audit log, so "was the seed ever unseeded, by whom, with what consent" is
+# answerable without grepping unrelated tool-call noise.
+SEED_LINEAGE_PATH = GOVERNANCE_DIR / "seed_lineage.jsonl"
 
 # Decision: hard defaults for cost-awareness so a runaway loop cannot spend
 # unbounded (simulated) money even if a caller forgets to set a cap.
@@ -42,5 +48,5 @@ DEFAULT_NOTE_MAX_BYTES = 64 * 1024
 
 
 def ensure_data_dirs() -> None:
-    for d in (DATA_DIR, MEMORY_DIR, NOTES_DIR, SANDBOX_DIR):
+    for d in (DATA_DIR, MEMORY_DIR, NOTES_DIR, SANDBOX_DIR, GOVERNANCE_DIR):
         d.mkdir(parents=True, exist_ok=True)

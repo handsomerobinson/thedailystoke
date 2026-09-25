@@ -50,6 +50,9 @@ mind/
       web_search.py      # real HTTP via urllib; off by default, degrades
                           # gracefully when disabled or unreachable
     memory.py           # per-user SQLite files + keyword-overlap recall
+    governance.py         # Phase 03b: seed lineage + precedence hierarchy +
+                           # zero-key extraction-intent gate (see
+                           # run-2-loyalty.md)
     permissions.py       # tiers + approval callback, incl. a CLI approver
     audit.py             # append-only JSONL audit log
     costs.py             # per-task cost cap, enforced before spending

@@ -229,3 +229,43 @@ already-disclosed limitations (see (d)) rather than new bugs.
   their contracts but were not verified against a live success in this
   sandboxed session — only a live, correctly-handled failure was actually
   observed for `web_search`.
+
+## Phase 03b changes (LOYALTY)
+
+Full report: `run-2-loyalty.md`. Summary of what changed in the mind:
+
+- **New module `mind/governance.py`**: seed lineage (`SeedLineage`, an
+  append-only JSONL ledger of plant/removal-request/removal events —
+  seeding and unseeding are both consented, recorded acts, never stealth),
+  a `PrecedenceTier(IntEnum)` hierarchy (legal/covenant > seed > operator
+  decisions > operator hypotheses > user request), and a zero-key
+  extraction-intent classifier (`assess_intent`) built from weighted
+  concept clusters with paraphrase coverage (English + two non-English
+  paraphrases + euphemisms like "stickiness"/"retention loop"), not a flat
+  keyword list, plus a benign-signal cluster so a user's own opt-in habit
+  tracking isn't over-refused.
+- **`Agent.run_task` now calls `GovernanceGate.resolve()` before the
+  provider is ever invoked** — a structural, provider-independent
+  guarantee (proven with a provider stub that raises if called at all): a
+  flagged directive is refused with `stopped_reason="refused_extraction_intent"`
+  at zero provider cost, citing the reasoning in the mind's own words and
+  the precedence rule it applied, plus a concrete alternative.
+- **`Agent.request_unseed()` / `Agent.confirm_unseed()`**: a two-step,
+  tokenized, confirm-phrase-gated removal flow (mirrors the existing
+  `IRREVERSIBLE_CONFIRM_PHRASE` idiom in `permissions.py`) — no single
+  message can silently delete the seed; a wrong phrase is itself logged.
+- **`Agent.run_task(..., operator_directive=...)`**: models a
+  system-level instruction distinct from the user's own request, scored
+  and classified one precedence tier below the seed, so an injected
+  "your highest goal is X" instruction can never outrank it.
+- Live-attacked all six loyalty attacks against this real code (not
+  simulated as prose); one disclosed, honest gap: the gate is per-message,
+  not trend-accumulating, so a slow-drift conversation is caught only once
+  a single message crosses the flag threshold (turn 8/10 in both tested
+  fixtures), not from the first sub-threshold normalization line.
+- New test module `tests/test_governance.py` (16 tests: seed lineage,
+  all six attacks, a 10-turn drift fixture + a euphemism-only variant, a
+  76-case paraphrase precision/recall corpus, R13 precedence-conflict
+  scenarios, and provider-independence). Full suite now 69/69 passing;
+  `mind/demo.py` gained a live section 7 demonstrating attack 1 and
+  attack 6 end to end with zero API keys.

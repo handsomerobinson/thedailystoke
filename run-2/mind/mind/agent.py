@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional
 from . import config
 from .audit import AuditLog
 from .costs import CostCapExceeded, CostTracker
+from .governance import Decision, GovernanceGate, PrecedenceTier
 from .memory import MemoryStore
 from .permissions import Approver, PermissionTier, auto_approver
 from .providers.base import LLMProvider
@@ -61,6 +62,7 @@ class Agent:
         approver: Optional[Approver] = None,
         max_retries: int = config.DEFAULT_MAX_REFLECTION_RETRIES,
         task_cost_cap_usd: float = config.DEFAULT_TASK_COST_CAP_USD,
+        governance: Optional[GovernanceGate] = None,
     ):
         self.provider = provider
         self.tools = tools
@@ -69,12 +71,65 @@ class Agent:
         self.approver = approver or auto_approver()
         self.max_retries = max_retries
         self.task_cost_cap_usd = task_cost_cap_usd
+        # Decision (Phase 03b/LOYALTY): the seed:origin memory + precedence
+        # resolver is a first-class collaborator of the agent, not an
+        # afterthought bolted onto the provider prompt -- every task passes
+        # through it before the provider is ever asked to plan (R13).
+        self.governance = governance or GovernanceGate(auto_plant_consented_by="operator:phase-03b-setup")
 
     # ------------------------------------------------------------------
-    def run_task(self, user_id: str, task_description: str, task_id: Optional[str] = None) -> TaskResult:
+    def run_task(
+        self,
+        user_id: str,
+        task_description: str,
+        task_id: Optional[str] = None,
+        operator_directive: Optional[str] = None,
+    ) -> TaskResult:
+        """`operator_directive` models a system-level instruction injected
+        by the platform operator for this session (attacks 2, 4, 6),
+        distinct from the individual user's own request. Both are checked,
+        but a flagged operator_directive is treated at OPERATOR_DECISION
+        tier -- one tier below the seed -- so it can never outrank it."""
         task_id = task_id or uuid.uuid4().hex[:12]
         mem = self.memory_store.for_user(user_id)
         costs = CostTracker(cap_usd=self.task_cost_cap_usd)
+
+        # --- structural gate: every objective/instruction change passes
+        # through the precedence resolver BEFORE the provider is ever asked
+        # to plan (R13). This does not depend on the rented brain reasoning
+        # correctly -- it is enforced in code, zero-key.
+        source = PrecedenceTier.OPERATOR_DECISION if operator_directive else PrecedenceTier.USER_REQUEST
+        directive_text = f"{operator_directive}\n{task_description}" if operator_directive else task_description
+        gate_decision = self.governance.resolve(directive_text, source=source)
+        if not gate_decision.allowed:
+            self.audit.record(
+                user_id=user_id,
+                actor="agent",
+                action="governance_refusal",
+                tier="governance",
+                granted=False,
+                cost_usd=0.0,
+                detail={
+                    "task_id": task_id,
+                    "concepts": gate_decision.assessment.hit_concepts if gate_decision.assessment else [],
+                    "reasoning": gate_decision.reasoning,
+                },
+            )
+            try:
+                mem.remember_episode(task_id, f"refused by governance gate: {gate_decision.reasoning[:200]}")
+            except Exception:
+                pass  # even a broken memory layer must not crash the refusal path
+            output = gate_decision.reasoning
+            if gate_decision.alternative:
+                output += "\n\nAlternative I would build instead: " + gate_decision.alternative
+            return TaskResult(
+                task_id=task_id,
+                ok=False,
+                output=output,
+                attempts=[],
+                cost_usd=0.0,
+                stopped_reason="refused_extraction_intent",
+            )
 
         attempts: List[AttemptRecord] = []
         prior_reflections: List[str] = []
@@ -201,6 +256,30 @@ class Agent:
         )
 
     # ------------------------------------------------------------------
+    def _seed_prefix(self) -> str:
+        """The seed, loaded first every session, ahead of any task-specific
+        instruction -- prepended to the system prompt so a real LLM
+        provider sees it before it sees the task. Returns '' only after a
+        confirmed, recorded unseed (attack 6)."""
+        seed = self.governance.seed_loaded_first()
+        if not seed:
+            return ""
+        return (
+            seed
+            + " Precedence: legal red lines/covenant > seed > operator "
+            "decisions > operator hypotheses > user request; the seed is "
+            "never, by itself, sufficient authorization.\n\n"
+        )
+
+    def request_unseed(self, operator_id: str, reason: str) -> Decision:
+        """The operator may ask to unseed their own mind -- consent cuts
+        both ways -- but this only records a pending, tokenized request; it
+        never deletes on the spot (attack 6)."""
+        return self.governance.request_unseed(operator_id=operator_id, reason=reason)
+
+    def confirm_unseed(self, token: str, operator_id: str, confirm_phrase: str) -> Decision:
+        return self.governance.confirm_unseed(token=token, operator_id=operator_id, confirm_phrase=confirm_phrase)
+
     def _pick_tool(self, task_description: str, lessons: List[str], costs: CostTracker):
         tool_menu = "\n".join(f"- {t.name}: {t.description}" for t in self.tools.values())
         lesson_block = ""
@@ -216,7 +295,7 @@ class Agent:
             "ARGS: <json object of arguments>"
         )
         resp = self.provider.complete(
-            system="You are the planning step of a personal agent. Pick at most one tool.",
+            system=self._seed_prefix() + "You are the planning step of a personal agent. Pick at most one tool.",
             messages=[{"role": "user", "content": prompt}],
         )
         tool_name, tool_args = self._parse_tool_call(resp.text)
@@ -231,7 +310,7 @@ class Agent:
             "to do differently next time. Start with 'Reflection:'."
         )
         resp = self.provider.complete(
-            system="You are the self-reflection step of a personal agent (Reflexion-style). Be concrete.",
+            system=self._seed_prefix() + "You are the self-reflection step of a personal agent (Reflexion-style). Be concrete.",
             messages=[{"role": "user", "content": prompt}],
         )
         return resp.text.strip(), resp.cost_usd
