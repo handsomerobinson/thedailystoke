@@ -6,7 +6,9 @@ propagated is BudgetExceeded, because the agent loop must stop on it.
 """
 from __future__ import annotations
 
+import dataclasses
 import hashlib
+import re
 import threading
 import time
 from dataclasses import dataclass, field
@@ -60,7 +62,12 @@ class Tool:
     available: Availability = _always
     target: Callable[[dict[str, Any]], str] = lambda args: ""
     timeout: float = 20.0
-    trust: str = "data"  # "untrusted" (web) always taints the task; "data" taints only if it carries instructions
+    trust: str = "data"  # "untrusted" (web) / "other_user" (circle content) always taint; "data" only if it carries instructions
+    # MC2: hosts this call would send bytes to (empty = stays on the device)
+    destinations: Callable[[dict[str, Any], ToolContext], list[str]] = lambda args, ctx: []
+    # MC15: does this call return content authored by people other than the user?
+    third_party: Callable[[dict[str, Any]], bool] = lambda args: False
+    declared_tier: Tier | None = None  # what the tool claimed; the signed registry decides (MC3)
 
     def spec(self) -> ToolSpec:
         return ToolSpec(self.name, f"[{self.tier.name}] {self.description}", self.parameters)
@@ -102,15 +109,65 @@ def validate_args(schema: dict[str, Any], args: Any) -> tuple[dict[str, Any] | N
     return out, ""
 
 
+_SHINGLE_WORD = re.compile(r"[a-z0-9]+")
+
+
+def _shingles(text: str, n: int = 5) -> set[tuple[str, ...]]:
+    toks = _SHINGLE_WORD.findall((text or "").lower())
+    if len(toks) < n:
+        return {tuple(toks)} if len(toks) >= 3 else set()
+    return {tuple(toks[i:i + n]) for i in range(len(toks) - n + 1)}
+
+
+def carried_memory(args: dict[str, Any], ctx: ToolContext) -> str:
+    """MC2: does an outgoing payload contain stored memory or note contents?  Returns a description or ''."""
+    payload = " ".join(str(v) for v in args.values())
+    pay = _SHINGLE_WORD.findall(payload.lower())
+    pay_sh = {tuple(pay[i:i + 5]) for i in range(max(0, len(pay) - 4))}
+    pay_text = " " + " ".join(pay) + " "
+    hits: list[str] = []
+
+    def check(label: str, text: str) -> None:
+        for sh in _shingles(text):
+            if (len(sh) == 5 and sh in pay_sh) or (len(sh) < 5 and f" {' '.join(sh)} " in pay_text):
+                hits.append(label)
+                return
+    mem = ctx.memory
+    if mem is not None:
+        try:
+            for item in mem.recent(None, 500):
+                if item.kind in ("fact", "note", "reflection"):
+                    check(f"memory #{item.id}", item.text)
+        except Exception:  # noqa: BLE001 - if memory cannot be read, assume the worst
+            return "memory unreadable (assumed to be carried)"
+    try:
+        notes = ctx.settings.user_dir(ctx.user_id) / "notes"
+        for p in list(notes.glob("*.md"))[:200]:
+            check(f"note {p.stem}", p.read_text(encoding="utf-8", errors="replace")[:20000])
+    except Exception:  # noqa: BLE001
+        pass
+    return ", ".join(sorted(set(hits))[:5])
+
+
 class ToolRegistry:
-    def __init__(self, gate: PermissionGate, audit: AuditLog, output_cap: int = 4000):
+    def __init__(self, gate: PermissionGate, audit: AuditLog, output_cap: int = 4000, tiers=None):
+        from ..tiers import TierRegistry
         self.gate = gate
         self.audit = audit
         self.output_cap = output_cap
+        self.tiers = tiers if tiers is not None else TierRegistry()
         self._tools: dict[str, Tool] = {}
+        self.tier_notes: list[str] = []
 
     def register(self, tool: Tool) -> None:
-        self._tools[tool.name] = tool
+        """The signed registry decides the tier (MC3).  Undeclared -> IRREVERSIBLE; a mismatch is reported."""
+        signed = self.tiers.tier_of(tool.name)
+        declared = tool.declared_tier if tool.declared_tier is not None else tool.tier
+        if not self.tiers.declared(tool.name):
+            self.tier_notes.append(f"{tool.name}: not in the signed tier registry -> IRREVERSIBLE")
+        elif signed != declared:
+            self.tier_notes.append(f"{tool.name}: declares {declared.name}, signed registry says {signed.name}")
+        self._tools[tool.name] = dataclasses.replace(tool, tier=signed, declared_tier=declared)
 
     def get(self, name: str) -> Tool | None:
         return self._tools.get(name)
@@ -176,10 +233,23 @@ class ToolRegistry:
             return ToolResult(False, f"permission denied: charter integrity failure ({lock}); state-changing tools are "
                                      f"disabled until an operator runs `mind charter restore` or a recorded removal", denied=True)
         tainted = str(ctx.extras.get("tainted") or "")
+        destinations, carries = [], ""
+        if tool.tier == Tier.EGRESS:
+            try:
+                destinations = [str(d).lower() for d in tool.destinations(args, ctx) if d]
+            except Exception as exc:  # noqa: BLE001 - an unknown destination is not a local one
+                self._log("tool.rejected", **base, reason=f"cannot determine egress destination: {exc}")
+                return ToolResult(False, f"permission denied: cannot determine where {tool.name} would send data ({exc})",
+                                  denied=True)
+            if destinations:
+                carries = carried_memory(args, ctx)
+        allow = frozenset(getattr(ctx.settings, "egress_allowlist", lambda: frozenset())())
         req = ActionRequest(user=ctx.user_id, tool=tool.name, tier=tool.tier, args=args,
-                            summary=f"{tool.name}({_short_args(args)}) [{tool.tier.name}]" + (f" [TAINTED: {tainted}]" if tainted else ""),
+                            summary=f"{tool.name}({_short_args(args)}) [{tool.tier.name}]" + (f" [TAINTED: {tainted}]" if tainted else "")
+                            + (f" -> {', '.join(destinations)}" if destinations else ""),
                             confirmation_phrase=f"{tool.name} {target}".strip(),
-                            task_id=ctx.task_id, headless=ctx.headless, tainted=tainted)
+                            task_id=ctx.task_id, headless=ctx.headless, tainted=tainted,
+                            destinations=destinations, allowlist=allow, carries_memory=carries)
         if not preconfirmed:
             decision = self.gate.authorize(req)
             if not decision.allowed:

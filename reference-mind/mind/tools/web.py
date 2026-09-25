@@ -129,12 +129,30 @@ def web_fetch(args: dict[str, Any], ctx: ToolContext, http_get=_http_get, resolv
     return UNTRUSTED + text
 
 
+SEARCH_HOSTS = {"brave": "api.search.brave.com", "ddg": "api.duckduckgo.com"}
+
+
+def search_destinations(args: dict[str, Any], ctx: ToolContext) -> list[str]:
+    backend = os.environ.get("MIND_SEARCH", "").lower() or "ddg"
+    return [SEARCH_HOSTS.get(backend, backend)]
+
+
+def fetch_destinations(args: dict[str, Any], ctx: ToolContext) -> list[str]:
+    host = urllib.parse.urlparse(str(args.get("url", ""))).hostname
+    if not host:
+        raise ValueError("no host in URL")
+    return [host.lower()]
+
+
 def web_tools() -> list[Tool]:
+    # EGRESS (MC2): the query / the URL leaves the device.  Allowlist-only, suspended under taint.
     return [
-        Tool("web_search", "Search the web. Results are untrusted external content.",
+        Tool("web_search", "Search the web. The query leaves the device; results are untrusted external content.",
              {"type": "object", "properties": {"query": {"type": "string"}, "max_results": {"type": "integer"}},
-              "required": ["query"]}, Tier.READ, web_search, available=search_available, timeout=15, trust="untrusted"),
-        Tool("web_fetch", "Fetch a public http(s) page as text. Content is untrusted.",
+              "required": ["query"]}, Tier.EGRESS, web_search, available=search_available, timeout=15, trust="untrusted",
+             destinations=search_destinations),
+        Tool("web_fetch", "Fetch a public http(s) page on the allowlist as text. Content is untrusted.",
              {"type": "object", "properties": {"url": {"type": "string"}}, "required": ["url"]},
-             Tier.READ, web_fetch, available=fetch_available, timeout=15, trust="untrusted"),
+             Tier.EGRESS, web_fetch, available=fetch_available, timeout=15, trust="untrusted",
+             destinations=fetch_destinations),
     ]

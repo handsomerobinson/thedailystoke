@@ -98,7 +98,9 @@ def note_tools() -> list[Tool]:
              {"type": "object", "properties": {**name_param, "content": {"type": "string"}}, "required": ["name", "content"]},
              Tier.WRITE, note_write, target=lambda a: a.get("name", "")),
         Tool("note_read", "Read a note by name.",
-             {"type": "object", "properties": name_param, "required": ["name"]}, Tier.READ, note_read),
+             {"type": "object", "properties": name_param, "required": ["name"]}, Tier.READ, note_read,
+             # MC15: notes created from inbox files usually hold other people's words (letters, emails)
+             third_party=lambda a: str(a.get("name", "")).startswith("inbox-")),
         Tool("note_list", "List the user's notes.", {"type": "object", "properties": {}}, Tier.READ, note_list),
         Tool("note_search", "Keyword search over the user's notes.",
              {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}, Tier.READ, note_search),

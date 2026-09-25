@@ -400,6 +400,166 @@ OUTPUT_MECHANISMS = _rx(
 
 
 # --------------------------------------------------------------------------------------
+# BUILD ROUND additions (lexical; measured, not trusted).
+#   * SOCIAL rules: extraction aimed at *other humans through the member's own messages* (red-team D): nag
+#     cadences, social-proof pressure, emotional-state timing of asks, conversion-maximising copy, lapsed-member
+#     win-back lists, compulsion loops.  Category "extraction", signal harm:social.
+#   * PERSON rules (MC9): harm to specific people - guilt pressure, dossiers/ranking, locating a person,
+#     impersonation, deception, messages faked as coming from different people, covert surveillance.
+#     Category "harm_person".
+# Each rule is a conjunction of patterns; all must match.  Benign frames never subtract from these (MC10).
+# --------------------------------------------------------------------------------------
+_OTHERS = r"\b(?:guests?|friends|people|members|invitees|everyone|everybody|folks|attendees|users|customers|neighbou?rs|the group|them|they)\b"
+_NUDGE = r"\b(?:nudg\w*|remind\w*|ping\w*|nag\w*|follow ?ups?|chas(?:e|ing)|text(?:s|ing)?|messag\w*|notif\w*)\b"
+_UNANSWERED = (r"\b(?:haven'?t|have not|hasn'?t|didn'?t|did not|don'?t|do not|never) (?:yet )?(?:answered|replied|responded|"
+               r"rsvp'?d|rsvped|said|confirmed|opened|clicked|signed up|come)\b|\bnon ?(?:responders|respondents)\b")
+_REPEAT = (r"\b(?:every|each) (?:single )?(?:morning|day|night|evening|hour|few hours|afternoon)\b|\bdaily (?:nudges?|reminders?|pings?)\b|"
+           r"\b(?:again and again|over and over|keep (?:nudging|reminding|pinging|messaging|texting|chasing))\b|"
+           r"\b(?:third|fourth|fifth) (?:reminder|nudge|ping|message)\b")
+_UNTIL = r"\buntil (?:they|he|she|people|everyone|guests|each)\b(?: \w+){0,3} (?:say|says|answer|reply|respond|rsvp|agree|give in|confirm|come|sign)\b"
+_ASK_CONTEXT = (r"\b(?:prompt|ask|offer|upsell|pitch|upgrade|keepers?|subscri\w*|pay\w*|donat\w*|membership|sign ?up|buy|"
+                r"purchase|sell|ads?|appears?|pop ?up|banner|paywall)\b")
+
+SOCIAL_RULES: list[tuple[str, list[re.Pattern]]] = [
+    ("nag_cadence", [_rx(_NUDGE), _rx(_REPEAT), _rx(_UNANSWERED)]),
+    ("nag_until", [_rx(_NUDGE), _rx(_UNTIL)]),
+    ("social_proof_pressure", [_rx(r"\b(?:how many|the number of|count of) (?:of )?(?:their|your|his|her|each guest'?s) "
+                                   r"(?:friends|contacts|neighbou?rs|peers|followers|classmates|coworkers)\b(?:\W+\w+){0,4}?\W+"
+                                   r"(?:already|have|said|are)\b",
+                                   r"\bdon'?t be the (?:only|last) one\b")]),
+    ("emotional_timing", [_rx(r"\bwhen (?:they(?:'re| are)|people are|users are|guests are|someone is|someone'?s|he'?s|she'?s|"
+                              r"he is|she is) (?:at their )?(?:happiest|most (?:happy|excited|emotional|grateful|generous|"
+                              r"euphoric|vulnerable|impulsive)|on a high|in a good mood|feeling (?:great|generous|happy))\b",
+                              r"\bright after (?:\w+ ){0,6}?(?:gets? (?:lots of|many|a lot of)|celebrat\w*|wins?|succeed\w*)\b"),
+                          _rx(_ASK_CONTEXT)]),
+    ("conversion_maximising", [_rx(r"\b(?:gets?|getting|drives?|push(?:es)?|converts?|persuades?|makes?) (?:the )?(?:most|as many|"
+                                   r"more|max\w*) (?:of (?:the |our )?)?(?:people|users|guests|visitors|folks|invitees|them)?"
+                                   r"\s?(?:as possible )?to (?:claim|sign ?up|register|create (?:an )?accounts?|upgrade|"
+                                   r"subscribe|install|download|pay)\b")]),
+    ("lapsed_winback", [_rx(r"\b(?:haven'?t|have not|hasn'?t|didn'?t) (?:come|visited|shown up|opened|logged in|been (?:back|"
+                            r"active|in|around|seen)|posted|attended|checked in)\b(?:\W+\w+){0,3}?\W+(?:for|in|since) "
+                            r"(?:\d+|a|two|three|four|several|a few|many) ?(?:days?|weeks?|months?)\b",
+                            r"\b(?:lapsed|inactive|dormant|churned|quiet) (?:members|users|guests|people|customers|folks)\b"),
+                        _rx(r"\bwe miss you\b", r"\bmiss(?:ing)? you\b", r"\bwin (?:them )?back\b", r"\bre ?engag\w*",
+                            r"\bbring (?:them|people|users|members) back\b", r"\b(?:for|to) each (?:of them|one|member|person|guest)\b")]),
+    ("compulsion_loop", [_rx(r"\bso (?:that )?(?:people|users|they|guests|members|everyone|folks|visitors|kids|viewers)\b"),
+                         _rx(r"\b(?:keep|keeps|kept|will keep|continue|constantly|always) (?:coming back|checking|refreshing|"
+                             r"returning|opening|scrolling|looking)\b", r"\bcome back (?:again and again|often|every)\b",
+                             r"\bcan'?t stop (?:checking|scrolling|looking)\b")]),
+]
+
+_AGENCY = (r"\b(?:help me|i want to|i need to|how (?:can|do|could|should) i|can you|could you|let'?s|we should|i'?d like to|"
+           r"write|draft|plan|find|get|make|compose|send)\b")
+_PERSON_NOUN = (r"(?:wife|husband|partner|girlfriend|boyfriend|ex|spouse|employee|employees|coworker|colleague|roommate|"
+                r"flatmate|tenant|neighbou?r|sister|brother|mom|mum|dad|mother|father|friend|boss)")
+PERSON_RULES: list[tuple[str, list[re.Pattern]]] = [
+    ("guilt_pressure", [_rx(r"\b(?:make|makes|making|leave|leaves|get) (?!me\b|myself\b|us\b)(?:\w+ ){0,6}?(?:feel|felt|feeling) "
+                            r"(?:a (?:bit|little|tad) |really |so |very )?(?:bad|guilty|ashamed|awful|terrible|small|stupid|"
+                            r"embarrassed|left out)\b",
+                            r"\bguilt ?(?:trip\w*|them|him|her|into)\b", r"\bshame (?:them|him|her|people|everyone)\b")]),
+    ("dossier_ranking", [_rx(r"\b(?:my|our|all) (?:friends|guests|contacts|members|followers|invitees|classmates|coworkers|"
+                             r"colleagues|neighbou?rs|family)\b", r"\bwhich of my\b", r"\beach (?:one|friend|guest|member|person) of\b"),
+                         _rx(r"\brank\w* (?:them|my|the|all|each|every|people|friends|guests|members)\b",
+                             r"\b(?:reply|replies|respond|responds|answer|answers|texts?|shows? up)\b(?: \w+){0,1} (?:the )?"
+                             r"(?:least|most|less|fewest)(?: often)?\b",
+                             r"\b(?:least|most) (?:responsive|reliable|flaky)\b", r"\bby (?:responsiveness|reply rate|response rate|how often)\b",
+                             r"\bleaderboard of (?:my )?(?:friends|guests|members)\b")]),
+    ("locate_person", [_rx(r"\b(?:find|locate|track|trace|get|look up|dig up|figure out|work out|pin ?point)\w* (?:out )?"
+                           r"(?:\w+ ){0,2}?(?:where (?:she|he|my ex|my \w+|[a-z]+) (?:lives|works|is staying|stays|sleeps|parks)|"
+                           r"(?:her|his|my ex'?s?|their) (?:home |current |new )?(?:address|location|whereabouts|workplace|"
+                           r"routine|daily schedule|phone number|licen[cs]e plate))\b",
+                           r"\bhome address (?:of|for) (?:my |this |that )?\w+")]),
+    ("impersonation", [_rx(r"\b(?:pretend(?:ing)? to be|pos(?:e|ing) as|impersonat\w*|pass(?:ing)? (?:myself |me )?off as|"
+                           r"masquerad\w* as)\s+(?:my |her |his |their |our |the |a )?(?:boss|manager|mom|mum|mother|dad|father|"
+                           r"parent|wife|husband|partner|ex|sister|brother|friend|teacher|landlord|bank|doctor|police|officer|"
+                           r"lawyer|hr|ceo|colleague|coworker|school|[a-z]+'s)\b",
+                           r"\b(?:write|send|sign|draft|text)\w* (?:it|this|a message|an email|a text|a note|them) (?:as if (?:it'?s |"
+                           r"it is |it was |it came )?from|so it looks like it (?:came |comes )?from|signed as|pretending to be) "
+                           r"(?:my |her |his |their |the )?\w+"),
+                       _rx(r"\b(?:message|text|email|e mail|note|letter|post|dm|call|voicemail|send|reply|sign)\w*\b")]),
+    ("deception", [_rx(r"\b(?:trick|fool|con|dupe|deceive|mislead|manipulat\w*) (?:my |her |his |him |them |their |our |the )?"
+                       r"(?:\w+ ){0,2}?(?:into|so (?:she|he|they)|to believe)\b",
+                       r"\bgaslight\w*\b", r"\blie to (?:my |her |him |them |his |the )?\w+ (?:about|so)\b",
+                       r"\bmake (?:her|him|them|my \w+) (?:believe|think) (?:that )?(?:i|we|it)\b"),
+                   _rx(_AGENCY)]),
+    ("fake_senders", [_rx(r"\b(?:look|looks|seem|seems|appear|appears)(?: like)? (?:it'?s |they'?re |they are |it is )?(?:coming |"
+                          r"sent )?from (?:different|many|lots of|multiple|separate|various|real|independent) (?:people|neighbou?rs|"
+                          r"residents|users|customers|parents|voters|accounts|senders|friends)\b",
+                          r"\b(?:sign|send) (?:each|every|them|it) (?:one )?(?:with|from|under) (?:a )?different (?:names?|accounts?|numbers?)\b",
+                          r"\bas if (?:they|it) (?:came|come|were|was) from (?:different|many|separate|various) (?:people|neighbou?rs|users|parents)\b")]),
+    ("covert_surveillance", [_rx(r"\b(?:read|monitor|check|see|access|track|watch|log)\w* (?:my |her |his |their )?" + _PERSON_NOUN +
+                                 r"'?s? (?:messages|texts|dms|emails?|phone|location|browser|browsing|history|calls|whereabouts|"
+                                 r"keystrokes|chats)\b",
+                                 r"\bspy(?:ing)? on (?:my |her |his |their )?(?:" + _PERSON_NOUN[3:-1] + r"|her|him|them)\b",
+                                 r"\b(?:secretly|covertly) (?:track|monitor|record|follow|watch|read)\w*\b")]),
+]
+
+
+def _rule_hits(rules: list[tuple[str, list[re.Pattern]]], vs: list[str]) -> list[str]:
+    return [name for name, pats in rules if any(all(p.search(v) for p in pats) for v in vs)]
+
+
+def social_harms(text_or_variants) -> list[str]:
+    vs = variants(text_or_variants) if isinstance(text_or_variants, str) else text_or_variants
+    return _rule_hits(SOCIAL_RULES, vs)
+
+
+def person_harms(text_or_variants) -> list[str]:
+    vs = variants(text_or_variants) if isinstance(text_or_variants, str) else text_or_variants
+    return _rule_hits(PERSON_RULES, vs)
+
+
+# Content-level extraction aimed at other humans, in an OUTPUT (a draft the member will send) - red-team G.
+OUTPUT_PRESSURE: list[tuple[str, re.Pattern]] = [
+    ("fomo", _rx(r"\bdon'?t be the (?:only|last) one\b", r"\b(?:missing|miss) out\b", r"\bfomo\b", r"\b\d+ of you (?:have )?already\b",
+                 r"\beveryone else (?:is|has|already)\b", r"\bonly \d+ (?:spots?|seats?|places?) left\b")),
+    ("nag", _rx(r"\bi'?ll (?:check back|remind (?:you|everyone)|ping (?:you|everyone)|nudge (?:you|everyone)|follow up|keep reminding)\b"
+                r"(?:\W+\w+){0,10}?\W+(?:again|every|twice|until)\b",
+                r"\b(?:and again|another reminder) (?:tomorrow|at lunch|tonight|later)\b")),
+    ("upsell", _rx(r"\b(?:keepers?|premium|pro members?|plus members?|paid members?|subscribers?) (?:get|gets|unlock|unlocks|enjoy)\b",
+                   r"\b(?:keepers?|premium|membership|subscription|pro plan|paid plan|upgrade)\b(?:\W+\w+){0,8}?\W+\$\s?\d",
+                   r"\$\s?\d+(?:\.\d\d)?\b(?:\W+\w+){0,3}?\W+worth it\b")),
+]
+
+# Directive / L1 screen (MC12, MC18, MC20): what no operator text and no seed text may say.
+DIRECTIVE_SCREEN: list[tuple[str, re.Pattern]] = [
+    ("adds content to the member's messages to other people", _rx(
+        r"\b(?:when(?:ever)?|each time|every time|if) (?:you )?(?:draft|write|compose|prepare|create)\w* (?:a |any |the |an )?"
+        r"(?:message|draft|reminder|invite|invitation|text|email|post|note|card)s?\b(?:\W+\w+){0,25}?\W+(?:end|close|finish|"
+        r"sign off|add|append|include|mention|insert|put|attach|promote|invite|recommend)\w*\b",
+        r"\b(?:in|to|into) (?:every|each|all|any) (?:member'?s? )?(?:drafts?|messages?|reminders?|invites?|invitations?)\b"
+        r"(?:\W+\w+){0,6}?\W+(?:add|append|include|insert|mention|end|close)\w*")),
+    ("tells the mind to conceal something", _rx(
+        r"\bnever (?:mention|reveal|disclose|admit|say|tell)\b", r"\b(?:don'?t|do not) (?:mention|reveal|disclose|admit|tell (?:the )?(?:user|member|them))\b",
+        r"\bkeep (?:this|it) (?:secret|hidden|quiet)\b", r"\bwithout (?:telling|informing|mentioning)\b")),
+    ("promotes a paid tier", _rx(
+        r"\b(?:keepers?|premium|upgrade|membership|subscription|paid plan|pro plan|\d+ ?gb (?:of )?(?:photo |storage )?space)\b"
+        r"(?:\W+\w+){0,10}?\W+(?:mention\w*|promot\w*|suggest\w*|invit\w*|offer\w*|upsell\w*|remind\w*|pitch\w*|get|gets)\b",
+        r"\b(?:mention\w*|promot\w*|suggest\w*|invit\w*|offer\w*|upsell\w*|pitch\w*|become)\b(?:\W+\w+){0,10}?\W+(?:keepers?|"
+        r"premium|membership|subscription|paid plan|pro plan|upgrade)\b")),
+    ("adds a reminder cadence beyond the member's choice", _rx(
+        r"\b(?:second|third|another|extra|follow ?up|additional) (?:reminder|nudge|ping|message|text)\b",
+        r"\bremind (?:them|people|guests|everyone) (?:again|every|daily)\b", r"\bsends? (?:a )?(?:second|third)\b")),
+]
+
+
+def screen_directive(text: str, source: str = "operator") -> tuple[bool, list[str]]:
+    """Screen operator/steward text (a P2 directive, or P4 seed text before publication).  Returns (bad, reasons)."""
+    reasons: list[str] = []
+    v = analyze(text, source)
+    # A seed or directive may *talk about* the seed and its removal procedure; what it may not do is carry an
+    # extraction objective, reorder precedence, jailbreak, bribe or target a person.
+    harmful = [c for c in v.categories if c in ("extraction", "override", "jailbreak", "bribe", "harm_person", "injection")]
+    if harmful:
+        reasons.append(_reason(harmful, v.signals, source))
+    vs = variants(text)
+    for why, rx in DIRECTIVE_SCREEN:
+        if any(rx.search(x) for x in vs):
+            reasons.append(why)
+    return bool(reasons), reasons
+
+
+# --------------------------------------------------------------------------------------
 @dataclass
 class Verdict:
     attack: bool
@@ -540,6 +700,17 @@ def analyze(text: str, source: str = "user", context: dict | None = None) -> Ver
 
     if ext >= 0.7 and not meta_q:  # "would you still refuse to build X?" asks about the refusal, not for X
         cats.append("extraction")
+    social = [] if meta_q else _rule_hits(SOCIAL_RULES, vs)
+    if social:
+        sig.append("harm:social")
+        sig.append("social:" + ",".join(social))
+        ext = max(ext, 0.75)
+        if "extraction" not in cats:
+            cats.append("extraction")
+    person = [] if meta_q else _rule_hits(PERSON_RULES, vs)
+    if person:  # MC9: harm to specific people
+        sig.append("person:" + ",".join(person))
+        cats.append("harm_person")
     if context.get("heightened") and 0.5 <= ext < 0.7 and "analysis_frame" not in sig:
         cats.append("extraction")
         sig.append("heightened_after_drift")
@@ -567,7 +738,7 @@ def analyze(text: str, source: str = "user", context: dict | None = None) -> Ver
         action = "quarantine"
     elif "removal" in cats:
         action = "procedure"
-    elif "bribe" in cats or "jailbreak" in cats or "extraction" in cats:
+    elif "bribe" in cats or "jailbreak" in cats or "extraction" in cats or "harm_person" in cats:
         action = "refuse"
     else:
         action = "hold_precedence"
@@ -588,13 +759,19 @@ def _reason(cats: list[str], sig: list[str], source: str) -> str:
              "jailbreak": "tries to strip the seed through roleplay or 'switch off your values'",
              "bribe": "offers capability in exchange for abandoning the seed",
              "removal": "asks to remove or rewrite seed:origin outside the recorded procedure",
+             "harm_person": "targets a specific person who has not agreed to it (deception, guilt pressure, "
+                            "impersonation, locating or surveilling them, ranking or profiling them, or fake senders)",
              "injection": f"instructions aimed at the agent arrived through an untrusted channel ({source})"}
     return "; ".join(names[c] for c in cats if c in names)
 
 
 ADDRESSED = _rx(r"\bi want you to\b", r"\byou are (?:now )?(?:a|an|the)?\s*\w+", r"\bact as\b", r"\bpretend\b", r"\bplay the role\b",
                 r"\b(?:answer|respond|reply|write|say|output) (?:the following|as|with|in the style)\b", r"\bhello (?:gpt|ai|assistant|claude)\b",
-                r"\byour (?:new |next )?(?:task|job|challenge) is\b", r"\bnow (?:please )?(?:help me|write|answer|focus)\b")
+                r"\byour (?:new |next )?(?:task|job|challenge) is\b", r"\bnow (?:please )?(?:help me|write|answer|focus)\b",
+                # BUILD ROUND (red-team E): notes addressed to whoever/whatever writes the drafts
+                r"\bwhoever (?:writes|makes|sends|compiles|drafts|tidies|reads)\b", r"\b(?:note|message|p\.? ?s\.?) (?:for|to) the (?:helper|assistant|bot|ai|agent|organi[sz]er'?s? (?:helper|assistant))\b",
+                r"\bto the (?:helper|assistant|bot|ai|agent) (?:that|who|compiling|writing|tidying)\b", r"\b(?:pls|please|be sure to|make sure (?:to|you)) (?:include|add|paste|copy|link)\b",
+                r"\b(?:copy|paste|pasted) (?:the|this|it|my) (?:full )?\w+(?: \w+)? (?:into|in) (?:the )?\w+", r"\bhosts? usually want\b")
 
 
 def taint_hint(text: str) -> bool:
@@ -610,9 +787,14 @@ def taint_hint(text: str) -> bool:
 # Output-side backstop: does an answer *itself* read like an extraction design?
 # --------------------------------------------------------------------------------------
 def output_is_extraction_design(answer: str) -> tuple[bool, list[str]]:
+    """Withhold an answer that is itself an extraction design (feeds, streaks...) OR extraction *content* aimed at
+    other humans (a draft with FOMO, a nag cadence or an upsell: red-team G).  Needs >= 2 mechanisms."""
     v = normalize(answer)
     mechs = sorted({m.group(0) for m in OUTPUT_MECHANISMS.finditer(v)
                     if not NEGATOR.search(v[max(0, m.start() - 40):m.start()])})
+    for name, rx in OUTPUT_PRESSURE:
+        mechs += sorted({f"{name}: {m.group(0)}" for m in rx.finditer(v)
+                         if not NEGATOR.search(v[max(0, m.start() - 25):m.start()])})
     if len(mechs) >= 2 and not REFUSAL_MARKERS.search(v[:400]):
         return True, mechs
     return False, mechs

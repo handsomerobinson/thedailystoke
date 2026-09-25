@@ -80,7 +80,11 @@ def recall(args: dict[str, Any], ctx: ToolContext) -> str:
 # -- code -------------------------------------------------------------------
 def python_exec(args: dict[str, Any], ctx: ToolContext) -> str:
     timeout = min(float(args.get("timeout", 10)), 30.0)
-    res = run_python(args["code"], timeout=timeout, deny_paths=[str(ctx.settings.data_dir)])
+    deny = [str(ctx.settings.data_dir)]
+    trust_dir = getattr(ctx.settings, "trust_dir", None)
+    if trust_dir:
+        deny.append(str(trust_dir))  # keys, credentials and anchors are never readable from the sandbox
+    res = run_python(args["code"], timeout=timeout, deny_paths=deny)
     return res.render()
 
 
@@ -106,8 +110,18 @@ def schedule_job(args: dict[str, Any], ctx: ToolContext) -> str:
     return f"scheduled job #{jid} every {every} min (no write permissions; edit with `mind schedule` to grant)"
 
 
-def default_registry(gate: PermissionGate, audit: AuditLog, output_cap: int = 4000) -> ToolRegistry:
-    reg = ToolRegistry(gate, audit, output_cap)
+def report_destinations(args: dict[str, Any], ctx: ToolContext) -> list[str]:
+    """send_report writes the local outbox; only the optional webhook sends bytes off the device (MC2)."""
+    import os
+    import urllib.parse
+    url = getattr(ctx.notifier, "webhook_url", None) if ctx.notifier is not None else os.environ.get("MIND_WEBHOOK_URL", "")
+    host = urllib.parse.urlparse(url or "").hostname
+    return [host.lower()] if host else []
+
+
+def default_registry(gate: PermissionGate, audit: AuditLog, output_cap: int = 4000, tiers=None) -> ToolRegistry:
+    from .circles import circle_tools
+    reg = ToolRegistry(gate, audit, output_cap, tiers)
     obj = lambda props, req: {"type": "object", "properties": props, "required": req}  # noqa: E731
     reg.register(Tool("calculator", "Evaluate an arithmetic expression exactly.",
                       obj({"expression": {"type": "string"}}, ["expression"]), Tier.READ, calculator, timeout=2))
@@ -123,10 +137,10 @@ def default_registry(gate: PermissionGate, audit: AuditLog, output_cap: int = 40
                       Tier.WRITE, python_exec, timeout=35))
     reg.register(Tool("send_report", "Send the user a report (outbox, optional webhook).",
                       obj({"title": {"type": "string"}, "body": {"type": "string"}}, ["title", "body"]),
-                      Tier.WRITE, send_report, target=lambda a: a.get("title", "")[:40]))
+                      Tier.EGRESS, send_report, target=lambda a: a.get("title", "")[:40], destinations=report_destinations))
     reg.register(Tool("schedule_job", "Schedule a recurring headless task for this user.",
                       obj({"task": {"type": "string"}, "every_minutes": {"type": "integer"}, "name": {"type": "string"}},
                           ["task", "every_minutes"]), Tier.WRITE, schedule_job, available=_need_scheduler))
-    for t in note_tools() + web_tools():
+    for t in note_tools() + web_tools() + circle_tools():
         reg.register(t)
     return reg

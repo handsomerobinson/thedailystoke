@@ -37,6 +37,11 @@ from .util import safe_name, safe_user_id
 
 MAX_FAILURES = 5
 TRIGGERS = ("interval", "daily", "once", "event")
+REMINDER_CAP = 2  # MC21: at most 2 reminders per person per gathering, whatever the request or directive
+
+
+class ReminderCapExceeded(ValueError):
+    pass
 
 
 class _SafeDict(dict):
@@ -74,7 +79,16 @@ class Scheduler:
             CREATE TABLE IF NOT EXISTS runs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, user TEXT NOT NULL,
                 started REAL NOT NULL, finished REAL, status TEXT, cost_usd REAL, summary TEXT);
-            """)
+            CREATE TABLE IF NOT EXISTS reminders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT NOT NULL, circle_id INTEGER NOT NULL,
+                gathering_id INTEGER NOT NULL, person TEXT NOT NULL, text TEXT NOT NULL, created REAL NOT NULL,
+                sent REAL, purpose TEXT NOT NULL DEFAULT '["scheduling"]', source TEXT NOT NULL DEFAULT 'user',
+                policy_version TEXT NOT NULL DEFAULT '');
+            CREATE TRIGGER IF NOT EXISTS reminder_cap BEFORE INSERT ON reminders
+            WHEN (SELECT COUNT(*) FROM reminders WHERE user=NEW.user AND circle_id=NEW.circle_id
+                  AND gathering_id=NEW.gathering_id AND person=NEW.person) >= %d
+            BEGIN SELECT RAISE(ABORT, 'reminder cap: at most %d reminders per person per gathering'); END;
+            """ % (REMINDER_CAP, REMINDER_CAP))
 
     def _conn(self) -> sqlite3.Connection:
         db = sqlite3.connect(str(self.path), timeout=10)
@@ -152,6 +166,47 @@ class Scheduler:
     def runs(self, user: str, n: int = 10) -> list[dict[str, Any]]:
         with self._conn() as db:
             return [dict(r) for r in db.execute("SELECT * FROM runs WHERE user=? ORDER BY id DESC LIMIT ?", (user, n))]
+
+    # -- reminders (MC21) -----------------------------------------------------------
+    def add_reminder(self, user: str, circle_id: int, gathering_id: int, person: str, text: str) -> list[int]:
+        """Queue a reminder to one person, or to 'everyone' in the circle (counts once for each member).  The cap is
+        enforced by a database trigger, so no caller, directive or request can exceed it; all-or-nothing."""
+        from .circles import CircleStore
+        from .purpose import POLICY_VERSION
+        safe_user_id(user)
+        cs = CircleStore(self.rt.settings.data_dir, user)
+        try:
+            if cs.gathering(gathering_id) is None or cs.gathering(gathering_id)["circle_id"] != int(circle_id):
+                raise ValueError(f"no gathering {gathering_id} in circle {circle_id}")
+            members = [m["person"] for m in cs.members(circle_id)]
+        finally:
+            cs.close()
+        people = members if person.strip().lower() in ("everyone", "all", "*") else [person]
+        if not set(people) <= set(members):
+            raise ValueError(f"{person!r} is not in circle {circle_id}")
+        ids: list[int] = []
+        try:
+            with self._lock, self._conn() as db:
+                for p in people:
+                    ids.append(int(db.execute(
+                        "INSERT INTO reminders(user, circle_id, gathering_id, person, text, created, policy_version) "
+                        "VALUES (?,?,?,?,?,?,?)", (user, int(circle_id), int(gathering_id), p, text[:1000], self.clock(),
+                                                   POLICY_VERSION)).lastrowid))
+        except sqlite3.DatabaseError as exc:
+            if "reminder cap" in str(exc):
+                self._audit("reminder.capped", user=user, circle_id=circle_id, gathering_id=gathering_id, person=person)
+                raise ReminderCapExceeded(f"not queued: {person} already has {REMINDER_CAP} reminders for this gathering "
+                                          f"(hard cap, MC21)") from exc
+            raise
+        self._audit("reminder.queued", user=user, circle_id=circle_id, gathering_id=gathering_id, person=person, ids=ids)
+        return ids
+
+    def reminders(self, user: str, gathering_id: int | None = None) -> list[dict[str, Any]]:
+        with self._conn() as db:
+            q, a = "SELECT * FROM reminders WHERE user=?", [user]
+            if gathering_id is not None:
+                q, a = q + " AND gathering_id=?", a + [int(gathering_id)]
+            return [dict(r) for r in db.execute(q + " ORDER BY id", a)]
 
     # -- events -------------------------------------------------------------------
     def emit_event(self, user: str, name: str, payload: dict[str, Any] | None = None) -> int:

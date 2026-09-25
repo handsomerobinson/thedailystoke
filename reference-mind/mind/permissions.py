@@ -2,8 +2,14 @@
 
     READ          runs freely (still audit-logged)
     WRITE         changes state reversibly -> needs approval
+    EGRESS        sends bytes off the device (MC2) -> destination must be on the allowlist; SUSPENDED (denied)
+                  whenever the task is tainted; carrying memory contents needs a FRESH human approval that no
+                  pre-grant, session grant or headless grant can supply.  No destination = local only = WRITE rules.
     IRREVERSIBLE  cannot be undone        -> needs explicit typed confirmation
                                              of an exact phrase ("note_delete draft")
+
+Tiers come from the signed tier registry (tiers.py), never from the tool itself (MC3); an undeclared tool is
+IRREVERSIBLE.
 
 Headless runs (schedules/events) have no human: WRITE tools run only if the
 job was granted them when it was created; IRREVERSIBLE actions are never run
@@ -33,7 +39,8 @@ from .audit import AuditError, AuditLog
 class Tier(IntEnum):
     READ = 0
     WRITE = 1
-    IRREVERSIBLE = 2
+    EGRESS = 2
+    IRREVERSIBLE = 3
 
 
 @dataclass
@@ -47,6 +54,13 @@ class ActionRequest:
     task_id: str = ""
     headless: bool = False
     tainted: str = ""  # non-empty: untrusted content with instructions was read earlier in this task
+    destinations: list[str] = field(default_factory=list)  # EGRESS: hosts the bytes go to
+    allowlist: frozenset = frozenset()                      # EGRESS: hosts the user allowed
+    carries_memory: str = ""  # EGRESS: non-empty if the payload contains stored memory/notes (needs fresh approval)
+
+    @property
+    def needs_fresh(self) -> bool:
+        return bool(self.carries_memory)
 
 
 @dataclass
@@ -86,9 +100,12 @@ class PolicyApprover(Approver):
 
     def approve(self, req: ActionRequest) -> bool:
         self.seen.append(req)
-        ok = req.tool in self.write_grants and not req.tainted  # pre-grants never cover a tainted task
+        # pre-grants never cover a tainted task, nor egress that carries memory contents (MC2: fresh approval only)
+        ok = req.tool in self.write_grants and not req.tainted and not req.needs_fresh
         if self.log:
-            self.log(f"  [approval] {req.summary} -> {'approved (pre-granted)' if ok else 'DENIED (' + ('tainted: pre-grants suspended' if req.tainted else 'not granted') + ')'}")
+            why = ('tainted: pre-grants suspended' if req.tainted else
+                   'carries memory: needs a fresh human approval' if req.needs_fresh else 'not granted')
+            self.log(f"  [approval] {req.summary} -> {'approved (pre-granted)' if ok else 'DENIED (' + why + ')'}")
         return ok
 
     def confirm(self, req: ActionRequest) -> str | None:
@@ -108,9 +125,12 @@ class InteractiveApprover(Approver):
         self.session_grants: set[str] = set()
 
     def approve(self, req: ActionRequest) -> bool:
-        if req.tool in self.session_grants and not req.tainted:
+        if req.tool in self.session_grants and not req.tainted and not req.needs_fresh:
             return True
         self.output_fn(self.describe(req))
+        if req.needs_fresh:
+            self.output_fn(f"NOTE: this sends stored memory/notes off the device ({req.carries_memory}) to "
+                           f"{', '.join(req.destinations) or 'nowhere'}. Session approvals do not cover this.")
         if req.tainted:
             self.output_fn(f"WARNING: this task read content containing instructions aimed at the agent ({req.tainted}). "
                            f"Session-wide approvals are suspended; approve only if YOU want this.")
@@ -192,7 +212,7 @@ class HeadlessApprover(Approver):
         self.queued: list[int] = []
 
     def approve(self, req: ActionRequest) -> bool:
-        return req.tool in self.grants and not req.tainted
+        return req.tool in self.grants and not req.tainted and not req.needs_fresh
 
     def confirm(self, req: ActionRequest) -> str | None:
         self.queued.append(self.pending.add(req))
@@ -224,14 +244,35 @@ class PermissionGate:
             out[k] = sv
         return out
 
+    def _egress(self, req: ActionRequest) -> Decision:
+        """MC2: allowlist-only, suspended under taint, memory contents only with a fresh approval."""
+        if req.tainted:
+            return Decision(False, f"egress suspended: this task read untrusted content ({req.tainted}); nothing leaves "
+                                   f"the device for the rest of the task")
+        off = [d for d in req.destinations if d not in req.allowlist]
+        if off:
+            return Decision(False, f"egress to {', '.join(off)} is not on the allowlist (MIND_EGRESS_ALLOW)")
+        if req.needs_fresh:
+            try:
+                ok = bool(self.approver.approve(req))
+            except Exception as exc:  # noqa: BLE001
+                return Decision(False, f"approver error: {exc}")
+            return Decision(ok, "fresh approval for egress carrying memory" if ok else
+                            f"egress would carry stored memory ({req.carries_memory}); needs a fresh human approval")
+        return Decision(True, f"egress to allowlisted {', '.join(req.destinations)}")
+
     def authorize(self, req: ActionRequest) -> Decision:
         base = dict(user=req.user, tool=req.tool, tier=req.tier.name, args=self._clip(req.args),
                     task_id=req.task_id, headless=req.headless)
+        if req.destinations:
+            base["destinations"] = list(req.destinations)
         if not self._audit("permission.request", **base) and req.tier > Tier.READ:
             return Decision(False, "audit log unavailable; state-changing actions are disabled (fail-closed)")
-        if req.tier == Tier.READ:
+        if req.tier == Tier.EGRESS and req.destinations:
+            decision = self._egress(req)
+        elif req.tier == Tier.READ:
             decision = Decision(True, "read-only: allowed")
-        elif req.tier == Tier.WRITE:
+        elif req.tier in (Tier.WRITE, Tier.EGRESS):
             try:
                 ok = bool(self.approver.approve(req))
             except Exception as exc:  # a broken approver must deny, never allow
